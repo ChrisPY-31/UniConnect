@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "career")
 @Getter
@@ -20,14 +22,10 @@ public class Career {
     @Column(name = "id_career")
     private Integer idCareer;
 
-    @Column(name = "id_student")
-    private Integer idStudent;
+    @Column(name = "career_name")
+    private String careerName;
 
-    @Enumerated(EnumType.STRING)
-    private CareerType career;
-
-    @OneToOne
-    @JoinColumn(name = "id_student" , referencedColumnName = "id" , insertable = false, updatable = false)
-    private Student student;
+    @OneToMany(mappedBy = "career")
+    private List<Student> students;
 
 }

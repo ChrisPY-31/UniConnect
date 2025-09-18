@@ -17,6 +17,9 @@ import java.util.Set;
 @NoArgsConstructor
 public class Student extends Person{
 
+    @Column(name = "id_career")
+    private Integer idCareer;
+
     private String semester;
 
     //Relaciones OneToMany
@@ -24,9 +27,10 @@ public class Student extends Person{
     @OneToMany(mappedBy = "student")
     private List<Project> projects;
 
-    //Relaciones OnetoOne
+    //Relaciones ManytoOne
 
-    @OneToOne(mappedBy = "student")
+    @ManyToOne
+    @JoinColumn(name = "id_career" , referencedColumnName = "id_career" , insertable = false , updatable = false)
     private Career career;
 
     //relacion llave compuesta OneToMany
