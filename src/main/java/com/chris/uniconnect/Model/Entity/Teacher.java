@@ -17,10 +17,11 @@ import java.util.List;
 @NoArgsConstructor
 public class Teacher extends Person {
 
-
     @Enumerated(EnumType.STRING)
     @Column(name = "academic_degree")
     private AcademicDegree academicDegree;
+
+    private String department;
 
     @OneToMany(mappedBy = "teacher")
     private List<Recomendation> recomendations;

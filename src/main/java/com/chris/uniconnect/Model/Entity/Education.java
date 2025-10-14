@@ -31,8 +31,8 @@ public class Education {
 
     private String description;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "education_type")
+    @Enumerated(EnumType.STRING)
     private EducationType educationType;
 
     @Column(name = "start_date" , columnDefinition = "DATE")
@@ -40,7 +40,6 @@ public class Education {
 
     @Column(name = "end_date", columnDefinition = "DATE")
     private LocalDate endDate;
-
 
     @ManyToOne
     @JoinColumn(name = "id_person" , referencedColumnName = "id" , insertable = false, updatable = false)
