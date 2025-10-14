@@ -3,7 +3,6 @@ package com.chris.uniconnect.Model.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.ClientInfoStatus;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,6 +19,9 @@ public abstract class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "id_ubication")
+    private Integer idUbication;
+
     @Column(length = 100, nullable = false)
     private String name;
 
@@ -33,8 +35,6 @@ public abstract class Person {
 
     private String image;
 
-    private String location;
-
     @Column(length = 100)
     private String specialty;
 
@@ -42,7 +42,7 @@ public abstract class Person {
     private String resumeUrl;
 
     @OneToMany(mappedBy = "person")
-    private List<Education> educations;
+    private List<Education> educations; //revisar la relacion
 
     @OneToMany(mappedBy = "person")
     private List<Aptitude> aptitudes;
@@ -63,5 +63,11 @@ public abstract class Person {
 
     @OneToMany(mappedBy = "person")
     private List<PersonContact> personContacts;
+
+    //relacion ManyToOne
+
+    @ManyToOne
+    @JoinColumn(name = "id_ubication" , referencedColumnName = "id_ubication" , insertable = false, updatable = false)
+    private Ubication ubication;
 
 }

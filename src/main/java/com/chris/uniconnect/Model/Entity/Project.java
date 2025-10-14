@@ -34,10 +34,10 @@ public class Project {
     @Column(length = 255)
     private String image;
 
-    @Column(columnDefinition = "DATE")
+    @Column(name = "start_date", columnDefinition = "DATE" )
     private LocalDate startDate;
 
-    @Column(columnDefinition = "DATE")
+    @Column(name = "end_date", columnDefinition = "DATE")
     private LocalDate endDate;
 
     @ManyToOne

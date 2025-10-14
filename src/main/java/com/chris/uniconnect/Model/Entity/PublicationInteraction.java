@@ -20,12 +20,13 @@ public class PublicationInteraction {
     @EmbeddedId
     private PublicationInteractionPK id;
 
+    @Column(columnDefinition = "boolean default false")
     private Boolean liked;
 
     private String comment;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;;
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "id_person" , referencedColumnName = "id" , insertable = false, updatable = false)
