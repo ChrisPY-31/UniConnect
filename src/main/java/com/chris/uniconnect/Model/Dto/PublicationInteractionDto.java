@@ -16,6 +16,5 @@ public class PublicationInteractionDto {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    private PublicationDto publicacion;
 
 }

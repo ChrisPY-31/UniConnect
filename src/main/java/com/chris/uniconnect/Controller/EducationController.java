@@ -1,6 +1,6 @@
 package com.chris.uniconnect.Controller;
 
-import com.chris.uniconnect.Exeptions.Mensaje;
+import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Model.Dto.EducationDto;
 import com.chris.uniconnect.Service.IEducationService;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ public class EducationController {
     public ResponseEntity<?> createEducation(@RequestBody EducationDto education) {
 
         try {
-            return new ResponseEntity<>(Mensaje.builder().object(educationService.create(education)).mensaje("Educacion creado con exito").build(), HttpStatus.CREATED);
+            return new ResponseEntity<>(MensajeResponse.builder().object(educationService.create(education)).mensaje("Educacion creado con exito").build(), HttpStatus.CREATED);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -31,9 +31,9 @@ public class EducationController {
         boolean existEducationId = educationService.exitEducation(id);
 
         if (existEducationId) {
-            return new ResponseEntity<>(Mensaje.builder().mensaje("Educacion elimando con exito").build(), HttpStatus.OK);
+            return new ResponseEntity<>(MensajeResponse.builder().mensaje("Educacion elimando con exito").build(), HttpStatus.OK);
 
         }
-        return new ResponseEntity<>(Mensaje.builder().mensaje("La educacion con el id: " + id + " no existe").build(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(MensajeResponse.builder().mensaje("La educacion con el id: " + id + " no existe").build(), HttpStatus.NOT_FOUND);
     }
 }

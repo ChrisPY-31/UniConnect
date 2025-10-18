@@ -1,11 +1,11 @@
-package com.chris.uniconnect.Exeptions;
+package com.chris.uniconnect.payload;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class Mensaje {
+public class MensajeResponse {
     String mensaje;
     Object object;
 }

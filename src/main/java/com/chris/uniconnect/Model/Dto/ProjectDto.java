@@ -4,13 +4,17 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
 
 public class ProjectDto {
 
-    private Integer id;
+    private Integer idProject;
+
+    private Integer idEstudiante;
 
     private String nombre;
 
@@ -21,6 +25,12 @@ public class ProjectDto {
     private LocalDate fechaInicio;
 
     private LocalDate fechaFin;
+
+    private Set<StudentAllDto> menciones;
+
+    private List<ProjectLinksDto> redes;
+
+    private List<TechnologyDto> tecnologias;
 
 
 }

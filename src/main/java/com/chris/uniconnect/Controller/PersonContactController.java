@@ -1,6 +1,6 @@
 package com.chris.uniconnect.Controller;
 
-import com.chris.uniconnect.Exeptions.Mensaje;
+import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Model.Dto.PersonContactDto;
 import com.chris.uniconnect.Service.IPersonContactService;
 import lombok.AllArgsConstructor;
@@ -18,6 +18,6 @@ public class PersonContactController {
 
     @PostMapping("/saveContact")
     public ResponseEntity<?> createContacto(@RequestBody PersonContactDto personContactDto) {
-        return new ResponseEntity<>(Mensaje.builder().mensaje("Contacto registrado con exito").object(personContactService.createPersonContact(personContactDto)).build(), HttpStatus.CREATED);
+        return new ResponseEntity<>(MensajeResponse.builder().mensaje("Contacto registrado con exito").object(personContactService.createPersonContact(personContactDto)).build(), HttpStatus.CREATED);
     }
 }

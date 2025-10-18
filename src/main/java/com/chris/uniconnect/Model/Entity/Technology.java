@@ -17,7 +17,7 @@ public class Technology {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_technology")
-    private Integer idTechnology;;
+    private Integer idTechnology;
 
     @Column(name = "id_project")
     private Integer idProject;

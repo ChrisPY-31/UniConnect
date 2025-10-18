@@ -16,10 +16,9 @@ public interface PublicationInteractionMappers {
 
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "liked" , target = "meGusta")
-    @Mapping(source = "comment" , target = "comentario")
-    @Mapping(source = "createdAt" , target = "createdAt")
-    @Mapping(source = "publication" , target = "publicacion")
+    @Mapping(source = "liked", target = "meGusta")
+    @Mapping(source = "comment", target = "comentario")
+    @Mapping(source = "createdAt", target = "createdAt")
     PublicationInteractionDto entityToPublicationInteractionDto(PublicationInteraction publicationInteraction);
 
     @InheritInverseConfiguration

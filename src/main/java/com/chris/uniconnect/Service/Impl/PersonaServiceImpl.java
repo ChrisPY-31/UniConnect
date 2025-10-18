@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Service.Impl;
 
+import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Mappers.PersonMappers;
 import com.chris.uniconnect.Mappers.RecruiterMappers;
 import com.chris.uniconnect.Mappers.TeacherMappers;
@@ -59,8 +60,8 @@ public class PersonaServiceImpl implements IPersonService {
         if (reruiter != null) {
             return reruiter;
         }
+        throw new ResourceNotFoundException("cliente", "id", id);
 
-        throw new RuntimeException("Persona no encontrada con el id: " + id);
     }
 
 

@@ -11,6 +11,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+import java.util.Set;
+
 @Mapper()
 public interface StudentMappers {
 
@@ -29,6 +32,7 @@ public interface StudentMappers {
     @InheritInverseConfiguration
     StudentAllDto studentToStudentAllDto(Student student);
 
-     @Mapping(source = "careerName", target = "carrera")
+    @Mapping(source = "careerName", target = "carrera")
     CareerDto carrerDtoToCareer(Career career);
+
 }

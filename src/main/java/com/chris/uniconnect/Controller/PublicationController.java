@@ -1,6 +1,6 @@
 package com.chris.uniconnect.Controller;
 
-import com.chris.uniconnect.Exeptions.Mensaje;
+import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Model.Dto.PublicationDto;
 import com.chris.uniconnect.Service.IPublicationService;
 import lombok.AllArgsConstructor;
@@ -28,9 +28,9 @@ public class PublicationController {
         PublicationDto savePublication = null;
         try {
             savePublication = publicationService.createPublication(publication);
-            return new ResponseEntity<>(Mensaje.builder().mensaje("Publicacion creada con exito").object(savePublication).build(), HttpStatus.CREATED);
+            return new ResponseEntity<>(MensajeResponse.builder().mensaje("Publicacion creada con exito").object(savePublication).build(), HttpStatus.CREATED);
         } catch (DataAccessException e) {
-            return new ResponseEntity<>(Mensaje.builder().mensaje(e.getMessage()).object(savePublication).build(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(MensajeResponse.builder().mensaje(e.getMessage()).object(savePublication).build(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -41,13 +41,13 @@ public class PublicationController {
         try {
             if (publicationService.existsPublication(id)) {
                 publicationUpdate = publicationService.createPublication(publication);
-                return new ResponseEntity<>(Mensaje.builder().mensaje("Publicacion Actualizada con exito").object(publicationUpdate).build(), HttpStatus.OK);
+                return new ResponseEntity<>(MensajeResponse.builder().mensaje("Publicacion Actualizada con exito").object(publicationUpdate).build(), HttpStatus.OK);
             } else {
-                return new ResponseEntity<>(Mensaje.builder().mensaje("El id no existe").object(publicationUpdate).build(), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(MensajeResponse.builder().mensaje("El id no existe").object(publicationUpdate).build(), HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
 
-            return ResponseEntity.ok(Mensaje.builder().mensaje(e.getMessage()).object(publicationUpdate).build());
+            return ResponseEntity.ok(MensajeResponse.builder().mensaje(e.getMessage()).object(publicationUpdate).build());
         }
 
     }
@@ -58,13 +58,13 @@ public class PublicationController {
         try {
             PublicationDto publicationDelete = publicationService.publicationById(id);
             publicationService.deletePublication(publicationDelete);
-            return new ResponseEntity<>(Mensaje.builder()
+            return new ResponseEntity<>(MensajeResponse.builder()
                     .mensaje("Publication eliminado")
                     .build(), HttpStatus.NO_CONTENT);
 
         } catch (DataAccessException e) {
             return new ResponseEntity<>(
-                    Mensaje.builder()
+                    MensajeResponse.builder()
                             .mensaje(e.getMessage())
                             .object(null)
                             .build(), HttpStatus.INTERNAL_SERVER_ERROR);

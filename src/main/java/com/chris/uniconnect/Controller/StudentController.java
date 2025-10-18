@@ -1,7 +1,8 @@
 package com.chris.uniconnect.Controller;
 
 
-import com.chris.uniconnect.Exeptions.Mensaje;
+import com.chris.uniconnect.payload.MensajeResponse;
+import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Model.Dto.StudentAllDto;
 import com.chris.uniconnect.Model.Dto.StudentDto;
 import com.chris.uniconnect.Service.IStudentService;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1")
@@ -32,6 +32,9 @@ public class StudentController {
     @GetMapping("/students/name")
     public ResponseEntity<?> getStudentsByName(@RequestParam String name) {
         List<StudentAllDto> studentName = studentService.getStudentByName(name);
+        if (studentName == null || studentName.isEmpty()) {
+            throw new ResourceNotFoundException("students");
+        }
         return ResponseEntity.ok(studentName);
     }
 
@@ -39,8 +42,7 @@ public class StudentController {
     @PostMapping("/student")
     public ResponseEntity<?> createStudent(@RequestBody StudentDto studentDto) {
         try {
-
-            return new ResponseEntity<>(Mensaje.builder().mensaje("Estudiante creado con exito").object(studentService.createStudent(studentDto)).build(), HttpStatus.CREATED);
+            return new ResponseEntity<>(MensajeResponse.builder().mensaje("Estudiante creado con exito").object(studentService.createStudent(studentDto)).build(), HttpStatus.CREATED);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -50,11 +52,11 @@ public class StudentController {
     public ResponseEntity<?> updateStudent(@RequestBody StudentDto student, @PathVariable int id) {
         boolean existStudent = studentService.existStudent(id);
         if (existStudent) {
-            return new ResponseEntity<>(Mensaje.builder()
+            return new ResponseEntity<>(MensajeResponse.builder()
                     .mensaje("Persona Actualizada con exito")
                     .object(studentService.updateStudent(student)).build(), HttpStatus.OK);
         }
-        return new ResponseEntity<>(Mensaje.builder().mensaje("La persona con el id: " + id + " no existe").build(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(MensajeResponse.builder().mensaje("La persona con el id: " + id + " no existe").build(), HttpStatus.NOT_FOUND);
     }
 
 }

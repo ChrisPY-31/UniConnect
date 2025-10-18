@@ -10,7 +10,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper
+@Mapper(uses = PublicationInteractionMappers.class)
 public interface PublicationMappers {
 
     PublicationMappers INSTANCE = Mappers.getMapper(PublicationMappers.class);
@@ -20,6 +20,8 @@ public interface PublicationMappers {
     @Mapping(source = "description" , target = "descripcion")
     @Mapping(source = "image" , target = "imagen")
     @Mapping(source = "createdAt" , target = "createdAt")
+    @Mapping(source = "publicationInteractions" , target = "interacciones")
+
     PublicationDto publicationDtoToPublicacionDto(Publication publication);
 
     @InheritInverseConfiguration
