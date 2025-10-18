@@ -1,6 +1,6 @@
 package com.chris.uniconnect.Controller;
 
-import com.chris.uniconnect.Exeptions.Mensaje;
+import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Model.Dto.PublicationInteractionDto;
 import com.chris.uniconnect.Service.IPublicationInteractionService;
 import lombok.AllArgsConstructor;
@@ -34,7 +34,7 @@ public class PublicationInteractionController {
 
         try {
             publicationInteractionDto1 = publicationInteractionService.createPublicationUsers(publicationInteractionDto);
-            return new ResponseEntity<>(Mensaje.builder()
+            return new ResponseEntity<>(MensajeResponse.builder()
                     .mensaje("Publicacion creada con exito")
                     .object(publicationInteractionDto1)
                     .build(), HttpStatus.CREATED);
@@ -50,12 +50,12 @@ public class PublicationInteractionController {
             boolean exit = publicationInteractionService.existPublicatio(publicationInteractionDto.getId().getIdPublication());
             if (exit) {
                 publicationInteractionDto1 = publicationInteractionService.createPublicationUsers(publicationInteractionDto);
-                return new ResponseEntity<>(Mensaje.builder()
+                return new ResponseEntity<>(MensajeResponse.builder()
                         .mensaje("Publicacion actualizada con exio")
                         .object(publicationInteractionDto1)
                         .build(), HttpStatus.OK);
             } else {
-                return new ResponseEntity<>(Mensaje.builder()
+                return new ResponseEntity<>(MensajeResponse.builder()
                         .mensaje("El id no se encuentra en la base de datos")
                         .object(publicationInteractionDto1)
                         .build(), HttpStatus.OK);

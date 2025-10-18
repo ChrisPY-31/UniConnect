@@ -15,7 +15,7 @@ import org.mapstruct.factory.Mappers;
         AptitudeMappers.class,
         PersonContactMappers.class
 })
-public interface TeacherMappers  {
+public interface TeacherMappers {
 
     TeacherMappers INSTANCE = Mappers.getMapper(TeacherMappers.class);
 
@@ -27,13 +27,13 @@ public interface TeacherMappers  {
     @Mapping(source = "birthDate", target = "fechaNacimiento")
     @Mapping(source = "image", target = "imagen")
     @Mapping(source = "specialty", target = "especialidad")
-    @Mapping(source = "resumeUrl", target = "curriculum")
+    @Mapping(source = "academicDegree", target = "gradoAcademico")
+    @Mapping(source = "department", target = "departamento")
     @Mapping(source = "aptitudes", target = "aptitudes")
     @Mapping(source = "personContacts", target = "redContactos")
     @Mapping(source = "educations", target = "educaciones")
     @Mapping(source = "ubication", target = "ubicacion")
     @Mapping(source = "languages", target = "idiomas")
-
     TeacherDto teacherToTeacherDto(Teacher teacher);
 
     @InheritInverseConfiguration

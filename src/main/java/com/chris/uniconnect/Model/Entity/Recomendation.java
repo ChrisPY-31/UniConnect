@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 
-
 @Entity
 @Table(name = "recomendation")
 @Getter
@@ -21,16 +20,16 @@ public class Recomendation {
     @EmbeddedId
     private RecomendationPk id;
 
-    private String Comment;
+    private String comment;
 
-    @Column(name = "recomendation_date" , columnDefinition = "DATE")
+    @Column(name = "recomendation_date", columnDefinition = "DATE")
     private LocalDate recomendationDate;
 
     @ManyToOne
-    @JoinColumn(name = "id_student" , referencedColumnName = "id" , insertable = false, updatable = false)
+    @JoinColumn(name = "id_student", referencedColumnName = "id", insertable = false, updatable = false)
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "id_teacher" , referencedColumnName = "id" , insertable = false , updatable = false)
+    @JoinColumn(name = "id_teacher", referencedColumnName = "id", insertable = false, updatable = false)
     private Teacher teacher;
 }

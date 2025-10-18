@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class PublicationDto {
@@ -19,4 +20,8 @@ public class PublicationDto {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    private List<PublicationInteractionDto> interacciones;
+
+
 }

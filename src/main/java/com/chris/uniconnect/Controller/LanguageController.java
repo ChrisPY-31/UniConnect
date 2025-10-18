@@ -1,15 +1,13 @@
 package com.chris.uniconnect.Controller;
 
 
-import com.chris.uniconnect.Exeptions.Mensaje;
+import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Model.Dto.LanguageDto;
 import com.chris.uniconnect.Service.ILanguageService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1")
@@ -29,18 +27,18 @@ public class LanguageController {
 
         if (!languageService.languageExists(id)) {
             LanguageDto language = languageService.createLanguage(languageDto);
-            return new ResponseEntity<>(Mensaje.builder().mensaje("El id : " + id + " No existe").object(language).build(), HttpStatus.OK);
+            return new ResponseEntity<>(MensajeResponse.builder().mensaje("El id : " + id + " No existe").object(language).build(), HttpStatus.OK);
         }
 
         if (languageDto.getIdIdioma() != null && !languageDto.getIdIdioma().equals(id)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Mensaje.builder()
+                    .body(MensajeResponse.builder()
                             .mensaje("ID del path no coincide con el ID del body")
                             .object(null)
                             .build());
         }
         LanguageDto updatedLanguage = languageService.createLanguage(languageDto);
-        return ResponseEntity.ok(Mensaje.builder()
+        return ResponseEntity.ok(MensajeResponse.builder()
                 .mensaje("Idioma actualizado con éxito")
                 .object(updatedLanguage)
                 .build());
@@ -55,8 +53,8 @@ public class LanguageController {
         if (existLanguage) {
             LanguageDto language = languageService.getLanguageById(id);
             languageService.deleteLanguage(language);
-            return new ResponseEntity<>(Mensaje.builder().mensaje("Idioma eliminado con exito").object(null).build(), HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(MensajeResponse.builder().mensaje("Idioma eliminado con exito").object(null).build(), HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(Mensaje.builder().mensaje("No existe el idioma").object(null).build(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(MensajeResponse.builder().mensaje("No existe el idioma").object(null).build(), HttpStatus.NOT_FOUND);
     }
 }

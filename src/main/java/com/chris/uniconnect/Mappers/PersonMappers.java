@@ -15,7 +15,9 @@ import java.util.List;
         EducationMappers.class,
         AptitudeMappers.class,
         CareerMappers.class,
-        PersonContactMappers.class
+        PersonContactMappers.class,
+        ProjectMappers.class,
+        RecomendationMappers.class
 })
 public interface PersonMappers {
 
@@ -38,6 +40,7 @@ public interface PersonMappers {
     @Mapping(source = "educations", target = "educaciones")
     @Mapping(source = "ubication", target = "ubicacion")
     @Mapping(source = "languages", target = "idiomas")
+    @Mapping(source = "projects", target = "proyectos")
     StudentDto studentToStudentDto(Student student);
 
     @InheritInverseConfiguration
