@@ -32,6 +32,7 @@ public interface StudentMappers {
     @InheritInverseConfiguration
     StudentAllDto studentToStudentAllDto(Student student);
 
+    @Mapping(source = "idCareer", target = "idCarrera")
     @Mapping(source = "careerName", target = "carrera")
     CareerDto carrerDtoToCareer(Career career);
 

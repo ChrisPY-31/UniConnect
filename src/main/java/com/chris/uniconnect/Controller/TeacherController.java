@@ -6,6 +6,7 @@ import com.chris.uniconnect.Service.ITeacherService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +25,7 @@ public class TeacherController {
         return ResponseEntity.ok(teacher);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teacher")
     public ResponseEntity<?> createTeacher(@RequestBody TeacherDto teacher) {
         TeacherDto saveTeacher = teacherService.createStudent(teacher);
