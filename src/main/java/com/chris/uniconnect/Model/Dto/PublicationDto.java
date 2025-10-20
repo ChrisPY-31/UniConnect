@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Model.Dto;
 
+import com.chris.uniconnect.Model.Dto.Response.PersonaResponseM;
 import jakarta.persistence.Column;
 import lombok.Data;
 
@@ -20,6 +21,8 @@ public class PublicationDto {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    private PersonaResponseM persona;
 
     private List<PublicationInteractionDto> interacciones;
 

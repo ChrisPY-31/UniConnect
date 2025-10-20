@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Model.Dto;
 
+import com.chris.uniconnect.Model.Dto.Response.PersonaResponseM;
 import com.chris.uniconnect.Model.Entity.PublicationInteractionPK;
 import lombok.Data;
 
@@ -16,5 +17,6 @@ public class PublicationInteractionDto {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    private PersonaResponseM persona;
 
 }
