@@ -29,7 +29,7 @@ public class ProjectController {
         return new ResponseEntity<>(MensajeResponse.builder().object(projects).build(), HttpStatus.NOT_FOUND);
     }
 
-    @PreAuthorize("hasRole('STUDENTF')")
+    @PreAuthorize("hasRole('STUDENT')")
     //verificar la validacion
     @PostMapping("/projects")
     public ResponseEntity<?> saveProject(@RequestBody ProjectDto projectDto) {
@@ -45,7 +45,6 @@ public class ProjectController {
         }
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     @PutMapping("/projects")
     public ResponseEntity<?> updateProject(@RequestBody ProjectDto projectDto) {
         ProjectDto project = null;
@@ -68,7 +67,6 @@ public class ProjectController {
         }
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     @DeleteMapping("/projects/{id}")
     public ResponseEntity<?> deleteProject(@PathVariable Integer id) {
         ProjectDto project = projectService.getProject(id);
