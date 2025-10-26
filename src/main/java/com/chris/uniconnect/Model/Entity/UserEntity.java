@@ -2,6 +2,7 @@ package com.chris.uniconnect.Model.Entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.util.HashSet;
@@ -23,6 +24,7 @@ public class UserEntity {
     @Column(unique = true)
     private String username;
 
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String password;

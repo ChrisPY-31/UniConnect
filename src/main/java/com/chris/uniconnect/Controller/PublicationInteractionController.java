@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class PublicationInteractionController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
     @PostMapping("/interactionPublicacion")
     public ResponseEntity<?> savePublication(@RequestBody PublicationInteractionDto publicationInteractionDto) {
         PublicationInteractionDto publicationInteractionDto1 = null;
@@ -43,6 +45,7 @@ public class PublicationInteractionController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
     @PutMapping("/interactionPublicacion")
     public ResponseEntity<?> updatePublication(@RequestBody PublicationInteractionDto publicationInteractionDto) {
         PublicationInteractionDto publicationInteractionDto1 = null;

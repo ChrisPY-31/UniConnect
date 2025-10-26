@@ -16,15 +16,6 @@ public class TeacherController {
 
     private final ITeacherService teacherService;
 
-    @GetMapping("/teacher/{id}")
-    public ResponseEntity<TeacherDto> getTeacher(@PathVariable int id) {
-        TeacherDto teacher = teacherService.getTeacherById(id);
-        if (teacher == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(teacher);
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teacher")
     public ResponseEntity<?> createTeacher(@RequestBody TeacherDto teacher) {
@@ -36,6 +27,7 @@ public class TeacherController {
                 .build(), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     @PutMapping("/teacher/{id}")
     public ResponseEntity<?> updateTeacher(@RequestBody TeacherDto teacher, @PathVariable int id) {
 

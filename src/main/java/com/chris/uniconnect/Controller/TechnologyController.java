@@ -14,6 +14,7 @@ import java.util.List;
 @RestController()
 @RequestMapping("api/v1")
 @AllArgsConstructor
+
 public class TechnologyController {
 
     private final ITechnologyService technologyService;

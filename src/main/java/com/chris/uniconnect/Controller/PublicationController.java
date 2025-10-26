@@ -23,7 +23,7 @@ public class PublicationController {
         return new ResponseEntity<>(publicationService.getAllPublications(), HttpStatus.OK);
     }
 
-
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
     @PostMapping("/publication")
     public ResponseEntity<?> createPublication(@RequestBody PublicationDto publication) {
         PublicationDto savePublication = null;
@@ -35,6 +35,7 @@ public class PublicationController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
     @PutMapping("/publication/{id}")
     public ResponseEntity<?> updatePublication(@PathVariable Integer id, @RequestBody PublicationDto publication) {
 
@@ -53,7 +54,7 @@ public class PublicationController {
 
     }
 
-
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
     @DeleteMapping("/publication/{id}")
     public ResponseEntity<?> deletePublication(@PathVariable Integer id) {
         try {

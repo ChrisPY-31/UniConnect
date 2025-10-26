@@ -18,6 +18,7 @@ public class RecomendationController {
 
     private final IRecomendationService recomendationService;
 
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
     @GetMapping("/recomendation")
     public ResponseEntity<?> getRecomendation() {
         List<RecomendationDto> recomendationDtos = recomendationService.getRecomendations();
@@ -27,7 +28,6 @@ public class RecomendationController {
         }
         return ResponseEntity.ok(recomendationDtos);
     }
-
 
     @PostMapping("/recomendation")
     public ResponseEntity<?> createRecomendation(@RequestBody RecomendationDto recomendation) {
