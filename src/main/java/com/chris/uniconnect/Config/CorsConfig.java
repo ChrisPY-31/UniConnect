@@ -16,7 +16,8 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-                "http://localhost:5173/",   // 👈 tu frontend local
+                "http://localhost:5173/",
+                "http://10.151.104.74:5173",/// 👈 tu frontend local
                 "https://tu-dominio.com"   // 👈 tu dominio en producción (opcional)
         ));
 
