@@ -22,6 +22,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
@@ -36,7 +37,8 @@ dependencies {
 
     implementation 'com.auth0:java-jwt:4.5.0'
 
-    implementation 'com.cloudinary:cloudinary-core:1.39.0'
+    implementation 'com.cloudinary:cloudinary-core:2.3.0'
+    implementation 'com.cloudinary:cloudinary-http5:2.3.0'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
