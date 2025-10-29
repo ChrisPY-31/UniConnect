@@ -15,7 +15,7 @@ public class PersonController {
 
     private final IPersonService personService;
 
-    @GetMapping("/persons/{id}")
+    @GetMapping("/person/{id}")
     public ResponseEntity<?> getIdPerson(@PathVariable int id) {
 
         return new ResponseEntity<>(MensajeResponse.builder()

@@ -41,6 +41,7 @@ public interface PersonMappers {
     @Mapping(source = "ubication", target = "ubicacion")
     @Mapping(source = "languages", target = "idiomas")
     @Mapping(source = "projects", target = "proyectos")
+    @Mapping(source = "recomendations" , target = "recomendaciones")
     StudentDto studentToStudentDto(Student student);
 
     @InheritInverseConfiguration
