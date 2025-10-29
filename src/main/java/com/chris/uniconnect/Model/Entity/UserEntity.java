@@ -47,4 +47,7 @@ public class UserEntity {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<RolesEntity> roles = new HashSet<>();
+
+    @OneToOne(mappedBy = "userEntity" , cascade = CascadeType.ALL)
+    private Person person;
 }

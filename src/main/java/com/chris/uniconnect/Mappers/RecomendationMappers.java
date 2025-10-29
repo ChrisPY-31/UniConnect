@@ -9,7 +9,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper(uses = TeacherMappers.class)
+@Mapper(uses = TeacherDetailMappers.class)
 public interface RecomendationMappers {
 
     RecomendationMappers INSTANCE = Mappers.getMapper(RecomendationMappers.class);

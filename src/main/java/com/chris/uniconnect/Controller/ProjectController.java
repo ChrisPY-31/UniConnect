@@ -29,7 +29,6 @@ public class ProjectController {
         return new ResponseEntity<>(MensajeResponse.builder().object(projects).build(), HttpStatus.NOT_FOUND);
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     //verificar la validacion
     @PostMapping("/projects")
     public ResponseEntity<?> saveProject(@RequestBody ProjectDto projectDto) {

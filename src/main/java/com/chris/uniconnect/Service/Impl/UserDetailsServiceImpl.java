@@ -9,6 +9,9 @@ import com.chris.uniconnect.Repository.RoleRepository;
 import com.chris.uniconnect.Repository.UserRepository;
 import com.chris.uniconnect.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -42,6 +45,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Value("${email.private.user}")
+    private String emailUser;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -103,6 +112,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new BadCredentialsException("El correo ya esta en uso.");
         }
 
+        try {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            mailMessage.setFrom(emailUser);
+            mailMessage.setTo(email);
+            mailMessage.setSubject("CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO");
+            mailMessage.setText("Hola alumno ya estas registrado en uniConnect tus credenciales de acceso son :\n" +
+                    "Usuario: " + username +
+                    " Contraseña: " + password + " con tu cuenta ahora podras desarrolar tu perfil profesional.");
+            mailSender.send(mailMessage);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
         List<String> roleRequest = authCreateUserRequest.roleRequest().roleListName();
         Set<RolesEntity> rolesEntitySet = roleRepository.findByRoleEnumIn(roleRequest).stream().collect(Collectors.toSet());
 
@@ -122,6 +144,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         UserEntity userCreated = userRepository.save(userEntity);
         ArrayList<SimpleGrantedAuthority> authorityList = new ArrayList<>();
+
 
         userCreated.getRoles().forEach(role -> authorityList.add(new SimpleGrantedAuthority("ROLE_".concat(role.getRoleEnum().name()))));
 

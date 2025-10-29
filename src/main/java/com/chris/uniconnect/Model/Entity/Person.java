@@ -41,6 +41,10 @@ public abstract class Person {
     @Column(name = "resume_url")
     private String resumeUrl;
 
+    @OneToOne
+    @JoinColumn(name = "id_user")
+    private UserEntity userEntity;
+
     @OneToMany(mappedBy = "person")
     private List<Education> educations; //revisar la relacion
 
