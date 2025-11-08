@@ -15,7 +15,6 @@ import java.util.List;
         StudentMappers.class,
         ProjectLinkMappers.class,
         TechnologyMappers.class,
-        ProjectLinkMappers.class,
         TechnologyMappers.class
 })
 public interface ProjectMappers {
@@ -29,8 +28,9 @@ public interface ProjectMappers {
     @Mapping(source = "image", target = "imagen")
     @Mapping(source = "startDate", target = "fechaInicio")
     @Mapping(source = "endDate", target = "fechaFin")
+    @Mapping(source = "gitHub", target = "github")
+    @Mapping(source = "deploy", target = "deploy")
     @Mapping(source = "mentions", target = "menciones")
-    @Mapping(source = "projectLinks", target = "redes")
     @Mapping(source = "technologies", target = "tecnologias")
     ProjectDto ProjectToProjectDto(Project project);
 

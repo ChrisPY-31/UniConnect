@@ -29,6 +29,7 @@ public interface RecruiterMappers {
     @Mapping(source = "image", target = "imagen")
     @Mapping(source = "specialty", target = "especialidad")
     @Mapping(source = "resumeUrl", target = "curriculum")
+    @Mapping(source = "type", target = "tipo")
     @Mapping(source = "aptitudes", target = "aptitudes")
     @Mapping(source = "personContacts", target = "redContactos")
     @Mapping(source = "educations", target = "educaciones")

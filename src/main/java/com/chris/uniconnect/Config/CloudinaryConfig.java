@@ -25,7 +25,6 @@ public class CloudinaryConfig {
                 "cloud_name", cloudName,
                 "api_key", apiKey,
                 "api_secret", apiSecret
-
         )
         );
     }

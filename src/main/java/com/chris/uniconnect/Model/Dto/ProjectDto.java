@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Model.Dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,13 +10,13 @@ import java.util.Set;
 
 @Data
 @Builder
-
 public class ProjectDto {
 
     private Integer idProject;
 
     private Integer idEstudiante;
 
+    @NotBlank
     private String nombre;
 
     private String descripcion;
@@ -26,9 +27,11 @@ public class ProjectDto {
 
     private LocalDate fechaFin;
 
-    private Set<StudentAllDto> menciones;
+    private String github;
 
-    private List<ProjectLinksDto> redes;
+    private String deploy;
+
+    private Set<StudentAllDto> menciones;
 
     private List<TechnologyDto> tecnologias;
 

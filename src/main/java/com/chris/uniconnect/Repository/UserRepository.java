@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Repository;
 
+import com.chris.uniconnect.Model.Entity.Person;
 import com.chris.uniconnect.Model.Entity.RolesEntity;
 import com.chris.uniconnect.Model.Entity.UserEntity;
 import org.apache.catalina.User;

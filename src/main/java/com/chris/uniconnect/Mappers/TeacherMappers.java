@@ -27,6 +27,7 @@ public interface TeacherMappers {
     @Mapping(source = "birthDate", target = "fechaNacimiento")
     @Mapping(source = "image", target = "imagen")
     @Mapping(source = "specialty", target = "especialidad")
+    @Mapping(source = "type" , target = "tipo")
     @Mapping(source = "academicDegree", target = "gradoAcademico")
     @Mapping(source = "department", target = "departamento")
     @Mapping(source = "aptitudes", target = "aptitudes")

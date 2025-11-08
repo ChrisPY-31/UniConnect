@@ -3,6 +3,7 @@ package com.chris.uniconnect.Service.Impl;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Mappers.PersonMappers;
 import com.chris.uniconnect.Mappers.RecruiterMappers;
+import com.chris.uniconnect.Mappers.StudentMappers;
 import com.chris.uniconnect.Mappers.TeacherMappers;
 import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.Model.Dto.RecruiterDto;
@@ -10,10 +11,7 @@ import com.chris.uniconnect.Model.Dto.StudentDto;
 import com.chris.uniconnect.Model.Dto.TeacherDto;
 import com.chris.uniconnect.Model.Entity.Person;
 import com.chris.uniconnect.Model.Entity.Teacher;
-import com.chris.uniconnect.Repository.PersonaRepository;
-import com.chris.uniconnect.Repository.RecruiterRepository;
-import com.chris.uniconnect.Repository.StudentRepository;
-import com.chris.uniconnect.Repository.TeacherRepostory;
+import com.chris.uniconnect.Repository.*;
 import com.chris.uniconnect.Service.IPersonService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,14 +62,27 @@ public class PersonaServiceImpl implements IPersonService {
 
     }
 
-
-    /*
     @Override
-    public PersonDto getPersonsById(Integer id) {
-        return PersonMappers personaRepository.findById(id).orElse(null);
-    }
+    public PersonDto getPersonByUserName(String username) {
 
-     */
+        StudentDto student = PersonMappers.INSTANCE.studentToStudentDto(studentRepository.findByUserEntityUsername(username));
+        if (student != null) {
+            return student;
+        }
+        TeacherDto teacher = TeacherMappers.INSTANCE.teacherToTeacherDto(teacherRepostory.findByUserEntityUsername(username));
+        if (teacher != null) {
+            return teacher;
+        }
+
+        RecruiterDto reruiter = RecruiterMappers.INSTANCE.recruiterToRecruiterDto(recruiterRepository.findByUserEntityUsername(username));
+        if (reruiter != null) {
+            return reruiter;
+        }
+
+
+
+        throw new ResourceNotFoundException("cliente", "id", username);
+    }
 
 
 }

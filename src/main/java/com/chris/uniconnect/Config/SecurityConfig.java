@@ -66,8 +66,9 @@ public class SecurityConfig {
                     authorize.requestMatchers(HttpMethod.PUT, "/api/v1/recomendations/**").hasRole("TEACHER");
                     authorize.requestMatchers(HttpMethod.DELETE, "/api/v1/recomendations/**").hasRole("TEACHER");
 
-                    //permisos de reclutadores
-
+                    //permisos de admin
+                    authorize.requestMatchers(HttpMethod.GET , "/api/v1/manager").hasRole("ADMIN");
+                    authorize.requestMatchers(HttpMethod.POST, "api/v1/publication").hasAnyRole("STUDENT" , "TEACHER", "RECRUITER");
 
 
                     //permisos de los reclutadores

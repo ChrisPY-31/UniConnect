@@ -21,16 +21,23 @@ public class TeacherServiceImpl implements ITeacherService {
     }
 
     @Override
-    public TeacherDto createStudent(TeacherDto teacher) {
+    public TeacherDto createTeacher(TeacherDto teacher) {
         return TeacherMappers.INSTANCE.teacherToTeacherDto(
                 teacherRepostory.save(TeacherMappers.INSTANCE.teacherDtoToTeacher(teacher)));
     }
 
     @Override
-    public TeacherDto updateStudent(TeacherDto teacher) {
-        return TeacherMappers.INSTANCE.teacherToTeacherDto(
-                teacherRepostory.save(TeacherMappers.INSTANCE.teacherDtoToTeacher(teacher)));
+    public TeacherDto updateTeacher(TeacherDto teacherDto) {
+        Teacher existingTeacher = teacherRepostory.findById(teacherDto.getId())
+                .orElseThrow(() -> new RuntimeException("Profesor no encontrado con id: " + teacherDto.getId()));
+
+        Teacher updatedTeacher = TeacherMappers.INSTANCE.teacherDtoToTeacher(teacherDto);
+
+        updatedTeacher.setUserEntity(existingTeacher.getUserEntity());
+
+        return TeacherMappers.INSTANCE.teacherToTeacherDto(teacherRepostory.save(updatedTeacher));
     }
+
 
     @Override
     public boolean existStudent(int id) {

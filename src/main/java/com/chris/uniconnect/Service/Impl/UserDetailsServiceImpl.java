@@ -1,12 +1,12 @@
 package com.chris.uniconnect.Service.Impl;
 
+import com.chris.uniconnect.Mappers.RecruiterMappers;
+import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.Model.Dto.Response.AuthCreateUserRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthLoginRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthResponse;
-import com.chris.uniconnect.Model.Entity.RolesEntity;
-import com.chris.uniconnect.Model.Entity.UserEntity;
-import com.chris.uniconnect.Repository.RoleRepository;
-import com.chris.uniconnect.Repository.UserRepository;
+import com.chris.uniconnect.Model.Entity.*;
+import com.chris.uniconnect.Repository.*;
 import com.chris.uniconnect.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +16,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,8 +47,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
+    private TeacherRepostory teacherRepostory;
+
     @Value("${email.private.user}")
     private String emailUser;
+    private RecruiterRepository recruiterRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -103,7 +108,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return new UsernamePasswordAuthenticationToken(username, userDetails.getPassword(), userDetails.getAuthorities());
     }
 
-    public AuthResponse createUser(AuthCreateUserRequest authCreateUserRequest) {
+    public AuthResponse createUser(AuthCreateUserRequest authCreateUserRequest, PersonDto person) {
         String username = authCreateUserRequest.username();
         String password = authCreateUserRequest.password();
         String email = authCreateUserRequest.email();
@@ -143,6 +148,32 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .build();
 
         UserEntity userCreated = userRepository.save(userEntity);
+
+        if (roleRequest.contains("STUDENT")) {
+            Student student = new Student();
+            student.setName(person.getNombre());
+            student.setLastName(person.getApellido());
+            student.setType("student");
+            student.setUserEntity(userCreated);
+            studentRepository.save(student);
+        }
+        if (roleRequest.contains("TEACHER")) {
+            Teacher teacher = new Teacher();
+            teacher.setName(person.getNombre());
+            teacher.setLastName(person.getApellido());
+            teacher.setUserEntity(userCreated);
+            teacher.setType("teacher");
+            teacherRepostory.save(teacher);
+        }
+        if (roleRequest.contains("RECRUITER")) {
+            Recruiter recruiter = new Recruiter();
+            recruiter.setName(person.getNombre());
+            recruiter.setLastName(person.getApellido());
+            recruiter.setUserEntity(userCreated);
+            recruiter.setType("recruiter");
+            recruiterRepository.save(recruiter);
+        }
+
         ArrayList<SimpleGrantedAuthority> authorityList = new ArrayList<>();
 
 
@@ -158,6 +189,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         String accessToken = jwtUtils.createToken(authentication);
 
         AuthResponse authResponse = new AuthResponse(userCreated.getUsername(), "User creado con exito", accessToken, true);
+
+
         return authResponse;
     }
 }

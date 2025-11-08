@@ -30,6 +30,14 @@ public interface PublicationMappers {
     @Mapping(source = "publicationInteractions", target = "interacciones")
     PublicationDto publicationDtoToPublicacionDto(Publication publication);
 
+
+    @Mapping(source = "id", target = "idPublication")
+    @Mapping(source = "idPersona", target = "idPerson")
+    @Mapping(source = "descripcion", target = "description")
+    @Mapping(source = "imagen", target = "image")
+    @Mapping(source = "createdAt", target = "createdAt")
+    @Mapping(source = "persona", target = "person" , ignore = true)
+    @Mapping(source = "interacciones", target = "publicationInteractions")
     Publication publicacionDtoToPublication(PublicationDto publicationDto);
 
     List<PublicationDto> publicationListToPublicacionDtoList(List<Publication> publicationList);

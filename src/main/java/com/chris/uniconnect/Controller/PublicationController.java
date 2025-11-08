@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -23,12 +24,11 @@ public class PublicationController {
         return new ResponseEntity<>(publicationService.getAllPublications(), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
     @PostMapping("/publication")
-    public ResponseEntity<?> createPublication(@RequestBody PublicationDto publication) {
+    public ResponseEntity<?> createPublication(@ModelAttribute PublicationDto publication , @RequestParam("image") MultipartFile image) {
         PublicationDto savePublication = null;
         try {
-            savePublication = publicationService.createPublication(publication);
+            savePublication = publicationService.createPublication(publication , image);
             return new ResponseEntity<>(MensajeResponse.builder().mensaje("Publicacion creada con exito").object(savePublication).build(), HttpStatus.CREATED);
         } catch (DataAccessException e) {
             return new ResponseEntity<>(MensajeResponse.builder().mensaje(e.getMessage()).object(savePublication).build(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -37,12 +37,12 @@ public class PublicationController {
 
     @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
     @PutMapping("/publication/{id}")
-    public ResponseEntity<?> updatePublication(@PathVariable Integer id, @RequestBody PublicationDto publication) {
+    public ResponseEntity<?> updatePublication(@PathVariable Integer id, @RequestBody PublicationDto publication ,@RequestParam("image") MultipartFile image) {
 
         PublicationDto publicationUpdate = null;
         try {
             if (publicationService.existsPublication(id)) {
-                publicationUpdate = publicationService.createPublication(publication);
+                publicationUpdate = publicationService.createPublication(publication , image);
                 return new ResponseEntity<>(MensajeResponse.builder().mensaje("Publicacion Actualizada con exito").object(publicationUpdate).build(), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(MensajeResponse.builder().mensaje("El id no existe").object(publicationUpdate).build(), HttpStatus.BAD_REQUEST);
