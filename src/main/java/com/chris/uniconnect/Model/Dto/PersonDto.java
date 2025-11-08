@@ -3,20 +3,24 @@ package com.chris.uniconnect.Model.Dto;
 import com.chris.uniconnect.Model.Dto.Response.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Builder;
-import lombok.Data;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 import java.util.List;
 
 @Data
-public abstract class PersonDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class PersonDto {
 
     private Integer id;
 
     private Integer idUbicacion;
 
+    @NotBlank
     private String nombre;
 
+    @NonNull
     private String apellido;
 
     private String descripcion;
@@ -28,6 +32,8 @@ public abstract class PersonDto {
     private String especialidad;
 
     private String curriculum;
+
+    private String tipo;
 
     private List<AptitudeResponse> aptitudes;
 

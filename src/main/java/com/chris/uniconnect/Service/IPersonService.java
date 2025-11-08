@@ -8,4 +8,5 @@ public interface IPersonService {
 
     PersonDto getPersonsById(Integer id);
 
+    PersonDto getPersonByUserName(String username);
 }

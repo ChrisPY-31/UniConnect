@@ -40,6 +40,10 @@ public class Project {
     @Column(name = "end_date", columnDefinition = "DATE")
     private LocalDate endDate;
 
+    private String gitHub;
+
+    private String deploy;
+
     @ManyToOne
     @JoinColumn(name = "id_student" , referencedColumnName = "id" , insertable = false , updatable = false)
     private Student student;
@@ -50,9 +54,6 @@ public class Project {
             inverseJoinColumns = @JoinColumn(name = "id_student")
     )
     private Set<Student> mentions;
-
-    @OneToMany(mappedBy = "project")
-    private List<ProjectLink> projectLinks;
 
     @OneToMany(mappedBy = "project")
     private List<Technology> technologies;

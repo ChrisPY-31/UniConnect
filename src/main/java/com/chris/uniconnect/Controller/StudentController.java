@@ -52,7 +52,7 @@ public class StudentController {
     }
 
     @PutMapping("/student/{id}")
-    public ResponseEntity<?> updateStudent(@RequestBody StudentDto student, @PathVariable int id) {
+    public ResponseEntity<?> updateStudent(@RequestBody StudentDto student, @PathVariable int id ) {
         boolean existStudent = studentService.existStudent(id);
         if (existStudent) {
             return new ResponseEntity<>(MensajeResponse.builder()

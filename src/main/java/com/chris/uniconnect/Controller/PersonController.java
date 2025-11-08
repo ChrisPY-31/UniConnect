@@ -6,6 +6,7 @@ import com.chris.uniconnect.Service.IPersonService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +25,14 @@ public class PersonController {
                 .build(), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' , 'STUDENT', 'RECRUITER')")
+    @GetMapping("/userAccount/{username}")
+    public ResponseEntity<?> getAccountUser(@PathVariable String username) {
+        return new ResponseEntity<>(MensajeResponse.builder()
+                .mensaje("Cuenta encontrada correctamente")
+                .object(personService.getPersonByUserName(username))
+                .build(), HttpStatus.OK);
+    }
 /*
 
     //Esta ruta es para el administrador

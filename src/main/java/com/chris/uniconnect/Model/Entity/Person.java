@@ -41,6 +41,8 @@ public abstract class Person {
     @Column(name = "resume_url")
     private String resumeUrl;
 
+    private String type;
+
     @OneToOne
     @JoinColumn(name = "id_user")
     private UserEntity userEntity;

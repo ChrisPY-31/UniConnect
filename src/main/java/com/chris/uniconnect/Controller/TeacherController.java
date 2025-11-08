@@ -19,7 +19,7 @@ public class TeacherController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teacher")
     public ResponseEntity<?> createTeacher(@RequestBody TeacherDto teacher) {
-        TeacherDto saveTeacher = teacherService.createStudent(teacher);
+        TeacherDto saveTeacher = teacherService.createTeacher(teacher);
 
         return new ResponseEntity<>(MensajeResponse.builder()
                 .mensaje("cuenta del maestro creada con exito")
@@ -32,7 +32,7 @@ public class TeacherController {
     public ResponseEntity<?> updateTeacher(@RequestBody TeacherDto teacher, @PathVariable int id) {
 
         if (teacherService.existStudent(id)) {
-            TeacherDto updateTeacher = teacherService.updateStudent(teacher);
+            TeacherDto updateTeacher = teacherService.updateTeacher(teacher);
             return new ResponseEntity<>(MensajeResponse.builder()
                     .mensaje("Persona Actualizada con exito")
                     .object(updateTeacher).build(), HttpStatus.OK);

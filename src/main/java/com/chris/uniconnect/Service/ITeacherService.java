@@ -8,9 +8,9 @@ public interface ITeacherService {
 
     TeacherDto getTeacherById(int id);
 
-    TeacherDto createStudent(TeacherDto teacher);
+    TeacherDto createTeacher(TeacherDto teacher);
 
-    TeacherDto updateStudent(TeacherDto teacher);
+    TeacherDto updateTeacher(TeacherDto teacher);
 
     boolean existStudent(int id);
 }

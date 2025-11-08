@@ -33,6 +33,7 @@ public interface PersonMappers {
     @Mapping(source = "image", target = "imagen")
     @Mapping(source = "specialty", target = "especialidad")
     @Mapping(source = "resumeUrl", target = "curriculum")
+    @Mapping(source = "type" , target = "tipo")
     @Mapping(source = "aptitudes", target = "aptitudes")
     @Mapping(source = "semester", target = "semestre")
     @Mapping(source = "career", target = "carrera")

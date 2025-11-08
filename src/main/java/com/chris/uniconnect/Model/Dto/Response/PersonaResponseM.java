@@ -18,7 +18,7 @@ import lombok.Data;
         @JsonSubTypes.Type(value = StudentResponse.class, name = "student")
 })
 @Data
-public abstract class PersonaResponseM {
+public class PersonaResponseM {
 
     private Integer id;
 

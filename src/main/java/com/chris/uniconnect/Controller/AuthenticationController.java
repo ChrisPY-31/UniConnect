@@ -1,6 +1,8 @@
 package com.chris.uniconnect.Controller;
 
 
+import com.chris.uniconnect.Model.Dto.PersonDto;
+import com.chris.uniconnect.Model.Dto.RegisterRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthCreateUserRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthLoginRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthResponse;
@@ -9,10 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -22,8 +21,10 @@ public class AuthenticationController {
     private UserDetailsServiceImpl userDetailsService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<AuthResponse> register(@RequestBody @Valid AuthCreateUserRequest authCreateUserRequest) {
-        return new ResponseEntity<>(this.userDetailsService.createUser(authCreateUserRequest), HttpStatus.CREATED);
+    public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
+        AuthCreateUserRequest authCreateUserRequest = registerRequest.getUser();
+        PersonDto person = registerRequest.getPerson();
+        return new ResponseEntity<>(this.userDetailsService.createUser(authCreateUserRequest , person), HttpStatus.CREATED);
     }
 
     @PostMapping("/log-in")
