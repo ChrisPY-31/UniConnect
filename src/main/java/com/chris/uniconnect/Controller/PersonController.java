@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Controller;
 
+import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Service.IPersonService;
@@ -33,20 +34,20 @@ public class PersonController {
                 .object(personService.getPersonByUserName(username))
                 .build(), HttpStatus.OK);
     }
-/*
+
 
     //Esta ruta es para el administrador
-    @DeleteMapping("/persons")
-    public ResponseEntity<?> deletePerson(@RequestBody PersonDto person) {
-        PersonDto searchPerson = personService.getPersonId(person.getId());
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/persons/{id}")
+    public ResponseEntity<?> deletePerson(@PathVariable Integer id) {
+        PersonDto searchPerson = personService.getPersonsById(id);
 
         if (searchPerson != null) {
-            personService.deletePerson(person);
-            return new ResponseEntity<>(MensajeResponse.builder().mensaje("Persona Eliminada con exito"), HttpStatus.OK);
+            personService.deletePerson(searchPerson);
+            return new ResponseEntity<>(MensajeResponse.builder().mensaje("Persona Eliminada con exito").build(), HttpStatus.OK);
         }
-        return new ResponseEntity<>(MensajeResponse.builder().mensaje("Persona No se encontro con el id " + person.getId()).object(null), HttpStatus.OK);
+        return new ResponseEntity<>(MensajeResponse.builder().mensaje("Persona No se encontro con el id " + id).object(null).build(), HttpStatus.OK);
     }
-     */
 
 
 }

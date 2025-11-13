@@ -18,5 +18,5 @@ public class TeacherDto extends PersonDto {
 
     private String departamento;
 
-    private List<RecomendationDto> recomendacion;
+    private List<RecomendationDto> recomendaciones;
 }

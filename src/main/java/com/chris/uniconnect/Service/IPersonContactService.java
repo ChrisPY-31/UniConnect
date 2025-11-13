@@ -4,7 +4,9 @@ import com.chris.uniconnect.Model.Dto.PersonContactDto;
 import com.chris.uniconnect.Model.Entity.PersonContact;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface IPersonContactService {
 
-    PersonContactDto createPersonContact(PersonContactDto personContact);
+    List<PersonContactDto> createPersonContact(List<PersonContactDto> personContact);
 }

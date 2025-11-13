@@ -27,12 +27,16 @@ public interface PersonContactMappers {
     @InheritInverseConfiguration
     PersonContactDto personContactToPersonContactDto(PersonContact personContact);
 
-    @Mapping(source = "idContact" , target = "idContacto")
-    @Mapping(source = "contact" , target = "red")
+    @Mapping(source = "idContact", target = "idContacto")
+    @Mapping(source = "contact", target = "red")
     ContactDto contactToContactDto(Contact contact);
 
     PersonContactDto toDto(RedesContactoResponse redesContactoResponse);
 
     RedesContactoResponse toEntity(PersonContactDto personDto);
+
+    List<PersonContact> toPersonContacList(List<PersonContactDto> redes);
+
+    List<PersonContactDto> toPersonContacDtoList(List<PersonContact> redes);
 
 }

@@ -4,5 +4,6 @@ public enum EducationType {
     COURSE,
     MASTER,
     BACHELOR,
-    DIPLOMA
+    DIPLOMA,
+    PHD
 }

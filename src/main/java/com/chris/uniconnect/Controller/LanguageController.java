@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1")
 @AllArgsConstructor
@@ -19,11 +21,12 @@ public class LanguageController {
     private final ILanguageService languageService;
 
     @PostMapping("/language")
-    public ResponseEntity<?> createLanguage(@RequestBody LanguageDto languageDto) {
+    public ResponseEntity<?> createLanguage(@RequestBody List<LanguageDto> languageDto) {
         languageService.createLanguage(languageDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    /*
     @PutMapping("/language/{id}")
     public ResponseEntity<?> updateLanguage(@RequestBody LanguageDto languageDto, @PathVariable Integer id) {
 
@@ -46,6 +49,7 @@ public class LanguageController {
                 .build());
 
     }
+     */
 
 
     @DeleteMapping("/language/{id}")
