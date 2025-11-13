@@ -15,21 +15,22 @@ public interface IdiomasMappers {
 
     IdiomasMappers INSTANCE = Mappers.getMapper(IdiomasMappers.class);
 
-    @Mapping(source = "idLanguaje" , target = "idIdioma")
-    @Mapping(source = "idPerson" , target = "idPersona")
-    @Mapping(source = "name" , target = "nombre")
-    @Mapping(source = "level" , target = "nivel")
+    @Mapping(source = "idLanguaje", target = "idIdioma")
+    @Mapping(source = "idPerson", target = "idPersona")
+    @Mapping(source = "name", target = "nombre")
+    @Mapping(source = "level", target = "nivel")
     LanguageDto languageToLanguageDto(Language language);
 
     @InheritInverseConfiguration
-
     Language languageDtoLanguage(LanguageDto languageDto);
 
     List<LanguageDto> LanguageListtoLanguageDtoList(List<Language> languages);
 
-    LanguageDto toDto (LanguageResponse languageResponse);
+    List<Language> LanguageDtoListtoLangugeList(List<LanguageDto> languageDtos);
 
-    LanguageResponse toEntity (LanguageDto languageDto);
+    LanguageDto toDto(LanguageResponse languageResponse);
+
+    LanguageResponse toEntity(LanguageDto languageDto);
 }
 
 

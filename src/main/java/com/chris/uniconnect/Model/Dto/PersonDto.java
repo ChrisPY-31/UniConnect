@@ -39,7 +39,7 @@ public class PersonDto {
 
     private UbicationDto ubicacion;
 
-    private List<LanguageResponse> idiomas;
+    private List<LanguageResponse> lenguajes;
 
     private List<EducationResponse> educaciones;
 

@@ -13,7 +13,8 @@ import org.mapstruct.factory.Mappers;
         UbicationMappers.class,
         EducationMappers.class,
         AptitudeMappers.class,
-        PersonContactMappers.class
+        PersonContactMappers.class,
+        RecomendationMappers.class,
 })
 public interface TeacherMappers {
 
@@ -27,14 +28,15 @@ public interface TeacherMappers {
     @Mapping(source = "birthDate", target = "fechaNacimiento")
     @Mapping(source = "image", target = "imagen")
     @Mapping(source = "specialty", target = "especialidad")
-    @Mapping(source = "type" , target = "tipo")
+    @Mapping(source = "type", target = "tipo")
     @Mapping(source = "academicDegree", target = "gradoAcademico")
     @Mapping(source = "department", target = "departamento")
     @Mapping(source = "aptitudes", target = "aptitudes")
     @Mapping(source = "personContacts", target = "redContactos")
     @Mapping(source = "educations", target = "educaciones")
     @Mapping(source = "ubication", target = "ubicacion")
-    @Mapping(source = "languages", target = "idiomas")
+    @Mapping(source = "languages", target = "lenguajes")
+    @Mapping(source = "recomendations", target = "recomendaciones")
     TeacherDto teacherToTeacherDto(Teacher teacher);
 
     @InheritInverseConfiguration

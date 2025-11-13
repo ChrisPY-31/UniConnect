@@ -21,12 +21,14 @@ public class LanguageServiceImpl implements ILanguageService {
     }
 
     @Override
-    public LanguageDto createLanguage(LanguageDto languageDto) {
-        return IdiomasMappers.INSTANCE.languageToLanguageDto(languageRepository.save(IdiomasMappers.INSTANCE.languageDtoLanguage(languageDto)));
+    public List<LanguageDto> createLanguage(List<LanguageDto> languageDto) {
+
+        return IdiomasMappers.INSTANCE.LanguageListtoLanguageDtoList(languageRepository.saveAll(IdiomasMappers.INSTANCE.LanguageDtoListtoLangugeList(languageDto)));
     }
 
     @Override
     public void deleteLanguage(LanguageDto languageDto) {
+
         languageRepository.delete(IdiomasMappers.INSTANCE.languageDtoLanguage(languageDto));
     }
 

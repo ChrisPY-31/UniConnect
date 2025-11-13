@@ -8,7 +8,7 @@ public interface ILanguageService {
 
     List<LanguageDto> getAllLanguages();
 
-    LanguageDto createLanguage(LanguageDto languageDto);
+    List<LanguageDto> createLanguage(List<LanguageDto> languageDto);
 
     void deleteLanguage(LanguageDto languageDto);
 

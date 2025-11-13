@@ -34,7 +34,7 @@ public interface RecruiterMappers {
     @Mapping(source = "personContacts", target = "redContactos")
     @Mapping(source = "educations", target = "educaciones")
     @Mapping(source = "ubication", target = "ubicacion")
-    @Mapping(source = "languages", target = "idiomas")
+    @Mapping(source = "languages", target = "lenguajes")
     RecruiterDto recruiterToRecruiterDto(Recruiter recruiter);
 
     @InheritInverseConfiguration

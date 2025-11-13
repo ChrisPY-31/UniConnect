@@ -17,4 +17,6 @@ public class RecomendationDto {
     private LocalDate fechaRecomendacion = LocalDate.now();
 
     private TeacherDetailResponse maestro;
+
+    private StudentAllDto estudiante;
 }

@@ -9,7 +9,10 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper(uses = TeacherDetailMappers.class)
+@Mapper(uses = {
+        TeacherDetailMappers.class,
+        StudentMappers.class
+})
 public interface RecomendationMappers {
 
     RecomendationMappers INSTANCE = Mappers.getMapper(RecomendationMappers.class);
@@ -18,6 +21,7 @@ public interface RecomendationMappers {
     @Mapping(source = "comment", target = "comentario")
     @Mapping(source = "recomendationDate", target = "fechaRecomendacion")
     @Mapping(source = "teacher", target = "maestro")
+    @Mapping(source = "student", target = "estudiante")
     RecomendationDto recomendationToRecomendationDto(Recomendation recomendation);
 
     @InheritInverseConfiguration

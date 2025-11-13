@@ -40,7 +40,7 @@ public interface PersonMappers {
     @Mapping(source = "personContacts", target = "redContactos")
     @Mapping(source = "educations", target = "educaciones")
     @Mapping(source = "ubication", target = "ubicacion")
-    @Mapping(source = "languages", target = "idiomas")
+    @Mapping(source = "languages", target = "lenguajes")
     @Mapping(source = "projects", target = "proyectos")
     @Mapping(source = "recomendations" , target = "recomendaciones")
     StudentDto studentToStudentDto(Student student);
