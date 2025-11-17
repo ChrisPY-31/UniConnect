@@ -53,9 +53,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private TeacherRepostory teacherRepostory;
 
+    @Autowired
+    private RecruiterRepository recruiterRepository;
+
     @Value("${email.private.user}")
     private String emailUser;
-    private RecruiterRepository recruiterRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

@@ -25,7 +25,7 @@ public class CompanyController {
     @GetMapping("/company")
     public ResponseEntity<?> getAllCompanies() {
         List<CompanyDto> companies = companyService.getAllCompanies();
-        if (!companies.isEmpty()) {
+        if (companies.isEmpty()) {
             throw new ResourceNotFoundException("company");
         }
         return new ResponseEntity<>(MensajeResponse.builder().mensaje("Peticion con exito").object(companies).build(), HttpStatus.OK);

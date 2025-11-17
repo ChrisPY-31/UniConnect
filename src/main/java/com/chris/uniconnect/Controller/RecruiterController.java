@@ -45,7 +45,7 @@ public class RecruiterController {
             if (!recruiterService.existRecruiter(id)) {
                 throw new ResourceNotFoundException("recuiter", "id", id);
             }
-            updateRecruiter = recruiterService.createRecruiter(recruiter);
+            updateRecruiter = recruiterService.updateRecruiter(recruiter);
             return new ResponseEntity<>(
                     MensajeResponse.builder()
                             .mensaje("peticion actualizada con exito")

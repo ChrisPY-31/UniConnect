@@ -12,8 +12,11 @@ import java.util.List;
 @Service
 public class CompanyServiceImpl implements ICompanyService {
 
-    @Autowired
-    private CompanyRepository companyRepository;
+    private final CompanyRepository companyRepository;
+
+    public CompanyServiceImpl(CompanyRepository companyRepository) {
+        this.companyRepository = companyRepository;
+    }
 
     @Override
     public List<CompanyDto> getAllCompanies() {
