@@ -54,9 +54,9 @@ public class PersonaServiceImpl implements IPersonService {
             return teacher;
         }
 
-        RecruiterDto reruiter = RecruiterMappers.INSTANCE.recruiterToRecruiterDto(recruiterRepository.findById(id).orElse(null));
-        if (reruiter != null) {
-            return reruiter;
+        RecruiterDto recruiter = RecruiterMappers.INSTANCE.recruiterToRecruiterDto(recruiterRepository.findById(id).orElse(null));
+        if (recruiter != null) {
+            return recruiter;
         }
         throw new ResourceNotFoundException("cliente", "id", id);
 
@@ -75,6 +75,7 @@ public class PersonaServiceImpl implements IPersonService {
         }
 
         RecruiterDto reruiter = RecruiterMappers.INSTANCE.recruiterToRecruiterDto(recruiterRepository.findByUserEntityUsername(username));
+
         if (reruiter != null) {
             return reruiter;
         }

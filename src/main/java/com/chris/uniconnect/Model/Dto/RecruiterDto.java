@@ -8,5 +8,9 @@ import lombok.*;
 @NoArgsConstructor
 public class RecruiterDto extends PersonDto{
 
+    private Integer idCompania;
+
     private String posicion;
+
+    private CompanyDto compania;
 }

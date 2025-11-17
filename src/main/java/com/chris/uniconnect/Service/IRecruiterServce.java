@@ -10,5 +10,7 @@ public interface IRecruiterServce {
 
     RecruiterDto createRecruiter(RecruiterDto recruiter);
 
+    RecruiterDto updateRecruiter(RecruiterDto recruiter);
+
     boolean existRecruiter(int id);
 }
