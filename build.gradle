@@ -8,14 +8,17 @@ group = 'com.chris'
 version = '0.0.1-SNAPSHOT'
 description = 'UniConnect'
 
+/*
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
+ */
 
-sourceCompatibility = '17'
-targetCompatibility = '17'
+sourceCompatibility = '21'
+targetCompatibility = '21'
 
 configurations {
     compileOnly {
