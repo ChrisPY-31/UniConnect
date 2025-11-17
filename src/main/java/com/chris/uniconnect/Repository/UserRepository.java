@@ -20,4 +20,6 @@ public interface UserRepository extends CrudRepository<UserEntity, Integer> {
     boolean existsByEmail(String email);
 
 
+
+
 }
