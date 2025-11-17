@@ -88,7 +88,7 @@ public class FileUpLoadServiceImpl implements FileUploadService {
             if (tipoUser.equals("recruiter")) {
                 RecruiterDto recruiter = recruiterServce.getRecruiterById(id);
                 recruiter.setImagen(imageUserUrl);
-                recruiterServce.createRecruiter(recruiter);
+                recruiterServce.updateRecruiter(recruiter);
             }
 
             // Aquí deberías guardar la persona actualizada en la base de datos

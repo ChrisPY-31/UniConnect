@@ -32,4 +32,6 @@ public class AuthenticationController {
 
         return new ResponseEntity<>(this.userDetailsService.loginUser(userRequest), HttpStatus.OK);
     }
+
+
 }
