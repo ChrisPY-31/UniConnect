@@ -39,13 +39,14 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource)) // ✅ usa tu clase CorsConfig
-                .httpBasic(Customizer.withDefaults())
+                .httpBasic(httpBasic -> httpBasic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> {
                     //configurar endpoints publicos
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/students").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/publication").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/students").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET, "/api/v1/teachers").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/auth/**").permitAll();
                     //configurar endpoints privados
                     //permisos generales
@@ -67,8 +68,8 @@ public class SecurityConfig {
                     authorize.requestMatchers(HttpMethod.DELETE, "/api/v1/recomendations/**").hasRole("TEACHER");
 
                     //permisos de admin
-                    authorize.requestMatchers(HttpMethod.GET , "/api/v1/manager").hasRole("ADMIN");
-                    authorize.requestMatchers(HttpMethod.POST, "api/v1/publication").hasAnyRole("STUDENT" , "TEACHER", "RECRUITER");
+                    authorize.requestMatchers(HttpMethod.GET, "/api/v1/manager").hasRole("ADMIN");
+                    authorize.requestMatchers(HttpMethod.POST, "api/v1/publication").hasAnyRole("STUDENT", "TEACHER", "RECRUITER");
 
 
                     //permisos de los reclutadores

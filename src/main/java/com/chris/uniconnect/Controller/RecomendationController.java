@@ -6,6 +6,7 @@ import com.chris.uniconnect.Service.IRecomendationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +33,6 @@ public class RecomendationController {
     @PostMapping("/recomendation")
     public ResponseEntity<?> createRecomendation(@RequestBody RecomendationDto recomendation) {
         recomendationService.saveRecomendation(recomendation);
-
         return new ResponseEntity<>(MensajeResponse.builder()
                 .mensaje("Recomendacion realizada con exito")
                 .object(recomendation)

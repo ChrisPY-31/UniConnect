@@ -2,11 +2,15 @@ package com.chris.uniconnect.Model.Dto;
 
 import com.chris.uniconnect.Model.Dto.Response.PersonaResponseM;
 import com.chris.uniconnect.Model.Entity.PublicationInteractionPK;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PublicationInteractionDto {
 
     private PublicationInteractionPK id;

@@ -46,7 +46,7 @@ public class EducationController {
         }
     }
 
-    @DeleteMapping("education/{id}")
+    @DeleteMapping("/educationUser/{id}")
     public ResponseEntity<?> deleteEducation(@PathVariable Integer id) {
 
         if (educationService.exitEducation(id)) {

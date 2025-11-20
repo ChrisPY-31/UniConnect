@@ -14,7 +14,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper(uses = PublicationMappers.class)
+@Mapper()
 public interface PublicationInteractionMappers {
 
     PublicationInteractionMappers INSTANCE = Mappers.getMapper(PublicationInteractionMappers.class);

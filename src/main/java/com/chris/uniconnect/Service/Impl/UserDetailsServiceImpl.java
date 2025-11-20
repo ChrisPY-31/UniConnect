@@ -5,6 +5,7 @@ import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.Model.Dto.Response.AuthCreateUserRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthLoginRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthResponse;
+import com.chris.uniconnect.Model.Dto.Response.UserResponse;
 import com.chris.uniconnect.Model.Entity.*;
 import com.chris.uniconnect.Repository.*;
 import com.chris.uniconnect.util.JwtUtils;
@@ -55,6 +56,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private RecruiterRepository recruiterRepository;
+
+    @Autowired
+    private EmailServiceImpl emailService;
 
     @Value("${email.private.user}")
     private String emailUser;
@@ -120,14 +124,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         try {
-            SimpleMailMessage mailMessage = new SimpleMailMessage();
-            mailMessage.setFrom(emailUser);
-            mailMessage.setTo(email);
-            mailMessage.setSubject("CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO");
-            mailMessage.setText("Hola alumno ya estas registrado en uniConnect tus credenciales de acceso son :\n" +
-                    "Usuario: " + username +
-                    " Contraseña: " + password + " con tu cuenta ahora podras desarrolar tu perfil profesional.");
-            mailSender.send(mailMessage);
+            emailService.sendEmail(email, "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO", "Hola alumno ya estas registrado en uniConnect tus credenciales de acceso son :\n" +
+                    "Usuario: " + username + "\n" +
+                    " Contraseña: " + password + " \n con tu cuenta ahora podras desarrolar tu perfil profesional.");
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -196,5 +195,42 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return authResponse;
     }
 
+    public UserResponse userBlocked(String username) {
+
+        UserEntity userEntity = userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("El usuario " + username + " no existe"));
+
+        if (!userEntity.isAccountNonLocked()) {
+            userEntity.setAccountNonLocked(true);
+            userRepository.save(userEntity);
+            return new UserResponse(username, "Cuenta desbloqueada con exito");
+        }
+
+        userEntity.setAccountNonLocked(false);
+        userRepository.save(userEntity);
+        return new UserResponse(username, "Cuenta bloqueada tempralmente");
+
+    }
+
+    public List<UserEntity> getUsers() {
+        return userRepository.findAll();
+    }
+
+    public UserResponse updatePassword(String username, String newPassword) {
+        UserEntity userEntity = userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("El usuario " + username + " no existe"));
+
+        userEntity.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(userEntity);
+
+        try {
+
+            emailService.sendEmail(userEntity.getEmail(), "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO", "Hola estudiante actualizaste tu contraseña aqui te dejamos tus datos :\n" +
+                    "Usuario: " + username + "\n" +
+                    " Contraseña: " + newPassword );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return new UserResponse(username, "contraseña actualizada con exito");
+
+    }
 
 }
