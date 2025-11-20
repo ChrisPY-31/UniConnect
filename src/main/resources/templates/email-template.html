@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a uniConnect</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .credentials {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .credential-item {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .button {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            text-align: center;
+            font-weight: lighter;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <!-- Reemplaza con tu logo -->
+        <div style="font-size: 32px; margin-bottom: 10px;">🎓</div>
+        <h1>CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO</h1>
+        <p>¡Bienvenido a uniConnect!</p>
+    </div>
+
+    <div class="content">
+        <h2>¡Hola estimado alumno!</h2>
+        <h3>El CEO and Founder at UniConect Christian Peña Yañez te habilitado una cuenta.</h3>
+        <p>Nos complace informarte que tu registro en <strong>uniConnect</strong> ha sido exitoso.
+            Ahora formas parte de nuestra comunidad universitaria.</p>
+
+        <div class="credentials">
+            <h3 style="color: #2c3e50; margin-top: 0;">Tus credenciales de acceso:</h3>
+            <div class="credential-item">
+                <strong>👤 Usuario:</strong> <span text="${username}">usuario_ejemplo</span>
+            </div>
+            <div class="credential-item">
+                <strong>🔑 Contraseña:</strong> <span text="${password}">contraseña_ejemplo</span>
+            </div>
+        </div>
+
+        <p><strong>Con tu cuenta ahora podrás:</strong></p>
+        <ul>
+            <li>🌐 Desarrollar tu perfil profesional</li>
+            <li>📚 Acceder a recursos educativos</li>
+            <li>👥 Conectar con compañeros y profesores</li>
+            <li>💼 Explorar oportunidades profesionales</li>
+        </ul>
+
+        <div style="text-align: center;">
+            <a href="https://porfiles-students-front-end.vercel.app/" class="button">Acceder a mi cuenta</a>
+        </div>
+
+        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin-top: 20px;">
+            <strong>🔒 Importante:</strong> Por seguridad, te recomendamos cambiar tu contraseña después de tu primer
+            acceso.
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Centro Universitario UAEMEX Tianguistenco</p>
+        <p>uniConnect - Plataforma de desarrollo profesional</p>
+        <p>© 2024 Todos los derechos reservados</p>
+    </div>
+</div>
+</body>
+</html>

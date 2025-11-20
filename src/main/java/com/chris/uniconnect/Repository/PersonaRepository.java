@@ -10,4 +10,5 @@ public interface PersonaRepository extends JpaRepository<Person , Integer> {
 
     Person findByUserEntityUsername(String username);
 
+
 }

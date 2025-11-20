@@ -1,6 +1,8 @@
 package com.chris.uniconnect.Service.Impl;
 
+import com.chris.uniconnect.Mappers.TeacherDetailMappers;
 import com.chris.uniconnect.Mappers.TeacherMappers;
+import com.chris.uniconnect.Model.Dto.Response.TeacherDetailResponse;
 import com.chris.uniconnect.Model.Dto.StudentDto;
 import com.chris.uniconnect.Model.Dto.TeacherDto;
 import com.chris.uniconnect.Model.Entity.Teacher;
@@ -9,11 +11,18 @@ import com.chris.uniconnect.Service.ITeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class TeacherServiceImpl implements ITeacherService {
 
     @Autowired
     private TeacherRepostory teacherRepostory;
+
+    @Override
+    public List<TeacherDetailResponse> getAllTeachers() {
+        return TeacherDetailMappers.INSTANCE.teacherListToTeacherDetailResponse(teacherRepostory.findAll());
+    }
 
     @Override
     public TeacherDto getTeacherById(int id) {
