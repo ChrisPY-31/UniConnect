@@ -16,7 +16,7 @@ public class EducationServiceImpl implements IEducationService {
 
     @Override
     public EducationDto create(EducationDto educationDto) {
-            return EducationMappers.INSTANCE.educationToEducationDto(educationRepository.save(EducationMappers.INSTANCE.educationDtoToEducation(educationDto)));
+        return EducationMappers.INSTANCE.educationToEducationDto(educationRepository.save(EducationMappers.INSTANCE.educationDtoToEducation(educationDto)));
     }
 
     @Override
@@ -31,13 +31,6 @@ public class EducationServiceImpl implements IEducationService {
 
     @Override
     public void deleteEducation(int educationId) {
-        Education education = educationRepository.findById(educationId).orElse(null);
-
-        if (education != null) {
-            educationRepository.delete(education);
-        }
-
-        throw new RuntimeException("error");
-
+        educationRepository.findById(educationId).ifPresent(education -> educationRepository.delete(education));
     }
 }

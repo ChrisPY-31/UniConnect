@@ -28,9 +28,9 @@ public class UserConfigController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/user-blocked/{username}")
-    public ResponseEntity<?> studentBlocked(@PathVariable String username) {
-        return new ResponseEntity<>(userDetailsService.userBlocked(username), HttpStatus.OK);
+    @PostMapping("/user-blocked/{id}")
+    public ResponseEntity<?> studentBlocked(@PathVariable Integer id) {
+        return new ResponseEntity<>(userDetailsService.userBlocked(id), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

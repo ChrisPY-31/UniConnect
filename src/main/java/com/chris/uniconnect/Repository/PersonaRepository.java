@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PersonaRepository extends JpaRepository<Person , Integer> {
+public interface PersonaRepository extends JpaRepository<Person, Integer> {
 
     Person findByUserEntityUsername(String username);
 
-
+    long countBy();
 }

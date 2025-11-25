@@ -46,15 +46,25 @@ public class EducationController {
         }
     }
 
-    @DeleteMapping("/educationUser/{id}")
+    @DeleteMapping("/education/{id}")
     public ResponseEntity<?> deleteEducation(@PathVariable Integer id) {
 
-        if (educationService.exitEducation(id)) {
-            educationService.deleteEducation(id);
-            return new ResponseEntity<>(MensajeResponse.builder().mensaje("Educacion elimando con exito").build(), HttpStatus.OK);
+        try {
+            if (educationService.exitEducation(id)) {
+                educationService.deleteEducation(id);
+                return new ResponseEntity<>(MensajeResponse.builder()
+                        .mensaje("Educacion eliminado con exito").build(), HttpStatus.OK);
+            }
+            throw new ResourceNotFoundException("id", "educacion", id);
 
+        } catch (Exception e) {
+            // Log del error real
+            System.err.println("Error al eliminar educación: " + e.getMessage());
+            e.printStackTrace();
+
+            return new ResponseEntity<>(MensajeResponse.builder()
+                    .mensaje("Error interno del servidor al eliminar educación")
+                    .build(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        throw new ResourceNotFoundException("id", "educacion", id);
-        //return new ResponseEntity<>(MensajeResponse.builder().mensaje("La educacion con el id: " + id + " no existe").build(), HttpStatus.NOT_FOUND);
     }
 }

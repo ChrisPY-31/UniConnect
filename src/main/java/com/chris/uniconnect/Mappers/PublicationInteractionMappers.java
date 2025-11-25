@@ -14,7 +14,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper()
+@Mapper
 public interface PublicationInteractionMappers {
 
     PublicationInteractionMappers INSTANCE = Mappers.getMapper(PublicationInteractionMappers.class);
@@ -25,6 +25,8 @@ public interface PublicationInteractionMappers {
     @Mapping(source = "comment", target = "comentario")
     PublicationInteractionDto entityToPublicationInteractionDto(PublicationInteraction publicationInteraction);
 
+
+    @InheritInverseConfiguration
     PublicationInteraction DtoToPublicationInteraction(PublicationInteractionDto publicationInteractionDto);
 
     List<PublicationInteractionDto> entityToPublicationInteractionDtoList(List<PublicationInteraction> publicationInteractions);

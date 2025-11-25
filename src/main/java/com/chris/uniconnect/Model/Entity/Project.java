@@ -55,7 +55,7 @@ public class Project {
     )
     private Set<Student> mentions;
 
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
     private List<Technology> technologies;
 
 }

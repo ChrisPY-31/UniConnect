@@ -22,6 +22,9 @@ public class PublicationInteractionServiceImpl implements IPublicationInteractio
 
     @Override
     public PublicationInteractionDto createPublicationUsers(PublicationInteractionDto publicationInteractionDto) {
+        System.out.println("entramos al impl");
+        System.out.println(publicationInteractionDto.getComentario());
+        System.out.println(publicationInteractionDto.getComentario());
         return PublicationInteractionMappers.INSTANCE.entityToPublicationInteractionDto(
                 publicationInteractionRepository.save(PublicationInteractionMappers.INSTANCE.DtoToPublicationInteraction(publicationInteractionDto)));
     }

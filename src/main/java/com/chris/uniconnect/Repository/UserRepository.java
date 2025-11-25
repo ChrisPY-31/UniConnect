@@ -19,7 +19,7 @@ public interface UserRepository extends ListCrudRepository<UserEntity, Integer> 
 
     boolean existsByEmail(String email);
 
-
+    Optional<UserEntity> findByPersonId(Integer personId);
 
 
 }

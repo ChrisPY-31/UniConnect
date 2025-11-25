@@ -17,6 +17,10 @@ public interface StudentRepository extends JpaRepository<Student , Integer> {
 
     Integer countAllByCareer_CareerName(String careerName);
 
+    long countByCareer_CareerName(String careerName);
+
+
+
 
 
 }

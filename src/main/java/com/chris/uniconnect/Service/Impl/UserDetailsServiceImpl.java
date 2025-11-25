@@ -9,11 +9,15 @@ import com.chris.uniconnect.Model.Dto.Response.UserResponse;
 import com.chris.uniconnect.Model.Entity.*;
 import com.chris.uniconnect.Repository.*;
 import com.chris.uniconnect.util.JwtUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -96,6 +100,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         String accessToken = jwtUtils.createToken(authentication);
 
+
         AuthResponse authResponse = new AuthResponse(username, "User loged successfuly", accessToken, true);
         return authResponse;
     }
@@ -109,6 +114,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             throw new BadCredentialsException("Invalid password");
+        }
+        if (!userDetails.isAccountNonLocked()) {
+            throw new BadCredentialsException("User is locked");
         }
 
         return new UsernamePasswordAuthenticationToken(username, userDetails.getPassword(), userDetails.getAuthorities());
@@ -195,19 +203,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return authResponse;
     }
 
-    public UserResponse userBlocked(String username) {
+    public UserResponse userBlocked(Integer id) {
 
-        UserEntity userEntity = userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("El usuario " + username + " no existe"));
+        UserEntity userEntity = userRepository.findByPersonId(id).orElseThrow(() -> new UsernameNotFoundException("El usuario " + id + " no existe"));
 
         if (!userEntity.isAccountNonLocked()) {
             userEntity.setAccountNonLocked(true);
             userRepository.save(userEntity);
-            return new UserResponse(username, "Cuenta desbloqueada con exito");
+            return new UserResponse(userEntity.getUsername(), "Cuenta desbloqueada con exito");
         }
 
         userEntity.setAccountNonLocked(false);
         userRepository.save(userEntity);
-        return new UserResponse(username, "Cuenta bloqueada tempralmente");
+        return new UserResponse(userEntity.getUsername(), "Cuenta bloqueada tempralmente");
 
     }
 
@@ -225,7 +233,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
             emailService.sendEmail(userEntity.getEmail(), "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO", "Hola estudiante actualizaste tu contraseña aqui te dejamos tus datos :\n" +
                     "Usuario: " + username + "\n" +
-                    " Contraseña: " + newPassword );
+                    " Contraseña: " + newPassword);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
