@@ -100,8 +100,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         String accessToken = jwtUtils.createToken(authentication);
 
+        UserEntity userLocked = userRepository.findUserByUsername(username).orElse(null);
 
-        AuthResponse authResponse = new AuthResponse(username, "User loged successfuly", accessToken, true);
+        assert userLocked != null;
+
+        AuthResponse authResponse = new AuthResponse(username, "User loged successfuly", accessToken,
+                true, userLocked.isAccountNonLocked()
+
+        );
         return authResponse;
     }
 
@@ -115,9 +121,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             throw new BadCredentialsException("Invalid password");
         }
-        if (!userDetails.isAccountNonLocked()) {
-            throw new BadCredentialsException("User is locked");
-        }
+
 
         return new UsernamePasswordAuthenticationToken(username, userDetails.getPassword(), userDetails.getAuthorities());
     }
@@ -132,11 +136,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         try {
-            emailService.sendEmail(email, "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO", "Hola alumno ya estas registrado en uniConnect tus credenciales de acceso son :\n" +
-                    "Usuario: " + username + "\n" +
-                    " Contraseña: " + password + " \n con tu cuenta ahora podras desarrolar tu perfil profesional.");
+
+            emailService.sendHtmlEmail(
+                    email,
+                    "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO",
+                    username,
+                    password
+            );
+
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("Error enviando correo HTML: " + e.getMessage());
         }
 
         List<String> roleRequest = authCreateUserRequest.roleRequest().roleListName();
@@ -197,7 +206,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         String accessToken = jwtUtils.createToken(authentication);
 
-        AuthResponse authResponse = new AuthResponse(userCreated.getUsername(), "User creado con exito", accessToken, true);
+        AuthResponse authResponse = new AuthResponse(userCreated.getUsername(), "User creado con exito", accessToken, true, true);
 
 
         return authResponse;
@@ -231,7 +240,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         try {
 
-            emailService.sendEmail(userEntity.getEmail(), "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO", "Hola estudiante actualizaste tu contraseña aqui te dejamos tus datos :\n" +
+            emailService.sendEmailUpdate(userEntity.getEmail(), "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO", "Hola estudiante actualizaste tu contraseña aqui te dejamos tus datos :\n" +
                     "Usuario: " + username + "\n" +
                     " Contraseña: " + newPassword);
         } catch (Exception e) {

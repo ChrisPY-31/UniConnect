@@ -33,7 +33,7 @@ public class UserConfigController {
         return new ResponseEntity<>(userDetailsService.userBlocked(id), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("permitAll()")
     @PutMapping("/{username}/{password}")
     public ResponseEntity<?> updatePassword(@PathVariable String username, @PathVariable String password) {
         try {

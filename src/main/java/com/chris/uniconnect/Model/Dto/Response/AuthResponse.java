@@ -6,5 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public record AuthResponse(String username,
                            String message,
                            String jwt,
-                           boolean status) {
+                           boolean status,
+                           boolean accoundLocked
+                           ) {
 }
