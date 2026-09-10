@@ -18,7 +18,8 @@ public class FileUploadController {
 
     @PreAuthorize("hasAnyRole('STUDENT' , 'TEACHER' , 'RECRUITER')")
     @PatchMapping("/fileUsers/{id}")
-    public ResponseEntity<?> uploadFileUsers(@PathVariable Integer id, @RequestParam("image") MultipartFile file, @RequestParam("tipo") String tipoUser) {
+    public ResponseEntity<?> uploadFileUsers(@PathVariable Integer id, @RequestParam("image") MultipartFile file,
+                                             @RequestParam("tipo") String tipoUser) {
         try {
             return ResponseEntity.ok(fileUploadService.uploadFileUser(id, file, tipoUser));
         } catch (Exception e) {
