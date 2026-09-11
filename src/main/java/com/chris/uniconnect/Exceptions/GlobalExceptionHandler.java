@@ -1,11 +1,11 @@
 package com.chris.uniconnect.Exceptions;
 
 import com.chris.uniconnect.payload.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import org.apache.coyote.Response;
-import org.springframework.boot.autoconfigure.mail.MailProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -52,11 +53,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse> handlerAuthenticationException(AuthenticationException exception,
+                                                                       WebRequest webRequest) {
+
+        String mensaje = exception instanceof BadCredentialsException
+                ? "Usuario o contraseña invalidos"
+                : exception.getMessage();
+        ApiResponse apiResponse = new ApiResponse(mensaje, webRequest.getDescription(false));
+        return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handlerException(Exception exception,
                                                         WebRequest webRequest) {
 
-        ApiResponse apiResponse = new ApiResponse(exception.getMessage(), webRequest.getDescription(false));
+        log.error("Error no controlado en {}", webRequest.getDescription(false), exception);
+        ApiResponse apiResponse = new ApiResponse("Ocurrio un error interno, intenta de nuevo mas tarde.",
+                webRequest.getDescription(false));
         return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

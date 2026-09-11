@@ -11,6 +11,12 @@ import java.util.Properties;
 @Configuration
 public class MainConfiguration {
 
+    @Value("${email.private.host}")
+    private String emailHost;
+
+    @Value("${email.private.port}")
+    private int emailPort;
+
     @Value("${email.private.user}")
     private String emailUser;
 
@@ -22,8 +28,8 @@ public class MainConfiguration {
 
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587);
+        mailSender.setHost(emailHost);
+        mailSender.setPort(emailPort);
         mailSender.setUsername(emailUser);
         mailSender.setPassword(emailPassword);
 

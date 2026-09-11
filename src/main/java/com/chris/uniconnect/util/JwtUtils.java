@@ -22,7 +22,7 @@ public class JwtUtils {
     @Value("${security.jwt.key.private}")
     private String privateKey;
 
-    @Value("${security.jwt.user.generator}")
+    @Value("${JWT_USER_GENERATOR}")
     private String userGenerator;
 
     public String createToken(Authentication authentication) {

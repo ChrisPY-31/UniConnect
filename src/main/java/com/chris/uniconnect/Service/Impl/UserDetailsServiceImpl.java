@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,12 +29,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -121,7 +124,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             throw new BadCredentialsException("Invalid password");
         }
-
+        if (!userDetails.isAccountNonLocked()) {
+            throw new LockedException("La cuenta se encuentra bloqueada");
+        }
+        if (!userDetails.isEnabled()) {
+            throw new DisabledException("La cuenta se encuentra deshabilitada");
+        }
 
         return new UsernamePasswordAuthenticationToken(username, userDetails.getPassword(), userDetails.getAuthorities());
     }
@@ -133,19 +141,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         if (userRepository.existsByEmail(email)) {
             throw new BadCredentialsException("El correo ya esta en uso.");
-        }
-
-        try {
-
-            emailService.sendHtmlEmail(
-                    email,
-                    "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO",
-                    username,
-                    password
-            );
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error enviando correo HTML: " + e.getMessage());
         }
 
         List<String> roleRequest = authCreateUserRequest.roleRequest().roleListName();
@@ -190,6 +185,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             recruiter.setUserEntity(userCreated);
             recruiter.setType("recruiter");
             recruiterRepository.save(recruiter);
+        }
+
+        try {
+            emailService.sendHtmlEmail(
+                    email,
+                    "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO",
+                    username,
+                    password
+            );
+        } catch (Exception e) {
+            log.error("No se pudo enviar el correo de bienvenida a {} para el usuario {}", email, username, e);
         }
 
         ArrayList<SimpleGrantedAuthority> authorityList = new ArrayList<>();
@@ -239,12 +245,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         userRepository.save(userEntity);
 
         try {
-
             emailService.sendEmailUpdate(userEntity.getEmail(), "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO", "Hola estudiante actualizaste tu contraseña aqui te dejamos tus datos :\n" +
                     "Usuario: " + username + "\n" +
                     " Contraseña: " + newPassword);
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            log.error("No se pudo enviar el correo de confirmacion de cambio de contraseña a {}", userEntity.getEmail(), e);
         }
         return new UserResponse(username, "contraseña actualizada con exito");
 

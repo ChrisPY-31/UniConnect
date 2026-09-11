@@ -43,7 +43,6 @@ dependencies {
 
 
     implementation 'com.auth0:java-jwt:4.5.0'
-    implementation 'com.sendgrid:sendgrid-java:4.10.2'
 
 
     implementation 'com.cloudinary:cloudinary-core:2.3.0'

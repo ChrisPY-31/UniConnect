@@ -45,7 +45,6 @@ public class SecurityConfig {
                     //configurar endpoints publicos
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/students").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/publication").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET, "/api/v1/students").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/teachers").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/auth/**").permitAll();
                     //configurar endpoints privados
@@ -69,7 +68,7 @@ public class SecurityConfig {
 
                     //permisos de admin
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/manager").hasRole("ADMIN");
-                    authorize.requestMatchers(HttpMethod.POST, "api/v1/publication").hasAnyRole("STUDENT", "TEACHER", "RECRUITER");
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/publication").hasAnyRole("STUDENT", "TEACHER", "RECRUITER");
 
 
                     //permisos de los reclutadores

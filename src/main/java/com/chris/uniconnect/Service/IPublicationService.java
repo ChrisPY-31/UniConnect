@@ -12,6 +12,8 @@ public interface IPublicationService {
 
     PublicationDto createPublication(PublicationDto publicationDto, MultipartFile file);
 
+    PublicationDto updatePublication(PublicationDto publicationDto);
+
     void deletePublication(PublicationDto publicationDto);
 
     Boolean existsPublication(Integer idPublication);

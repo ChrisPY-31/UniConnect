@@ -58,6 +58,11 @@ public class PublicationServiceImpl implements IPublicationService {
     }
 
     @Override
+    public PublicationDto updatePublication(PublicationDto publicationDto) {
+        return PublicationMappers.INSTANCE.publicationDtoToPublicacionDto(publicationRepository.save(PublicationMappers.INSTANCE.publicacionDtoToPublication(publicationDto)));
+    }
+
+    @Override
     public void deletePublication(PublicationDto publicationDto) {
         publicationRepository.deleteById(publicationDto.getId());
     }
