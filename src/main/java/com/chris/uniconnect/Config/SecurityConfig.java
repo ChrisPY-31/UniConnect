@@ -62,9 +62,9 @@ public class SecurityConfig {
                     authorize.requestMatchers(HttpMethod.DELETE, "/api/v1/technology/**").hasRole("STUDENT");
 
                     //permisos de los maestros
-                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/recomendations").hasRole("TEACHER");
-                    authorize.requestMatchers(HttpMethod.PUT, "/api/v1/recomendations/**").hasRole("TEACHER");
-                    authorize.requestMatchers(HttpMethod.DELETE, "/api/v1/recomendations/**").hasRole("TEACHER");
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/recomendation").hasRole("TEACHER");
+                    authorize.requestMatchers(HttpMethod.PUT, "/api/v1/recomendation/**").hasRole("TEACHER");
+                    authorize.requestMatchers(HttpMethod.DELETE, "/api/v1/recomendation/**").hasRole("TEACHER");
 
                     //permisos de admin
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/manager").hasRole("ADMIN");

@@ -2,6 +2,7 @@ package com.chris.uniconnect.Service.Impl;
 
 import com.chris.uniconnect.Mappers.RecomendationMappers;
 import com.chris.uniconnect.Model.Dto.RecomendationDto;
+import com.chris.uniconnect.Model.Entity.RecomendationPk;
 import com.chris.uniconnect.Repository.RecomendationRepository;
 import com.chris.uniconnect.Service.IRecomendationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +27,12 @@ public class RecomendatoinServiceImpl implements IRecomendationService {
     }
 
     @Override
-    public RecomendationDto getIdRecomendation(int id) {
+    public RecomendationDto getIdRecomendation(RecomendationPk id) {
         return RecomendationMappers.INSTANCE.recomendationToRecomendationDto( recomendationRepository.findById(id).orElse(null));
     }
 
     @Override
-    public boolean existsRecomendation(int id) {
+    public boolean existsRecomendation(RecomendationPk id) {
         return recomendationRepository.existsById(id);
     }
 

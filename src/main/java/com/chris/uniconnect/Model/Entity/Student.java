@@ -37,7 +37,4 @@ public class Student extends Person{
     @OneToMany(mappedBy = "student")
     private List<Recomendation> recomendations;
 
-    @OneToMany(mappedBy = "student")
-    private List<JobFound> jobFounds;
-
 }

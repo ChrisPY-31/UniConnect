@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Entity
 @Table(name = "recruiter")
 @Getter
@@ -24,7 +22,4 @@ public class Recruiter extends Person {
     @ManyToOne
     @JoinColumn(name = "id_company" , referencedColumnName = "id_company" , insertable = false , updatable = false)
     private Company company;
-
-    @OneToMany(mappedBy = "recruiter")
-    private List<JobFound> jobFounds;
 }

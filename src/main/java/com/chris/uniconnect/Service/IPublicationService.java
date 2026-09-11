@@ -10,7 +10,7 @@ public interface IPublicationService {
 
     List<PublicationDto> getAllPublications();
 
-    PublicationDto createPublication(PublicationDto publicationDto, MultipartFile file);
+    PublicationDto createPublication(PublicationDto publicationDto);
 
     PublicationDto updatePublication(PublicationDto publicationDto);
 

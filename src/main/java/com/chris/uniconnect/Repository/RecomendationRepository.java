@@ -1,9 +1,10 @@
 package com.chris.uniconnect.Repository;
 
 import com.chris.uniconnect.Model.Entity.Recomendation;
+import com.chris.uniconnect.Model.Entity.RecomendationPk;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RecomendationRepository extends JpaRepository<Recomendation , Integer> {
+public interface RecomendationRepository extends JpaRepository<Recomendation , RecomendationPk> {
 }

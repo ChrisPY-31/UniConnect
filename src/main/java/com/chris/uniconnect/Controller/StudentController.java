@@ -55,6 +55,7 @@ public class StudentController {
     public ResponseEntity<?> updateStudent(@RequestBody StudentDto student, @PathVariable int id ) {
         boolean existStudent = studentService.existStudent(id);
         if (existStudent) {
+            student.setId(id);
             return new ResponseEntity<>(MensajeResponse.builder()
                     .mensaje("Persona Actualizada con exito")
                     .object(studentService.updateStudent(student)).build(), HttpStatus.OK);

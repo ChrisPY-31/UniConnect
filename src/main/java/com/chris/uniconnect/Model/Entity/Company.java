@@ -33,8 +33,4 @@ public class Company {
     @OneToMany(mappedBy = "company")
     private List<Recruiter> recruiters;
 
-    @OneToMany(mappedBy = "company")
-    private List<JobFound> jobFounds;
-
-
 }

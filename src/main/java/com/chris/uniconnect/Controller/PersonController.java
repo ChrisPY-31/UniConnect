@@ -44,7 +44,7 @@ public class PersonController {
 
         if (searchPerson != null) {
             personService.deletePerson(searchPerson);
-            return new ResponseEntity<>(MensajeResponse.builder().mensaje("Persona Eliminada con exito").build(), HttpStatus.OK);
+            return new ResponseEntity<>(MensajeResponse.builder().mensaje("Cuenta desactivada con exito").build(), HttpStatus.OK);
         }
         return new ResponseEntity<>(MensajeResponse.builder().mensaje("Persona No se encontro con el id " + id).object(null).build(), HttpStatus.OK);
     }

@@ -2,6 +2,7 @@ package com.chris.uniconnect.Controller;
 
 import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Model.Dto.RecomendationDto;
+import com.chris.uniconnect.Model.Entity.RecomendationPk;
 import com.chris.uniconnect.Service.IRecomendationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,12 +40,13 @@ public class RecomendationController {
                 .build(), HttpStatus.CREATED);
     }
 
-    @PutMapping("/recomendation/{id}")
-    public ResponseEntity<?> updateRecomendation(@RequestBody RecomendationDto recomendation, @PathVariable int id) {
-        RecomendationDto updaterecomendation = null;
+    @PutMapping("/recomendation/{idStudent}/{idTeacher}")
+    public ResponseEntity<?> updateRecomendation(@RequestBody RecomendationDto recomendation, @PathVariable Integer idStudent, @PathVariable Integer idTeacher) {
+        RecomendationPk id = new RecomendationPk(idStudent, idTeacher);
 
         if (recomendationService.existsRecomendation(id) && recomendation != null) {
-            updaterecomendation = recomendationService.saveRecomendation(recomendation);
+            recomendation.setId(id);
+            RecomendationDto updaterecomendation = recomendationService.saveRecomendation(recomendation);
             return new ResponseEntity<>(MensajeResponse.builder()
                     .mensaje("Recomendacion Actualizada con realizada con exito")
                     .object(updaterecomendation)
@@ -54,8 +56,9 @@ public class RecomendationController {
         }
     }
 
-    @DeleteMapping("/recomendation/{id}")
-    public ResponseEntity<?> deleteRecomendation(@PathVariable Integer id) {
+    @DeleteMapping("/recomendation/{idStudent}/{idTeacher}")
+    public ResponseEntity<?> deleteRecomendation(@PathVariable Integer idStudent, @PathVariable Integer idTeacher) {
+        RecomendationPk id = new RecomendationPk(idStudent, idTeacher);
 
         RecomendationDto deleteRecomendation = recomendationService.getIdRecomendation(id);
         if (deleteRecomendation != null) {
@@ -63,7 +66,7 @@ public class RecomendationController {
             return ResponseEntity.noContent().build();
         }
         return new ResponseEntity<>(MensajeResponse.builder()
-                .mensaje("Recomendacion  con el id: " + id + " no existe")
+                .mensaje("Recomendacion con los ids: " + idStudent + ", " + idTeacher + " no existe")
                 .object(null)
                 .build(), HttpStatus.OK);
 

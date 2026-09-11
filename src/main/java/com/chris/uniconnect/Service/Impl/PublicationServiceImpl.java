@@ -36,7 +36,7 @@ public class PublicationServiceImpl implements IPublicationService {
     }
 
     @Override
-    public PublicationDto createPublication(PublicationDto publicationDto, MultipartFile file) {
+    public PublicationDto createPublication(PublicationDto publicationDto) {
         PersonDto person = personService.getPersonsById(publicationDto.getIdPersona());
 
         if (publicationDto.getPersona() == null) {
@@ -47,12 +47,6 @@ public class PublicationServiceImpl implements IPublicationService {
             personaResponse.setImagen(person.getImagen());
             personaResponse.setEspecialidad(person.getEspecialidad());
         }
-        if (file == null) {
-
-            return PublicationMappers.INSTANCE.publicationDtoToPublicacionDto(publicationRepository.save(PublicationMappers.INSTANCE.publicacionDtoToPublication(publicationDto)));
-        }
-        String imageReady = fileUploadService.uploadFilePruebapublication(file);
-        publicationDto.setImagen(imageReady);
         return PublicationMappers.INSTANCE.publicationDtoToPublicacionDto(publicationRepository.save(PublicationMappers.INSTANCE.publicacionDtoToPublication(publicationDto)));
 
     }

@@ -1,11 +1,7 @@
 package com.chris.uniconnect.Repository;
 
-import com.chris.uniconnect.Model.Entity.Person;
-import com.chris.uniconnect.Model.Entity.RolesEntity;
+
 import com.chris.uniconnect.Model.Entity.UserEntity;
-import org.apache.catalina.User;
-import org.mapstruct.control.MappingControl;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 

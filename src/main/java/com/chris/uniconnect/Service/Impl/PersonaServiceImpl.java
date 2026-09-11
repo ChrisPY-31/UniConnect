@@ -11,6 +11,7 @@ import com.chris.uniconnect.Model.Dto.StudentDto;
 import com.chris.uniconnect.Model.Dto.TeacherDto;
 import com.chris.uniconnect.Model.Entity.Person;
 import com.chris.uniconnect.Model.Entity.Teacher;
+import com.chris.uniconnect.Model.Entity.UserEntity;
 import com.chris.uniconnect.Repository.*;
 import com.chris.uniconnect.Service.IPersonService;
 import jakarta.transaction.Transactional;
@@ -34,10 +35,19 @@ public class PersonaServiceImpl implements IPersonService {
     @Autowired
     private RecruiterRepository recruiterRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
 
     @Override
+    @Transactional
     public void deletePerson(PersonDto person) {
+        UserEntity userEntity = userRepository.findByPersonId(person.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "idPersona", person.getId()));
 
+        userEntity.setEnabled(false);
+        userEntity.setAccountNonLocked(false);
+        userRepository.save(userEntity);
     }
 
     @Override

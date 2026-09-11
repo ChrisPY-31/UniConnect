@@ -42,6 +42,7 @@ public class ProjectLinkController {
                 .build(), HttpStatus.NOT_FOUND);
     }
 
+    @PreAuthorize("hasRole('STUDENT')")
     @DeleteMapping("/projectLink/{id}")
     public ResponseEntity<?> deleteProjectLink(@PathVariable Integer id) {
         ProjectLinksDto projectLink = projectLinkService.getProjectLinkById(id);

@@ -1,6 +1,7 @@
 package com.chris.uniconnect.Service;
 
 import com.chris.uniconnect.Model.Dto.RecomendationDto;
+import com.chris.uniconnect.Model.Entity.RecomendationPk;
 
 import java.util.List;
 
@@ -10,9 +11,9 @@ public interface IRecomendationService {
 
     RecomendationDto saveRecomendation(RecomendationDto recomendationDto);
 
-    RecomendationDto getIdRecomendation(int id);
+    RecomendationDto getIdRecomendation(RecomendationPk id);
 
-    boolean existsRecomendation(int id);
+    boolean existsRecomendation(RecomendationPk id);
 
     void deleteRecomendation(RecomendationDto recomendationDto);
 

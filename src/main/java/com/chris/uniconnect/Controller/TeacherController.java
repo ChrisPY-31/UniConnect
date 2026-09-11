@@ -44,6 +44,7 @@ public class TeacherController {
     public ResponseEntity<?> updateTeacher(@RequestBody TeacherDto teacher, @PathVariable int id) {
 
         if (teacherService.existStudent(id)) {
+            teacher.setId(id);
             TeacherDto updateTeacher = teacherService.updateTeacher(teacher);
             return new ResponseEntity<>(MensajeResponse.builder()
                     .mensaje("Persona Actualizada con exito")

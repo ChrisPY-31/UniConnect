@@ -21,5 +21,6 @@ public class PublicationInteractionDto {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    private PersonaResponseM persona;
 
 }
