@@ -31,7 +31,11 @@ public class StudentController {
     }
 
     @GetMapping("/students/name")
-    public ResponseEntity<?> getStudentsByName(@RequestParam String name) {
+    public ResponseEntity<?> getStudentsByName(
+            @RequestParam String name,
+            @RequestParam String carrera,
+            @RequestParam String especialidad
+    ) {
         List<StudentAllDto> studentName = studentService.getStudentByName(name);
         if (studentName == null || studentName.isEmpty()) {
             throw new ResourceNotFoundException("students");

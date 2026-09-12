@@ -4,9 +4,13 @@ import com.chris.uniconnect.Model.Dto.RecruiterDto;
 import com.chris.uniconnect.Model.Dto.TeacherDto;
 import com.chris.uniconnect.Model.Entity.Recruiter;
 import com.chris.uniconnect.Model.Entity.Teacher;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.InheritConfiguration;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(uses = {
@@ -43,4 +47,8 @@ public interface RecruiterMappers {
 
     @InheritInverseConfiguration
     Recruiter recruiterDtoToRecruiter(RecruiterDto recruiterDto);
+
+    @InheritConfiguration(name = "recruiterDtoToRecruiter")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateRecruiterFromDto(RecruiterDto recruiterDto, @MappingTarget Recruiter recruiter);
 }

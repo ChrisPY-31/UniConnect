@@ -2,9 +2,13 @@ package com.chris.uniconnect.Mappers;
 
 import com.chris.uniconnect.Model.Dto.*;
 import com.chris.uniconnect.Model.Entity.*;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.InheritConfiguration;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -47,4 +51,8 @@ public interface PersonMappers {
 
     @InheritInverseConfiguration
     Student studentDtoToStudent(StudentDto studentDto);
+
+    @InheritConfiguration(name = "studentDtoToStudent")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateStudentFromDto(StudentDto studentDto, @MappingTarget Student student);
 }

@@ -26,4 +26,5 @@ public interface IStudentService {
 
     List<StudentAllDto> getStudentByName(String name );
 
+
 }

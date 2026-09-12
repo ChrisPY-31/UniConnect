@@ -47,6 +47,7 @@ public class SecurityConfig {
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/publication").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/teachers").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/auth/**").permitAll();
+                    authorize.requestMatchers("/ws/**").permitAll(); // el JWT se valida en el CONNECT de STOMP, no aqui
                     //configurar endpoints privados
                     //permisos generales
 

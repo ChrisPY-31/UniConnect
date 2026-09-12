@@ -40,11 +40,9 @@ public class TeacherServiceImpl implements ITeacherService {
         Teacher existingTeacher = teacherRepostory.findById(teacherDto.getId())
                 .orElseThrow(() -> new RuntimeException("Profesor no encontrado con id: " + teacherDto.getId()));
 
-        Teacher updatedTeacher = TeacherMappers.INSTANCE.teacherDtoToTeacher(teacherDto);
+        TeacherMappers.INSTANCE.updateTeacherFromDto(teacherDto, existingTeacher);
 
-        updatedTeacher.setUserEntity(existingTeacher.getUserEntity());
-
-        return TeacherMappers.INSTANCE.teacherToTeacherDto(teacherRepostory.save(updatedTeacher));
+        return TeacherMappers.INSTANCE.teacherToTeacherDto(teacherRepostory.save(existingTeacher));
     }
 
 

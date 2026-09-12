@@ -30,11 +30,9 @@ public class RecruiterServiceImpl implements IRecruiterServce {
         Recruiter existingRecruiter = recruiterRepository.findById(recruiterDto.getId())
                 .orElseThrow(() -> new RuntimeException("Profesor no encontrado con id: " + recruiterDto.getId()));
 
-        Recruiter updatedRecruiter = RecruiterMappers.INSTANCE.recruiterDtoToRecruiter(recruiterDto);
+        RecruiterMappers.INSTANCE.updateRecruiterFromDto(recruiterDto, existingRecruiter);
 
-        updatedRecruiter.setUserEntity(existingRecruiter.getUserEntity());
-
-        return RecruiterMappers.INSTANCE.recruiterToRecruiterDto(recruiterRepository.save(updatedRecruiter));
+        return RecruiterMappers.INSTANCE.recruiterToRecruiterDto(recruiterRepository.save(existingRecruiter));
 
     }
 

@@ -48,14 +48,11 @@ public class StudentServiceImpl implements IStudentService {
         Student existingStudent = studentRepository.findById(studentDto.getId())
                 .orElseThrow(() -> new RuntimeException("Estudiante no encontrado con id: " + studentDto.getId()));
 
-        // Convertir DTO a entidad
-        Student updatedStudent = PersonMappers.INSTANCE.studentDtoToStudent(studentDto);
-
-        // Mantener el userEntity original
-        updatedStudent.setUserEntity(existingStudent.getUserEntity());
+        // Aplicar solo los campos no nulos del DTO sobre la entidad existente
+        PersonMappers.INSTANCE.updateStudentFromDto(studentDto, existingStudent);
 
         // Guardar y devolver
-        return PersonMappers.INSTANCE.studentToStudentDto(studentRepository.save(updatedStudent));
+        return PersonMappers.INSTANCE.studentToStudentDto(studentRepository.save(existingStudent));
     }
 
     @Override

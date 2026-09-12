@@ -3,11 +3,11 @@ package com.chris.uniconnect.Controller;
 import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Model.Dto.RecomendationDto;
 import com.chris.uniconnect.Model.Entity.RecomendationPk;
+import com.chris.uniconnect.Service.INotificationService;
 import com.chris.uniconnect.Service.IRecomendationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +19,8 @@ import java.util.List;
 public class RecomendationController {
 
     private final IRecomendationService recomendationService;
+
+    private final INotificationService notificationService;
 
     @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
     @GetMapping("/recomendation")
@@ -33,10 +35,11 @@ public class RecomendationController {
 
     @PostMapping("/recomendation")
     public ResponseEntity<?> createRecomendation(@RequestBody RecomendationDto recomendation) {
-        recomendationService.saveRecomendation(recomendation);
+        RecomendationDto saved = recomendationService.saveRecomendation(recomendation);
+        notificationService.notifyRecommendation(saved.getId());
         return new ResponseEntity<>(MensajeResponse.builder()
                 .mensaje("Recomendacion realizada con exito")
-                .object(recomendation)
+                .object(saved)
                 .build(), HttpStatus.CREATED);
     }
 
