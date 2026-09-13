@@ -4,10 +4,12 @@ import com.chris.uniconnect.Enum.Roles;
 import com.chris.uniconnect.Model.Entity.RolesEntity;
 import com.chris.uniconnect.Model.Entity.Student;
 import com.chris.uniconnect.Model.Entity.Teacher;
+import com.chris.uniconnect.Model.Entity.Technology;
 import com.chris.uniconnect.Model.Entity.UserEntity;
 import com.chris.uniconnect.Repository.RoleRepository;
 import com.chris.uniconnect.Repository.StudentRepository;
 import com.chris.uniconnect.Repository.TeacherRepostory;
+import com.chris.uniconnect.Repository.TechnologyRepository;
 import com.chris.uniconnect.Repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -29,15 +31,18 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final StudentRepository studentRepository;
     private final TeacherRepostory teacherRepostory;
+    private final TechnologyRepository technologyRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DemoDataSeeder(UserRepository userRepository, RoleRepository roleRepository,
                            StudentRepository studentRepository, TeacherRepostory teacherRepostory,
+                           TechnologyRepository technologyRepository,
                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.studentRepository = studentRepository;
         this.teacherRepostory = teacherRepostory;
+        this.technologyRepository = technologyRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -52,6 +57,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         seedAdmin(adminRole);
         seedTeacher(teacherRole);
         seedStudent(studentRole);
+        seedTechnologies();
     }
 
     private RolesEntity ensureRole(Roles role) {
@@ -135,5 +141,21 @@ public class DemoDataSeeder implements CommandLineRunner {
         student.setUserEntity(savedUser);
         studentRepository.save(student);
         log.info("Usuario demo creado -> username: estudiante.demo | password: Student123*");
+    }
+
+    private void seedTechnologies() {
+        List<String> catalogo = List.of(
+                "Java", "Python", "JavaScript", "TypeScript", "C++", "C#", "PHP", "Kotlin", "Go",
+                "Spring Boot", "React", "Angular", "Vue.js", "Node.js", "Django", "Flask", ".NET",
+                "MySQL", "PostgreSQL", "MongoDB", "Docker", "Git"
+        );
+
+        for (String nombre : catalogo) {
+            if (!technologyRepository.existsByNameIgnoreCase(nombre)) {
+                Technology technology = new Technology();
+                technology.setName(nombre);
+                technologyRepository.save(technology);
+            }
+        }
     }
 }

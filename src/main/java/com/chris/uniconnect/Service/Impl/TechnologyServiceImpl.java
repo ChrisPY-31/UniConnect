@@ -2,6 +2,7 @@ package com.chris.uniconnect.Service.Impl;
 
 import com.chris.uniconnect.Mappers.TechnologyMappers;
 import com.chris.uniconnect.Model.Dto.TechnologyDto;
+import com.chris.uniconnect.Model.Entity.Technology;
 import com.chris.uniconnect.Repository.TechnologyRepository;
 import com.chris.uniconnect.Service.ITechnologyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,18 @@ public class TechnologyServiceImpl implements ITechnologyService {
     }
 
     @Override
+    public List<TechnologyDto> getTechnologies() {
+        return TechnologyMappers.INSTANCE.listTechnologyToListTechnonlogyDto(technologyRepository.findAll());
+    }
+
+    @Override
     public List<TechnologyDto> createTechnology(List<TechnologyDto> technologyDto) {
-        return TechnologyMappers.INSTANCE.listTechnologyToListTechnonlogyDto(technologyRepository.saveAll(TechnologyMappers.INSTANCE.listTechnologyDtoToListTechnonlogy(technologyDto)));
+        List<Technology> nuevasTecnologias = technologyDto.stream()
+                .filter(dto -> !technologyRepository.existsByNameIgnoreCase(dto.getNombre()))
+                .map(TechnologyMappers.INSTANCE::DtoToTechnology)
+                .toList();
+
+        return TechnologyMappers.INSTANCE.listTechnologyToListTechnonlogyDto(technologyRepository.saveAll(nuevasTecnologias));
     }
 
     @Override

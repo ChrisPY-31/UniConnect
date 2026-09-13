@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -55,7 +54,11 @@ public class Project {
     )
     private Set<Student> mentions;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
-    private List<Technology> technologies;
+    @ManyToMany
+    @JoinTable(name = "project_technology",
+            joinColumns = @JoinColumn(name = "id_project"),
+            inverseJoinColumns = @JoinColumn(name = "id_technology")
+    )
+    private Set<Technology> technologies;
 
 }

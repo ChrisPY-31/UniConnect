@@ -15,7 +15,6 @@ public interface TechnologyMappers {
     TechnologyMappers INSTANCE = Mappers.getMapper(TechnologyMappers.class);
 
     @Mapping(source = "idTechnology", target = "idTecnologia")
-    @Mapping(source = "idProject", target = "idProyecto")
     @Mapping(source = "name", target = "nombre")
     TechnologyDto tecnologyToDto(Technology technology);
 

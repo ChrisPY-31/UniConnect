@@ -4,7 +4,6 @@ import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Model.Dto.TechnologyDto;
 import com.chris.uniconnect.Service.ITechnologyService;
 import lombok.AllArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,17 +19,21 @@ public class TechnologyController {
 
     private final ITechnologyService technologyService;
 
-    @PreAuthorize("hasAnyRole('STUDENT')")
+    @GetMapping("/technology")
+    public ResponseEntity<?> getTechnologies() {
+        return ResponseEntity.ok(technologyService.getTechnologies());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/technology")
     public ResponseEntity<?> saveTechnology(@RequestBody List<TechnologyDto> technology) {
-        System.out.println("aqui tecnologias");
         return new ResponseEntity<>(MensajeResponse.builder()
                 .mensaje("Tecnologia creada con exito")
                 .object(technologyService.createTechnology(technology))
                 .build(), HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/technology")
     public ResponseEntity<?> updateTechnology(@RequestBody List<TechnologyDto> technology) {
         try {
@@ -44,7 +47,7 @@ public class TechnologyController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('STUDENT')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/technology/{id}")
     public ResponseEntity<?> deleteTechnology(@PathVariable Integer id) {
         if (technologyService.existTechnology(id)) {

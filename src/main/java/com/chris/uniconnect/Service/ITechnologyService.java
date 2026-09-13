@@ -8,6 +8,8 @@ public interface ITechnologyService {
 
     boolean existTechnology(Integer id);
 
+    List<TechnologyDto> getTechnologies();
+
     List<TechnologyDto> createTechnology(List<TechnologyDto> technologyDto);
 
     void deleteTechnology(Integer id);
