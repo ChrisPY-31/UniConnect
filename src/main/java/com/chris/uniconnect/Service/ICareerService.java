@@ -10,4 +10,8 @@ public interface ICareerService {
     List<CareerDto> getCareers();
 
     CareerDto saveCareer(CareerDto career);
+
+    CareerDto updateCareer(CareerDto career);
+
+    void deleteCareer(Integer idCareer);
 }

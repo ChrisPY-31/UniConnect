@@ -1,13 +1,10 @@
 package com.chris.uniconnect.Model.Dto;
 
 import com.chris.uniconnect.Enum.LanguageLevel;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.mapstruct.Mapping;
 
-//hay un error con el language Nivel
 @Data
 public class LanguageDto {
 
@@ -15,9 +12,10 @@ public class LanguageDto {
 
     private Integer idPersona;
 
+    @NotBlank(message = "El nombre del idioma es obligatorio")
     private String nombre;
 
-    @Enumerated(EnumType.STRING)
+    @NotNull(message = "El nivel es obligatorio")
     private LanguageLevel nivel;
 
 }

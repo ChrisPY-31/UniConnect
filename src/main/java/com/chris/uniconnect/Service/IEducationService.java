@@ -4,11 +4,9 @@ import com.chris.uniconnect.Model.Dto.EducationDto;
 
 public interface IEducationService {
 
-    EducationDto create(EducationDto educationDto);
+    EducationDto create(String username, EducationDto educationDto);
 
-    EducationDto updateEducation(EducationDto educationDto);
+    EducationDto updateEducation(String username, Integer idEducation, EducationDto educationDto);
 
-    Boolean exitEducation(Integer educationId);
-
-    void deleteEducation(int educationId);
+    void deleteEducation(String username, Integer educationId);
 }

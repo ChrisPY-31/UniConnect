@@ -39,11 +39,15 @@ public interface TeacherMappers {
     @Mapping(source = "personContacts", target = "redContactos")
     @Mapping(source = "educations", target = "educaciones")
     @Mapping(source = "ubication", target = "ubicacion")
+    @Mapping(source = "city", target = "ciudad")
     @Mapping(source = "languages", target = "lenguajes")
     @Mapping(source = "recomendations", target = "recomendaciones")
     TeacherDto teacherToTeacherDto(Teacher teacher);
 
     @InheritInverseConfiguration
+    @Mapping(target = "aptitudes", ignore = true)
+    @Mapping(target = "educations", ignore = true)
+    @Mapping(target = "languages", ignore = true)
     Teacher teacherDtoToTeacher(TeacherDto teacherDto);
 
     @InheritConfiguration(name = "teacherDtoToTeacher")

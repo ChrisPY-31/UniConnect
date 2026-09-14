@@ -3,15 +3,21 @@ package com.chris.uniconnect.Controller;
 import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Model.Dto.ProjectDto;
 import com.chris.uniconnect.Service.IProjectService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Proyectos", description = "Portafolio de proyectos de un estudiante. El dueno (idEstudiante) se resuelve por JWT en create/update/delete.")
 @RestController
 @RequestMapping("api/v1")
 @AllArgsConstructor
@@ -20,6 +26,9 @@ public class ProjectController {
 
     private final IProjectService projectService;
 
+    @Operation(summary = "Listar todos los proyectos")
+    @ApiResponse(responseCode = "200", description = "Lista de proyectos (vacia si no hay ninguno)")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/projects")
     public ResponseEntity<?> getProjects() {
         List<ProjectDto> projects = projectService.getAllProjects();
@@ -29,54 +38,51 @@ public class ProjectController {
         return new ResponseEntity<>(MensajeResponse.builder().object(projects).build(), HttpStatus.NOT_FOUND);
     }
 
-    //verificar la validacion
+    @Operation(
+            summary = "Crear un proyecto",
+            description = "Solo STUDENT. El idEstudiante se toma del usuario autenticado, no del body. Las menciones y tecnologias deben traer ids reales ya existentes."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Proyecto creado"),
+            @ApiResponse(responseCode = "400", description = "Nombre vacio"),
+            @ApiResponse(responseCode = "404", description = "Alguna mencion o tecnologia no existe")
+    })
+    @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/projects")
-    public ResponseEntity<?> saveProject(@RequestBody ProjectDto projectDto) {
-        ProjectDto project = null;
-        try {
-            project = projectService.createProject(projectDto);
-            return new ResponseEntity<>(MensajeResponse.builder()
-                    .mensaje("Proyecto guardado correctamente")
-                    .object(project)
-                    .build(), HttpStatus.CREATED);
-        } catch (DataAccessException e) {
-            return new ResponseEntity<>(MensajeResponse.builder().mensaje(e.getMessage()).object(projectDto).build(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PutMapping("/projects")
-    public ResponseEntity<?> updateProject(@RequestBody ProjectDto projectDto) {
-        ProjectDto project = null;
-
-        try {
-            Boolean exist = projectService.existBoolean(projectDto.getIdProject());
-            if (exist) {
-                project = projectService.updateProject(projectDto);
-                return new ResponseEntity<>(MensajeResponse.builder().mensaje("Proyecto actualizado correctamente").object(project).build(), HttpStatus.OK);
-            }
-            return new ResponseEntity<>(MensajeResponse.builder()
-                    .mensaje("El id: " + projectDto.getIdProject() + "del proyecto en la base de datos")
-                    .build(), HttpStatus.NOT_FOUND);
-
-        } catch (DataAccessException e) {
-            return new ResponseEntity<>(MensajeResponse.builder()
-                    .mensaje(e.getMessage())
-                    .object(projectDto)
-                    .build(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @DeleteMapping("/projects/{id}")
-    public ResponseEntity<?> deleteProject(@PathVariable Integer id) {
-        ProjectDto project = projectService.getProject(id);
-
-        if (project != null) {
-            projectService.deleteProject(project);
-            return new ResponseEntity<>(MensajeResponse.builder().mensaje("proyecto elimnado con exito").build(), HttpStatus.NO_CONTENT);
-        }
+    public ResponseEntity<?> saveProject(@RequestBody ProjectDto projectDto, Authentication authentication) {
+        ProjectDto project = projectService.createProject(authentication.getName(), projectDto);
         return new ResponseEntity<>(MensajeResponse.builder()
-                .mensaje("El id: " + id + "del proyecto en la base de datos")
-                .build(), HttpStatus.NOT_FOUND);
+                .mensaje("Proyecto guardado correctamente")
+                .object(project)
+                .build(), HttpStatus.CREATED);
+    }
 
+    @Operation(summary = "Actualizar un proyecto propio", description = "El body debe incluir idProject. Solo el dueno puede editarlo.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Proyecto actualizado"),
+            @ApiResponse(responseCode = "400", description = "El proyecto pertenece a otro estudiante"),
+            @ApiResponse(responseCode = "404", description = "No existe el proyecto, mencion o tecnologia")
+    })
+    @PreAuthorize("hasRole('STUDENT')")
+    @PutMapping("/projects")
+    public ResponseEntity<?> updateProject(@RequestBody ProjectDto projectDto, Authentication authentication) {
+        ProjectDto project = projectService.updateProject(authentication.getName(), projectDto);
+        return new ResponseEntity<>(MensajeResponse.builder()
+                .mensaje("Proyecto actualizado correctamente")
+                .object(project)
+                .build(), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Eliminar un proyecto propio")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Eliminado"),
+            @ApiResponse(responseCode = "400", description = "El proyecto pertenece a otro estudiante"),
+            @ApiResponse(responseCode = "404", description = "No existe el proyecto")
+    })
+    @PreAuthorize("hasRole('STUDENT')")
+    @DeleteMapping("/projects/{id}")
+    public ResponseEntity<?> deleteProject(@Parameter(description = "Id del proyecto") @PathVariable Integer id, Authentication authentication) {
+        projectService.deleteProject(authentication.getName(), id);
+        return new ResponseEntity<>(MensajeResponse.builder().mensaje("Proyecto eliminado con exito").build(), HttpStatus.NO_CONTENT);
     }
 }

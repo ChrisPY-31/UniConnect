@@ -5,11 +5,13 @@ import com.chris.uniconnect.Model.Dto.ProjectLinksDto;
 
 public interface IProjectLinkService {
 
-    ProjectLinksDto createProjectLinks(ProjectLinksDto projectLinksDto);
+    ProjectLinksDto createProjectLinks(String username, ProjectLinksDto projectLinksDto);
+
+    ProjectLinksDto updateProjectLinks(String username, Integer id, ProjectLinksDto projectLinksDto);
 
     ProjectLinksDto getProjectLinkById(Integer id);
 
-    void deleteProjectLinks(ProjectLinksDto projectLinksDto);
+    void deleteProjectLinks(String username, Integer id);
 
     boolean existsProjectLinks(Integer id);
 }

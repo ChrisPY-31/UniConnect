@@ -42,6 +42,13 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> {
+                    //documentacion Swagger/OpenAPI
+                    authorize.requestMatchers(
+                            "/swagger-ui/**",
+                            "/swagger-ui.html",
+                            "/v3/api-docs/**",
+                            "/v3/api-docs.yaml"
+                    ).permitAll();
                     //configurar endpoints publicos
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/students").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/publication").permitAll();

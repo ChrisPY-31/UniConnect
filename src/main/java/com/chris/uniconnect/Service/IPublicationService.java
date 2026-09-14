@@ -1,20 +1,18 @@
 package com.chris.uniconnect.Service;
 
 import com.chris.uniconnect.Model.Dto.PublicationDto;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IPublicationService {
 
     List<PublicationDto> getAllPublications();
 
-    PublicationDto createPublication(PublicationDto publicationDto);
+    PublicationDto createPublication(String username, PublicationDto publicationDto);
 
-    PublicationDto updatePublication(PublicationDto publicationDto);
+    PublicationDto updatePublication(String username, Integer idPublication, PublicationDto publicationDto);
 
-    void deletePublication(PublicationDto publicationDto);
+    void deletePublication(String username, Integer idPublication);
 
     Boolean existsPublication(Integer idPublication);
 

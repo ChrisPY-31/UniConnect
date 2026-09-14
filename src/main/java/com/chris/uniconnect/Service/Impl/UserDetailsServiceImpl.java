@@ -1,11 +1,13 @@
 package com.chris.uniconnect.Service.Impl;
 
+import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Mappers.RecruiterMappers;
 import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.Model.Dto.Response.AuthCreateUserRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthLoginRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthResponse;
 import com.chris.uniconnect.Model.Dto.Response.UserResponse;
+import com.chris.uniconnect.Model.Dto.Response.UserSummaryResponse;
 import com.chris.uniconnect.Model.Entity.*;
 import com.chris.uniconnect.Repository.*;
 import com.chris.uniconnect.util.JwtUtils;
@@ -236,25 +238,55 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     }
 
-    public List<UserEntity> getUsers() {
-        return userRepository.findAll();
+    public List<UserSummaryResponse> getUsers() {
+        return userRepository.findAll().stream()
+                .map(userEntity -> new UserSummaryResponse(
+                        userEntity.getId(),
+                        userEntity.getUsername(),
+                        userEntity.getEmail(),
+                        userEntity.isEnabled(),
+                        userEntity.isAccountNonLocked(),
+                        userEntity.getRoles().stream()
+                                .map(role -> role.getRoleEnum().name())
+                                .collect(Collectors.toSet())
+                ))
+                .collect(Collectors.toList());
     }
 
-    public UserResponse updatePassword(String username, String newPassword) {
+    public UserResponse changePassword(String username, String currentPassword, String newPassword) {
+        UserEntity userEntity = userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("El usuario " + username + " no existe"));
+
+        if (!passwordEncoder.matches(currentPassword, userEntity.getPassword())) {
+            throw new BadRequestException("La contrasena actual no es correcta");
+        }
+
+        userEntity.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(userEntity);
+
+        try {
+            emailService.sendEmailUpdate(userEntity.getEmail(), "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO",
+                    "Hola, tu contraseña fue actualizada correctamente. Si no reconoces este cambio, contacta al administrador.");
+        } catch (Exception e) {
+            log.error("No se pudo enviar el correo de confirmacion de cambio de contraseña a {}", userEntity.getEmail(), e);
+        }
+        return new UserResponse(username, "Contraseña actualizada con exito");
+    }
+
+    public UserResponse resetPassword(String username, String newPassword) {
         UserEntity userEntity = userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("El usuario " + username + " no existe"));
 
         userEntity.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(userEntity);
 
         try {
-            emailService.sendEmailUpdate(userEntity.getEmail(), "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO", "Hola estudiante actualizaste tu contraseña aqui te dejamos tus datos :\n" +
-                    "Usuario: " + username + "\n" +
-                    " Contraseña: " + newPassword);
+            emailService.sendEmailUpdate(userEntity.getEmail(), "CENTRO UNIVERSITARIO UAEMEX TIANGUISTENCO",
+                    "Hola, un administrador restablecio tu contraseña. Tus nuevos datos son:\n" +
+                            "Usuario: " + username + "\n" +
+                            "Contraseña: " + newPassword);
         } catch (Exception e) {
-            log.error("No se pudo enviar el correo de confirmacion de cambio de contraseña a {}", userEntity.getEmail(), e);
+            log.error("No se pudo enviar el correo de restablecimiento de contraseña a {}", userEntity.getEmail(), e);
         }
-        return new UserResponse(username, "contraseña actualizada con exito");
-
+        return new UserResponse(username, "Contraseña restablecida con exito");
     }
 
 }

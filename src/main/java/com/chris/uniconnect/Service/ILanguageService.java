@@ -6,13 +6,11 @@ import java.util.List;
 
 public interface ILanguageService {
 
-    List<LanguageDto> getAllLanguages();
+    List<LanguageDto> getMyLanguages(String username);
 
-    List<LanguageDto> createLanguage(List<LanguageDto> languageDto);
+    List<LanguageDto> createLanguage(String username, List<LanguageDto> languageDto);
 
-    void deleteLanguage(LanguageDto languageDto);
+    LanguageDto updateLanguage(String username, Integer id, LanguageDto languageDto);
 
-    LanguageDto getLanguageById(Integer id);
-
-    boolean languageExists(Integer id);
+    void deleteLanguage(String username, Integer id);
 }

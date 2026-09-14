@@ -39,6 +39,8 @@ public class PersonDto {
 
     private UbicationDto ubicacion;
 
+    private String ciudad;
+
     private List<LanguageResponse> lenguajes;
 
     private List<EducationResponse> educaciones;

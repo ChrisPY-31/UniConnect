@@ -8,9 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 public interface FileUploadService {
     PersonDto uploadFileUser(int id , MultipartFile file , String tipoUser);
 
-    ProjectDto uploadFileProject(int id , MultipartFile file );
+    ProjectDto uploadFileProject(String username, int id , MultipartFile file );
 
-    PublicationDto uploadFilePublication(int id , MultipartFile file );
+    PublicationDto uploadFilePublication(String username, int id , MultipartFile file );
 
     String uploadFilePruebapublication( MultipartFile file);
 }

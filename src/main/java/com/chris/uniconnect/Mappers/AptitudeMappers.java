@@ -16,19 +16,17 @@ public interface AptitudeMappers {
     AptitudeMappers INSTANCE = Mappers.getMapper(AptitudeMappers.class);
 
     @Mapping(source = "idAptitude", target = "idAptitud")
-    @Mapping(source = "idPerson", target = "idPersona")
     @Mapping(source = "name", target = "nombre")
     AptitudeDto aptitudeToAptitudeDto(Aptitude aptitude);
 
     @InheritInverseConfiguration
     Aptitude aptitudeDtoToAptitude(AptitudeDto aptitudeDto);
 
-    List<AptitudeDto> toEntity(List<Aptitude> aptitudes);
+    List<AptitudeDto> listAptitudeToListAptitudeDto(List<Aptitude> aptitudes);
 
-    List<Aptitude> aptitudeToEntity(List<AptitudeDto> aptitudeDtos);
+    List<Aptitude> listAptitudeDtoToListAptitude(List<AptitudeDto> aptitudeDtos);
 
-    AptitudeDto toDto(AptitudeResponse aptitude);
-
-    AptitudeResponse toResponse(AptitudeDto aptitude);
+    @Mapping(source = "idAptitude", target = "idAptitud")
+    @Mapping(source = "name", target = "nombre")
+    AptitudeResponse aptitudeToResponse(Aptitude aptitude);
 }
-

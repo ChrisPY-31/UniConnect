@@ -1,21 +1,17 @@
 package com.chris.uniconnect.Service.Impl;
 
+import com.chris.uniconnect.Exceptions.BadRequestException;
+import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Mappers.PublicationMappers;
-import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.Model.Dto.PublicationDto;
-import com.chris.uniconnect.Model.Dto.Response.PersonaResponseM;
-import com.chris.uniconnect.Model.Entity.Person;
-import com.chris.uniconnect.Repository.PersonaRepository;
+import com.chris.uniconnect.Model.Entity.Publication;
 import com.chris.uniconnect.Repository.PublicationRepository;
-import com.chris.uniconnect.Service.FileUploadService;
 import com.chris.uniconnect.Service.IPersonService;
 import com.chris.uniconnect.Service.IPublicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PublicationServiceImpl implements IPublicationService {
@@ -24,11 +20,7 @@ public class PublicationServiceImpl implements IPublicationService {
     private PublicationRepository publicationRepository;
 
     @Autowired
-    private FileUploadService fileUploadService;
-
-    @Autowired
     private IPersonService personService;
-
 
     @Override
     public List<PublicationDto> getAllPublications() {
@@ -36,29 +28,43 @@ public class PublicationServiceImpl implements IPublicationService {
     }
 
     @Override
-    public PublicationDto createPublication(PublicationDto publicationDto) {
-        PersonDto person = personService.getPersonsById(publicationDto.getIdPersona());
+    public PublicationDto createPublication(String username, PublicationDto publicationDto) {
+        Integer personId = personService.getPersonByUserName(username).getId();
+        publicationDto.setIdPersona(personId);
 
-        if (publicationDto.getPersona() == null) {
-            PersonaResponseM personaResponse = new PersonaResponseM();
-            personaResponse.setId(person.getId());
-            personaResponse.setNombre(person.getNombre());
-            personaResponse.setApellido(person.getApellido());
-            personaResponse.setImagen(person.getImagen());
-            personaResponse.setEspecialidad(person.getEspecialidad());
+        Publication savedPublication = publicationRepository.save(PublicationMappers.INSTANCE.publicacionDtoToPublication(publicationDto));
+        return PublicationMappers.INSTANCE.publicationDtoToPublicacionDto(savedPublication);
+    }
+
+    @Override
+    public PublicationDto updatePublication(String username, Integer idPublication, PublicationDto publicationDto) {
+        Integer personId = personService.getPersonByUserName(username).getId();
+
+        Publication existingPublication = publicationRepository.findById(idPublication)
+                .orElseThrow(() -> new ResourceNotFoundException("Publicacion", "id", idPublication));
+
+        if (!personId.equals(existingPublication.getIdPerson())) {
+            throw new BadRequestException("No tienes permiso para modificar esta publicacion");
         }
-        return PublicationMappers.INSTANCE.publicationDtoToPublicacionDto(publicationRepository.save(PublicationMappers.INSTANCE.publicacionDtoToPublication(publicationDto)));
 
+        publicationDto.setIdPersona(personId);
+        PublicationMappers.INSTANCE.updatePublicationFromDto(publicationDto, existingPublication);
+
+        return PublicationMappers.INSTANCE.publicationDtoToPublicacionDto(publicationRepository.save(existingPublication));
     }
 
     @Override
-    public PublicationDto updatePublication(PublicationDto publicationDto) {
-        return PublicationMappers.INSTANCE.publicationDtoToPublicacionDto(publicationRepository.save(PublicationMappers.INSTANCE.publicacionDtoToPublication(publicationDto)));
-    }
+    public void deletePublication(String username, Integer idPublication) {
+        Integer personId = personService.getPersonByUserName(username).getId();
 
-    @Override
-    public void deletePublication(PublicationDto publicationDto) {
-        publicationRepository.deleteById(publicationDto.getId());
+        Publication existingPublication = publicationRepository.findById(idPublication)
+                .orElseThrow(() -> new ResourceNotFoundException("Publicacion", "id", idPublication));
+
+        if (!personId.equals(existingPublication.getIdPerson())) {
+            throw new BadRequestException("No tienes permiso para eliminar esta publicacion");
+        }
+
+        publicationRepository.delete(existingPublication);
     }
 
     @Override
@@ -70,6 +76,4 @@ public class PublicationServiceImpl implements IPublicationService {
     public PublicationDto publicationById(Integer idPublication) {
         return PublicationMappers.INSTANCE.publicationDtoToPublicacionDto(publicationRepository.findById(idPublication).orElse(null));
     }
-
-
 }

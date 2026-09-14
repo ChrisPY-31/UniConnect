@@ -1,17 +1,14 @@
 package com.chris.uniconnect.Model.Dto;
 
-import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-@Builder
 public class AptitudeDto {
 
     private Integer idAptitud;
 
-    private Integer idPersona;
-
+    @NotBlank(message = "El nombre de la aptitud es obligatorio")
     private String nombre;
-
 
 }

@@ -44,12 +44,16 @@ public interface PersonMappers {
     @Mapping(source = "personContacts", target = "redContactos")
     @Mapping(source = "educations", target = "educaciones")
     @Mapping(source = "ubication", target = "ubicacion")
+    @Mapping(source = "city", target = "ciudad")
     @Mapping(source = "languages", target = "lenguajes")
     @Mapping(source = "projects", target = "proyectos")
     @Mapping(source = "recomendations" , target = "recomendaciones")
     StudentDto studentToStudentDto(Student student);
 
     @InheritInverseConfiguration
+    @Mapping(target = "aptitudes", ignore = true)
+    @Mapping(target = "educations", ignore = true)
+    @Mapping(target = "languages", ignore = true)
     Student studentDtoToStudent(StudentDto studentDto);
 
     @InheritConfiguration(name = "studentDtoToStudent")

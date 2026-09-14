@@ -2,13 +2,15 @@ package com.chris.uniconnect.Service;
 
 import com.chris.uniconnect.Model.Dto.UbicationDto;
 
+import java.util.List;
+
 public interface IUbicationService {
 
-    UbicationDto createUbication(UbicationDto ubicationDto);
+    List<UbicationDto> getUbications();
 
-    UbicationDto updateUbication(UbicationDto ubicationDto);
-
-    void deleteUbication(Integer id);
+    List<UbicationDto> createUbication(List<UbicationDto> ubicationDto);
 
     boolean existUbication(Integer id);
+
+    void deleteUbication(Integer id);
 }

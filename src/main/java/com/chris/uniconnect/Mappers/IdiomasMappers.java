@@ -3,9 +3,13 @@ package com.chris.uniconnect.Mappers;
 import com.chris.uniconnect.Model.Dto.LanguageDto;
 import com.chris.uniconnect.Model.Dto.Response.LanguageResponse;
 import com.chris.uniconnect.Model.Entity.Language;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.InheritConfiguration;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -23,6 +27,10 @@ public interface IdiomasMappers {
 
     @InheritInverseConfiguration
     Language languageDtoLanguage(LanguageDto languageDto);
+
+    @InheritConfiguration(name = "languageDtoLanguage")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateLanguageFromDto(LanguageDto languageDto, @MappingTarget Language language);
 
     List<LanguageDto> LanguageListtoLanguageDtoList(List<Language> languages);
 

@@ -8,11 +8,11 @@ public interface IProjectService {
 
     List<ProjectDto> getAllProjects();
 
-    ProjectDto createProject(ProjectDto projectDto);
+    ProjectDto createProject(String username, ProjectDto projectDto);
 
-    ProjectDto updateProject(ProjectDto projectDto);
+    ProjectDto updateProject(String username, ProjectDto projectDto);
 
-    void deleteProject(ProjectDto projectDto);
+    void deleteProject(String username, Integer idProject);
 
     Boolean existBoolean(Integer idProject);
 

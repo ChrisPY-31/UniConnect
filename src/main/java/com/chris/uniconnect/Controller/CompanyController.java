@@ -6,6 +6,7 @@ import com.chris.uniconnect.Model.Dto.CompanyDto;
 import com.chris.uniconnect.Model.Entity.Company;
 import com.chris.uniconnect.Service.ICompanyService;
 import com.chris.uniconnect.payload.MensajeResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -15,6 +16,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Oculto de Swagger a proposito: el modulo no tiene un diseno de negocio definido todavia
+// (updateCompany no persiste cambios, sin @PreAuthorize, ruta /compony con typo). No documentar
+// un contrato que probablemente va a cambiar por completo.
+@Hidden
 @RestController
 @RequestMapping("/api/v1")
 public class CompanyController {

@@ -1,11 +1,11 @@
 package com.chris.uniconnect.Repository;
 
 import com.chris.uniconnect.Model.Entity.Ubication;
-import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface UbicationRepository extends ListCrudRepository<Ubication , Integer> {
+public interface UbicationRepository extends JpaRepository<Ubication, Integer> {
+
+    boolean existsByStateIgnoreCase(String state);
 }

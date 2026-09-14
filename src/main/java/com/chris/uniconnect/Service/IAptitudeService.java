@@ -6,9 +6,12 @@ import java.util.List;
 
 public interface IAptitudeService {
 
+    List<AptitudeDto> getAptitudes();
+
     List<AptitudeDto> createAptitud(List<AptitudeDto> aptitudeDto);
 
-    void deleteAptitude(AptitudeDto aptitudeDto);
+    boolean existAptitude(Integer id);
 
+    void deleteAptitude(Integer id);
 
 }

@@ -2,6 +2,7 @@ package com.chris.uniconnect.Model.Entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = "idAptitude")
 public class Aptitude {
 
     @Id
@@ -19,12 +21,6 @@ public class Aptitude {
     @Column(name = "id_aptitude")
     private Integer idAptitude;
 
-    @Column(name = "id_person")
-    private Integer idPerson;
-
+    @Column(length = 100, nullable = false, unique = true)
     private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "id_person" , referencedColumnName = "id" , insertable = false , updatable = false)
-    private Person person;
 }

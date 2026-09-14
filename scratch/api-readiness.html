@@ -1,0 +1,663 @@
+<title>UniConnect Endpoint Audit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --paper: #F3F5F9;
+    --surface: #FFFFFF;
+    --ink: #161B26;
+    --ink-dim: #545E70;
+    --line: #D8DEE9;
+    --line-soft: #E6EAF1;
+    --indigo: #3548C4;
+    --indigo-soft: #EAEDFB;
+    --emerald: #1E8E5A;
+    --emerald-soft: #E4F3EB;
+    --amber: #9C6510;
+    --amber-soft: #FBF0DE;
+    --terracotta: #B4432E;
+    --terracotta-soft: #FAEAE6;
+    --get: #1E6FA8;
+    --post: #1E8E5A;
+    --put: #9C6510;
+    --patch: #7A4FB5;
+    --delete: #B4432E;
+    --shadow: 0 1px 2px rgba(22,27,38,0.04), 0 8px 24px -12px rgba(22,27,38,0.10);
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #10131C;
+      --surface: #171B27;
+      --ink: #E8EAF2;
+      --ink-dim: #97A1B5;
+      --line: #2A3142;
+      --line-soft: #232838;
+      --indigo: #7C8AF0;
+      --indigo-soft: #232A47;
+      --emerald: #4CC38A;
+      --emerald-soft: #1B2E27;
+      --amber: #E0A83E;
+      --amber-soft: #302615;
+      --terracotta: #E58A76;
+      --terracotta-soft: #332019;
+      --get: #6FB3E8;
+      --post: #4CC38A;
+      --put: #E0A83E;
+      --patch: #B79CF0;
+      --delete: #E58A76;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #10131C;
+    --surface: #171B27;
+    --ink: #E8EAF2;
+    --ink-dim: #97A1B5;
+    --line: #2A3142;
+    --line-soft: #232838;
+    --indigo: #7C8AF0;
+    --indigo-soft: #232A47;
+    --emerald: #4CC38A;
+    --emerald-soft: #1B2E27;
+    --amber: #E0A83E;
+    --amber-soft: #302615;
+    --terracotta: #E58A76;
+    --terracotta-soft: #332019;
+    --get: #6FB3E8;
+    --post: #4CC38A;
+    --put: #E0A83E;
+    --patch: #B79CF0;
+    --delete: #E58A76;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    padding: 0 20px 64px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  code, .mono { font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace; }
+
+  /* ---- Header ---- */
+  header {
+    padding-top: 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--indigo);
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 700;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  header p.lede {
+    max-width: 62ch;
+    color: var(--ink-dim);
+    font-size: 15.5px;
+    margin: 0 0 24px;
+  }
+
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .stat {
+    background: var(--surface);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat .n {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 24px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .l {
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .stat.ready .n { color: var(--emerald); }
+  .stat.caveat .n { color: var(--amber); }
+  .stat.blocked .n { color: var(--terracotta); }
+
+  @media (max-width: 560px) {
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ---- Controls ---- */
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--paper);
+    padding: 16px 0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+  }
+  .controls.stuck { border-bottom-color: var(--line); }
+  .search {
+    flex: 1 1 220px;
+    position: relative;
+  }
+  .search input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 12px 9px 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .search input:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 1px;
+  }
+  .search::before {
+    content: "";
+    position: absolute;
+    left: 11px; top: 50%; transform: translateY(-50%);
+    width: 13px; height: 13px;
+    border: 1.6px solid var(--ink-dim);
+    border-radius: 50%;
+  }
+  .search::after {
+    content: "";
+    position: absolute;
+    left: 21px; top: 63%;
+    width: 6px; height: 1.6px;
+    background: var(--ink-dim);
+    transform: rotate(45deg);
+  }
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .chip:focus-visible { outline: 2px solid var(--indigo); outline-offset: 1px; }
+  .chip[aria-pressed="true"] { color: var(--ink); border-color: var(--ink-dim); }
+  .chip[data-tier="ready"][aria-pressed="true"] { background: var(--emerald-soft); color: var(--emerald); border-color: var(--emerald); }
+  .chip[data-tier="caveat"][aria-pressed="true"] { background: var(--amber-soft); color: var(--amber); border-color: var(--amber); }
+  .chip[data-tier="blocked"][aria-pressed="true"] { background: var(--terracotta-soft); color: var(--terracotta); border-color: var(--terracotta); }
+
+  /* ---- Sections ---- */
+  section.tier { margin-top: 8px; }
+  .tier-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 36px 0 14px;
+  }
+  .tier-head h2 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 700;
+  }
+  .tier-head .count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink-dim);
+  }
+  .tier-head .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .tier[data-tier="ready"] .dot { background: var(--emerald); }
+  .tier[data-tier="caveat"] .dot { background: var(--amber); }
+  .tier[data-tier="blocked"] .dot { background: var(--terracotta); }
+  .tier-note {
+    font-size: 13.5px;
+    color: var(--ink-dim);
+    margin: -6px 0 16px;
+    max-width: 68ch;
+  }
+
+  .group {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    background: var(--paper);
+  }
+  .group-head h3 {
+    font-size: 14.5px;
+    margin: 0;
+    font-weight: 600;
+  }
+  .group-head .filesrc {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ink-dim);
+  }
+  .rows { }
+  .row {
+    display: grid;
+    grid-template-columns: 68px 1fr auto;
+    gap: 4px 12px;
+    align-items: center;
+    padding: 10px 16px 4px;
+  }
+  .row-wrap { border-bottom: 1px solid var(--line-soft); }
+  .row-wrap:last-child { border-bottom: none; }
+  .recv {
+    grid-column: 2 / -1;
+    font-size: 12px;
+    color: var(--ink-dim);
+    padding-bottom: 10px;
+    line-height: 1.45;
+  }
+  .recv b { color: var(--ink); font-weight: 600; }
+  .recv code {
+    font-size: 11.5px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+  .method {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 3px 0;
+    border-radius: 5px;
+    text-align: center;
+    color: #fff;
+  }
+  .method.get { background: var(--get); }
+  .method.post { background: var(--post); }
+  .method.put { background: var(--put); }
+  .method.patch { background: var(--patch); }
+  .method.delete { background: var(--delete); }
+  .path {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    overflow-wrap: anywhere;
+  }
+  .auth {
+    font-size: 12px;
+    color: var(--ink-dim);
+    justify-self: end;
+    text-align: right;
+    max-width: 220px;
+  }
+  .note-row {
+    grid-column: 1 / -1;
+    font-size: 12.5px;
+    color: var(--amber);
+    padding: 0 16px 10px 80px;
+    margin-top: -6px;
+  }
+  .tier[data-tier="blocked"] .note-row { color: var(--terracotta); }
+
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-dim);
+    font-size: 14px;
+  }
+
+  /* ---- Swagger callout ---- */
+  .callout {
+    margin-top: 40px;
+    border: 1px solid var(--indigo);
+    background: var(--indigo-soft);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .callout h2 {
+    font-size: 15px;
+    margin: 0 0 10px;
+    color: var(--indigo);
+  }
+  .callout ol {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13.5px;
+    display: grid;
+    gap: 6px;
+  }
+  .callout code {
+    background: var(--surface);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    border: 1px solid var(--line);
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-dim);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">UniConnect &middot; api/v1</p>
+    <h1>Qué documentar primero en Swagger</h1>
+    <p class="lede">Estado real de los 23 controllers después de la ronda de arreglos de esta sesión: validación, seguridad por rol y quién es el dueño de cada recurso. Filtrá por estado o buscá una ruta antes de escribir el <code>@Operation</code>.</p>
+    <div class="stat-strip">
+      <div class="stat ready"><span class="n" id="count-ready">–</span><span class="l">Listos</span></div>
+      <div class="stat caveat"><span class="n" id="count-caveat">–</span><span class="l">Con nota</span></div>
+      <div class="stat blocked"><span class="n" id="count-blocked">–</span><span class="l">Bloqueados</span></div>
+      <div class="stat"><span class="n" id="count-total">–</span><span class="l">Endpoints</span></div>
+    </div>
+  </header>
+
+  <div class="controls" id="controls">
+    <div class="search">
+      <input type="text" id="q" placeholder="Buscar por ruta, controller o nota…" aria-label="Buscar endpoint">
+    </div>
+    <div class="chip-row" role="group" aria-label="Filtrar por estado">
+      <button class="chip" data-tier="ready" aria-pressed="false">Listos</button>
+      <button class="chip" data-tier="caveat" aria-pressed="false">Con nota</button>
+      <button class="chip" data-tier="blocked" aria-pressed="false">Bloqueados</button>
+    </div>
+  </div>
+
+  <main id="tiers"></main>
+
+  <div class="empty" id="empty" hidden>Ningún endpoint coincide con ese filtro.</div>
+
+  <div class="callout">
+    <h2>Al anotar cada endpoint con Springdoc</h2>
+    <ol>
+      <li>Nivel método: <code>@Operation(summary = "…")</code> + <code>@ApiResponses</code> con los códigos reales que ya usa el <code>GlobalExceptionHandler</code> (400, 401, 404, 500).</li>
+      <li>Nivel clase: agregá <code>@Tag(name = "…")</code> donde falte — solo <code>StudentController</code>, <code>UserConfigController</code> y algún otro ya lo tienen.</li>
+      <li>En los endpoints marcados <strong>con nota</strong>, documentá el riesgo tal cual está hoy (ej. "el id del path no se valida contra el JWT") en vez de prometer un comportamiento que el código todavía no cumple.</li>
+      <li><code>Company</code> quedó afuera de este audit — no tiene un diseño definido todavía, así que no hay nada que documentar ahí sin inventarlo.</li>
+    </ol>
+  </div>
+
+  <footer>
+    <span>Generado a partir de la auditoría de esta sesión — no reemplaza releer el controller si algo cambió después.</span>
+    <span>23 controllers &middot; api/v1</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const DATA = [
+    // ---------- READY ----------
+    { tier: 'ready', group: 'AptitudeController', file: 'Controller/AptitudeController.java', rows: [
+      { m: 'GET', p: '/aptitude', auth: 'isAuthenticated()' },
+      { m: 'POST', p: '/aptitude', auth: "hasRole('ADMIN')" },
+      { m: 'DELETE', p: '/aptitude/{id}', auth: "hasRole('ADMIN')" },
+    ]},
+    { tier: 'ready', group: 'AuthenticationController', file: 'Controller/AuthenticationController.java', rows: [
+      { m: 'POST', p: '/auth/sign-up', auth: 'público' },
+      { m: 'POST', p: '/auth/log-in', auth: 'público' },
+    ]},
+    { tier: 'ready', group: 'CareerController', file: 'Controller/CareerController.java', rows: [
+      { m: 'GET', p: '/career', auth: 'isAuthenticated()' },
+      { m: 'POST', p: '/career', auth: "hasRole('ADMIN')" },
+      { m: 'PATCH', p: '/career', auth: "hasRole('ADMIN')" },
+      { m: 'DELETE', p: '/career/{id}', auth: "hasRole('ADMIN')" },
+    ]},
+    { tier: 'ready', group: 'ContactController', file: 'Controller/ContactController.java', rows: [
+      { m: 'GET', p: '/contact', auth: 'isAuthenticated()' },
+    ]},
+    { tier: 'ready', group: 'DashboardController', file: 'Controller/DashboardController.java', rows: [
+      { m: 'GET', p: '/manager', auth: "hasRole('ADMIN')" },
+      { m: 'GET', p: '/Usuarios', auth: "hasRole('ADMIN')" },
+    ]},
+    { tier: 'ready', group: 'EducationController', file: 'Controller/EducationController.java', rows: [
+      { m: 'POST', p: '/education', auth: 'STUDENT · TEACHER · RECRUITER' },
+      { m: 'PUT', p: '/education/{id}', auth: 'dueño, por JWT' },
+      { m: 'DELETE', p: '/education/{id}', auth: 'dueño, por JWT' },
+    ]},
+    { tier: 'ready', group: 'LanguageController', file: 'Controller/LanguageController.java', rows: [
+      { m: 'GET', p: '/language', auth: 'propios, por JWT' },
+      { m: 'POST', p: '/language', auth: 'STUDENT · TEACHER · RECRUITER' },
+      { m: 'PUT', p: '/language/{id}', auth: 'dueño, por JWT' },
+      { m: 'DELETE', p: '/language/{id}', auth: 'dueño, por JWT' },
+    ]},
+    { tier: 'ready', group: 'PersonContactController + ContactController', file: 'Controller/PersonContactController.java', rows: [
+      { m: 'GET', p: '/personContact', auth: 'propios, por JWT' },
+      { m: 'POST', p: '/personContact', auth: 'STUDENT · TEACHER · RECRUITER' },
+      { m: 'DELETE', p: '/personContact/{idContact}', auth: 'dueño, por JWT' },
+    ]},
+    { tier: 'ready', group: 'PersonController', file: 'Controller/PersonController.java', rows: [
+      { m: 'GET', p: '/person/{id}', auth: 'isAuthenticated() (lectura)' },
+      { m: 'GET', p: '/userAccount/{username}', auth: 'ADMIN · TEACHER · STUDENT · RECRUITER' },
+      { m: 'PUT', p: '/person/aptitudes', auth: 'propio, por JWT' },
+      { m: 'DELETE', p: '/persons/{id}', auth: "hasRole('ADMIN')" },
+    ]},
+    { tier: 'ready', group: 'ProjectController', file: 'Controller/ProjectController.java', rows: [
+      { m: 'GET', p: '/projects', auth: 'isAuthenticated()' },
+      { m: 'POST', p: '/projects', auth: "hasRole('STUDENT')" },
+      { m: 'PUT', p: '/projects', auth: 'dueño, por JWT' },
+      { m: 'DELETE', p: '/projects/{id}', auth: 'dueño, por JWT' },
+    ]},
+    { tier: 'ready', group: 'ProjectLinkController', file: 'Controller/ProjectLinkController.java', rows: [
+      { m: 'POST', p: '/projectLink', auth: 'dueño del proyecto' },
+      { m: 'PUT', p: '/projectLink/{id}', auth: 'dueño del proyecto' },
+      { m: 'DELETE', p: '/projectLink/{id}', auth: 'dueño del proyecto' },
+    ]},
+    { tier: 'ready', group: 'PublicationController', file: 'Controller/PublicationController.java', rows: [
+      { m: 'GET', p: '/publication', auth: 'isAuthenticated()' },
+      { m: 'POST', p: '/publication', auth: 'STUDENT · TEACHER · RECRUITER' },
+      { m: 'PUT', p: '/publication/{id}', auth: 'dueño, por JWT' },
+      { m: 'DELETE', p: '/publication/{id}', auth: 'dueño, por JWT' },
+    ]},
+    { tier: 'ready', group: 'PublicationInteractionController', file: 'Controller/PublicationInteractionController.java', rows: [
+      { m: 'GET', p: '/AllPublication', auth: 'isAuthenticated()' },
+      { m: 'POST', p: '/interactionPublicacion', auth: 'idPerson forzado por JWT' },
+      { m: 'PUT', p: '/interactionPublicacion', auth: 'idPerson forzado por JWT' },
+    ]},
+    { tier: 'ready', group: 'RecomendationController', file: 'Controller/RecomendationController.java', rows: [
+      { m: 'GET', p: '/recomendation', auth: 'STUDENT · TEACHER · RECRUITER' },
+      { m: 'POST', p: '/recomendation', auth: "hasRole('TEACHER')" },
+      { m: 'PUT', p: '/recomendation/{idStudent}', auth: 'TEACHER autenticado' },
+      { m: 'DELETE', p: '/recomendation/{idStudent}', auth: 'TEACHER autenticado' },
+    ]},
+    { tier: 'ready', group: 'TechnologyController', file: 'Controller/TechnologyController.java', rows: [
+      { m: 'GET', p: '/technology', auth: 'público (sin @PreAuthorize)' },
+      { m: 'POST', p: '/technology', auth: "hasRole('ADMIN')" },
+      { m: 'PUT', p: '/technology', auth: "hasRole('ADMIN')" },
+      { m: 'DELETE', p: '/technology/{id}', auth: "hasRole('ADMIN')" },
+    ]},
+    { tier: 'ready', group: 'UbicationController', file: 'Controller/UbicationController.java', rows: [
+      { m: 'GET', p: '/ubication', auth: 'isAuthenticated()' },
+      { m: 'POST', p: '/ubication', auth: "hasRole('ADMIN')" },
+      { m: 'DELETE', p: '/ubication/{id}', auth: "hasRole('ADMIN')" },
+    ]},
+    { tier: 'ready', group: 'UserConfigController', file: 'Controller/UserConfigController.java', rows: [
+      { m: 'GET', p: '/users', auth: "hasRole('ADMIN')" },
+      { m: 'POST', p: '/users/{id}/blocked', auth: "hasRole('ADMIN')" },
+      { m: 'PUT', p: '/users/password', auth: 'propio, self-service' },
+      { m: 'PUT', p: '/users/{username}/password/reset', auth: "hasRole('ADMIN')" },
+    ]},
+    { tier: 'ready', group: 'FileUploadController (proyecto y publicación)', file: 'Controller/FileUploadController.java', rows: [
+      { m: 'PATCH', p: '/fileProjects/{id}', auth: 'dueño, por JWT' },
+      { m: 'PATCH', p: '/filePublication/{id}', auth: 'dueño, por JWT' },
+    ]},
+
+    // ---------- CAVEAT ----------
+    { tier: 'caveat', group: 'StudentController', file: 'Controller/StudentController.java', rows: [
+      { m: 'GET', p: '/students', auth: 'sin @PreAuthorize', note: 'Listado paginado abierto — cualquiera puede pedirlo, sin filtro de rol.' },
+      { m: 'GET', p: '/students/name/carrera/especialidad', auth: 'sin @PreAuthorize' },
+      { m: 'PUT', p: '/student/{id}', auth: 'sin @PreAuthorize', note: 'El {id} del path no se valida contra el usuario del JWT — cualquiera puede editar el perfil de cualquier estudiante.' },
+    ]},
+    { tier: 'caveat', group: 'TeacherController', file: 'Controller/TeacherController.java', rows: [
+      { m: 'GET', p: '/teachers', auth: 'sin @PreAuthorize' },
+      { m: 'PUT', p: '/teacher/{id}', auth: "hasRole('TEACHER')", note: 'Cualquier TEACHER puede editar el perfil de otro profesor — el {id} no se compara contra el JWT.' },
+    ]},
+    { tier: 'caveat', group: 'RecruiterController', file: 'Controller/RecruiterController.java', rows: [
+      { m: 'PUT', p: '/recruiter/{id}', auth: "hasRole('RECRUITER')", note: 'Mismo patrón: el {id} no se valida contra el usuario autenticado.' },
+      { m: 'DELETE', p: '/recruiter/{id}', auth: "hasRole('RECRUITER')" },
+    ]},
+    { tier: 'caveat', group: 'NotificationController', file: 'Controller/NotificationController.java', rows: [
+      { m: 'GET', p: '/notifications/{personId}', auth: 'STUDENT · TEACHER · RECRUITER', note: 'Cualquier persona con esos roles puede leer las notificaciones de otra, pasando su id.' },
+      { m: 'PATCH', p: '/notifications/{id}/read', auth: 'STUDENT · TEACHER · RECRUITER' },
+    ]},
+    { tier: 'caveat', group: 'FileUploadController (foto de perfil)', file: 'Controller/FileUploadController.java', rows: [
+      { m: 'PATCH', p: '/fileUsers/{id}', auth: 'STUDENT · TEACHER · RECRUITER', note: 'Es el único de los tres endpoints de FileUpload que no quedó cerrado esta sesión — el {id} sigue sin validarse contra el JWT.' },
+    ]},
+
+    // ---------- BLOCKED ----------
+    { tier: 'blocked', group: 'CompanyController', file: 'Controller/CompanyController.java', rows: [
+      { m: 'GET', p: '/company', auth: 'sin @PreAuthorize' },
+      { m: 'POST', p: '/compony', auth: 'sin @PreAuthorize', note: 'Typo en la ruta. updateCompany no persiste ningún cambio. Sin diseño de negocio definido todavía — parqueado hasta decidir qué debe hacer.' },
+      { m: 'PUT', p: '/company/{id}', auth: 'sin @PreAuthorize' },
+      { m: 'DELETE', p: '/company/{id}', auth: 'sin @PreAuthorize' },
+    ]},
+  ];
+
+  const TIER_META = {
+    ready:   { title: 'Listos para documentar', note: 'Validación, seguridad por rol y dueño (cuando aplica) ya resueltos esta sesión — anotalos tal cual están.' },
+    caveat:  { title: 'Documentables, con una nota', note: 'Funcionan y están protegidos por rol, pero el id de la URL no se valida contra el usuario autenticado. Documentá el comportamiento real, no el ideal.' },
+    blocked: { title: 'Bloqueado', note: 'Sin diseño de negocio definido — documentarlo hoy significaría inventar un contrato que probablemente cambie.' },
+  };
+
+  const tiersEl = document.getElementById('tiers');
+  const emptyEl = document.getElementById('empty');
+  const qInput = document.getElementById('q');
+  const chips = Array.from(document.querySelectorAll('.chip'));
+  let activeTiers = new Set();
+
+  function countRows(tier) {
+    return DATA.filter(g => g.tier === tier).reduce((n, g) => n + g.rows.length, 0);
+  }
+  document.getElementById('count-ready').textContent = countRows('ready');
+  document.getElementById('count-caveat').textContent = countRows('caveat');
+  document.getElementById('count-blocked').textContent = countRows('blocked');
+  document.getElementById('count-total').textContent = DATA.reduce((n, g) => n + g.rows.length, 0);
+
+  function matches(group, row, q) {
+    if (!q) return true;
+    const hay = [group.group, row.m, row.p, row.auth, row.note || ''].join(' ').toLowerCase();
+    return hay.includes(q);
+  }
+
+  function render() {
+    const q = qInput.value.trim().toLowerCase();
+    tiersEl.innerHTML = '';
+    let shown = 0;
+
+    ['ready', 'caveat', 'blocked'].forEach(tierKey => {
+      if (activeTiers.size && !activeTiers.has(tierKey)) return;
+
+      const groups = DATA.filter(g => g.tier === tierKey)
+        .map(g => ({ ...g, rows: g.rows.filter(r => matches(g, r, q)) }))
+        .filter(g => g.rows.length);
+
+      if (!groups.length) return;
+
+      const section = document.createElement('section');
+      section.className = 'tier';
+      section.dataset.tier = tierKey;
+
+      const rowCount = groups.reduce((n, g) => n + g.rows.length, 0);
+      shown += rowCount;
+
+      section.innerHTML = `
+        <div class="tier-head">
+          <span class="dot"></span>
+          <h2>${TIER_META[tierKey].title}</h2>
+          <span class="count">${rowCount} endpoint${rowCount === 1 ? '' : 's'}</span>
+        </div>
+        <p class="tier-note">${TIER_META[tierKey].note}</p>
+      `;
+
+      groups.forEach(g => {
+        const group = document.createElement('div');
+        group.className = 'group';
+        const rowsHtml = g.rows.map(r => `
+          <div class="row-wrap">
+            <div class="row">
+              <span class="method ${r.m.toLowerCase()}">${r.m}</span>
+              <span class="path">${r.p}</span>
+              <span class="auth">${r.auth}</span>
+            </div>
+            <div class="recv"><b>Recibe:</b> ${r.recv || '— sin body'}</div>
+            ${r.note ? `<div class="note-row">${r.note}</div>` : ''}
+          </div>
+        `).join('');
+        group.innerHTML = `
+          <div class="group-head">
+            <h3>${g.group}</h3>
+            <span class="filesrc">${g.file}</span>
+          </div>
+          <div class="rows">${rowsHtml}</div>
+        `;
+        section.appendChild(group);
+      });
+
+      tiersEl.appendChild(section);
+    });
+
+    emptyEl.hidden = shown !== 0;
+  }
+
+  qInput.addEventListener('input', render);
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const t = chip.dataset.tier;
+      if (activeTiers.has(t)) { activeTiers.delete(t); chip.setAttribute('aria-pressed', 'false'); }
+      else { activeTiers.add(t); chip.setAttribute('aria-pressed', 'true'); }
+      render();
+    });
+  });
+
+  const controls = document.getElementById('controls');
+  const sentinel = document.createElement('div');
+  document.querySelector('header').after(sentinel);
+  new IntersectionObserver(([e]) => controls.classList.toggle('stuck', !e.isIntersecting),
+    { threshold: 1 }).observe(sentinel);
+
+  render();
+})();
+</script>

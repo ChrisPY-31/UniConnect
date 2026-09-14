@@ -7,16 +7,21 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper
 public interface UbicationMappers {
 
     UbicationMappers INSTANCE = Mappers.getMapper(UbicationMappers.class);
 
-    @Mapping(source = "idUbication" , target = "idUbicacion")
-    @Mapping(source = "country" , target = "pais")
-    @Mapping(source = "city" , target = "ciudad")
-    UbicationDto UbicationToUbicationDto(Ubication ubication);
+    @Mapping(source = "idUbication", target = "idUbicacion")
+    @Mapping(source = "state", target = "estado")
+    UbicationDto ubicationToDto(Ubication ubication);
 
     @InheritInverseConfiguration
-    Ubication UbicationDtoToUbication(UbicationDto ubicationDto);
+    Ubication dtoToUbication(UbicationDto ubicationDto);
+
+    List<UbicationDto> listUbicationToListDto(List<Ubication> ubications);
+
+    List<Ubication> listDtoToListUbication(List<UbicationDto> ubicationDtos);
 }

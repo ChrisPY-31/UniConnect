@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "person")
@@ -41,6 +42,9 @@ public abstract class Person {
     @Column(name = "resume_url")
     private String resumeUrl;
 
+    @Column(length = 100)
+    private String city;
+
     private String type;
 
     @OneToOne
@@ -50,8 +54,12 @@ public abstract class Person {
     @OneToMany(mappedBy = "person")
     private List<Education> educations; //revisar la relacion
 
-    @OneToMany(mappedBy = "person")
-    private List<Aptitude> aptitudes;
+    @ManyToMany
+    @JoinTable(name = "person_aptitude",
+            joinColumns = @JoinColumn(name = "id_person"),
+            inverseJoinColumns = @JoinColumn(name = "id_aptitude")
+    )
+    private Set<Aptitude> aptitudes;
 
     @OneToMany(mappedBy = "person")
     private List<Skill> skills;

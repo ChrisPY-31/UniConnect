@@ -3,9 +3,13 @@ package com.chris.uniconnect.Mappers;
 import com.chris.uniconnect.Model.Dto.EducationDto;
 import com.chris.uniconnect.Model.Dto.Response.EducationResponse;
 import com.chris.uniconnect.Model.Entity.Education;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.InheritConfiguration;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -26,6 +30,10 @@ public interface EducationMappers {
     @InheritInverseConfiguration
 
     Education educationDtoToEducation(EducationDto educationDto);
+
+    @InheritConfiguration(name = "educationDtoToEducation")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEducationFromDto(EducationDto educationDto, @MappingTarget Education education);
 
     EducationDto toDto(EducationResponse educationResponse);
 

@@ -113,7 +113,7 @@ public class FileUpLoadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public ProjectDto uploadFileProject(int idProject, MultipartFile file) {
+    public ProjectDto uploadFileProject(String username, int idProject, MultipartFile file) {
 
         List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "webp", "avif");
 
@@ -148,7 +148,7 @@ public class FileUpLoadServiceImpl implements FileUploadService {
 
             String imageProjectUrl = result.get("secure_url").toString();
             project.setImagen(imageProjectUrl);
-            projectService.updateProject(project);
+            projectService.updateProject(username, project);
 
         } catch (Exception e) {
             throw new RuntimeException("Error uploading file: " + e.getMessage());
@@ -158,7 +158,7 @@ public class FileUpLoadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public PublicationDto uploadFilePublication(int idPublication, MultipartFile file) {
+    public PublicationDto uploadFilePublication(String username, int idPublication, MultipartFile file) {
         List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "webp", "avif");
 
         PublicationDto publication = publicationService.publicationById(idPublication);
@@ -193,7 +193,7 @@ public class FileUpLoadServiceImpl implements FileUploadService {
 
             String imagePublicationUrl = result.get("secure_url").toString();
             publication.setImagen(imagePublicationUrl);
-            return publicationService.updatePublication(publication);
+            return publicationService.updatePublication(username, idPublication, publication);
 
         } catch (Exception e) {
             throw new RuntimeException("Error uploading file: " + e.getMessage());

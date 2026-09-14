@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Model.Dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
@@ -7,7 +8,6 @@ public class UbicationDto {
 
     private Integer idUbicacion;
 
-    private String pais;
-
-    private String ciudad;
+    @NotBlank(message = "El estado es obligatorio")
+    private String estado;
 }
