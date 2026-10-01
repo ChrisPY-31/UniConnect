@@ -1,6 +1,7 @@
 package com.chris.uniconnect.Controller;
 
 import com.chris.uniconnect.Model.Dto.PersonDto;
+import com.chris.uniconnect.Model.Dto.SkillsRequest;
 import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Service.IPersonService;
@@ -69,6 +70,24 @@ public class PersonController {
         return new ResponseEntity<>(MensajeResponse.builder()
                 .mensaje("Aptitudes actualizadas con exito")
                 .object(personService.updateAptitudes(authentication.getName(), aptitudeIds))
+                .build(), HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Elegir mis habilidades (tecnologias + aptitudes)",
+            description = "Reemplaza el conjunto completo de tecnologias y aptitudes del usuario autenticado. Usa ids de GET /skills/catalog " +
+                    "(maximo 15 tecnologias y 5 aptitudes; listas vacias quitan todas). El dueno se resuelve por JWT."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Habilidades actualizadas"),
+            @ApiResponse(responseCode = "400", description = "Se excede el maximo o algun id no existe en su catalogo")
+    })
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
+    @PutMapping("/person/skills")
+    public ResponseEntity<?> updateSkills(@RequestBody SkillsRequest skills, Authentication authentication) {
+        return new ResponseEntity<>(MensajeResponse.builder()
+                .mensaje("Habilidades actualizadas con exito")
+                .object(personService.updateSkills(authentication.getName(), skills))
                 .build(), HttpStatus.OK);
     }
 

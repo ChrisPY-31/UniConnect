@@ -8,7 +8,9 @@ import com.chris.uniconnect.Service.ITechnologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class TechnologyServiceImpl implements ITechnologyService {
@@ -28,7 +30,11 @@ public class TechnologyServiceImpl implements ITechnologyService {
 
     @Override
     public List<TechnologyDto> createTechnology(List<TechnologyDto> technologyDto) {
+        Set<String> vistos = new HashSet<>();
         List<Technology> nuevasTecnologias = technologyDto.stream()
+                .filter(dto -> dto.getNombre() != null && !dto.getNombre().isBlank())
+                .peek(dto -> dto.setNombre(dto.getNombre().trim()))
+                .filter(dto -> vistos.add(dto.getNombre().toLowerCase()))
                 .filter(dto -> !technologyRepository.existsByNameIgnoreCase(dto.getNombre()))
                 .map(TechnologyMappers.INSTANCE::DtoToTechnology)
                 .toList();
