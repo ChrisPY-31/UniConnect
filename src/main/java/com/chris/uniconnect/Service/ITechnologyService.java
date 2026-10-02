@@ -12,5 +12,7 @@ public interface ITechnologyService {
 
     List<TechnologyDto> createTechnology(List<TechnologyDto> technologyDto);
 
+    TechnologyDto updateTechnology(Integer id, TechnologyDto technologyDto);
+
     void deleteTechnology(Integer id);
 }

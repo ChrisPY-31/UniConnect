@@ -14,5 +14,6 @@ public class RegisterRequest {
 
     private AuthCreateUserRequest user;
 
-    private PersonDto person;
+    // StudentDto para recibir idCarrera y semestre; en cuentas TEACHER se ignoran
+    private StudentDto person;
 }

@@ -37,6 +37,8 @@ public class PersonDto {
 
     private List<AptitudeResponse> aptitudes;
 
+    private List<SkillResponse> habilidades;
+
     private UbicationDto ubicacion;
 
     private String ciudad;

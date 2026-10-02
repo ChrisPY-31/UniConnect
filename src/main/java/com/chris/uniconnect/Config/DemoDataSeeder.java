@@ -3,6 +3,7 @@ package com.chris.uniconnect.Config;
 import com.chris.uniconnect.Enum.ContactType;
 import com.chris.uniconnect.Enum.Roles;
 import com.chris.uniconnect.Model.Entity.Aptitude;
+import com.chris.uniconnect.Model.Entity.Career;
 import com.chris.uniconnect.Model.Entity.Contact;
 import com.chris.uniconnect.Model.Entity.RolesEntity;
 import com.chris.uniconnect.Model.Entity.Student;
@@ -11,6 +12,7 @@ import com.chris.uniconnect.Model.Entity.Technology;
 import com.chris.uniconnect.Model.Entity.Ubication;
 import com.chris.uniconnect.Model.Entity.UserEntity;
 import com.chris.uniconnect.Repository.AptitudeRepository;
+import com.chris.uniconnect.Repository.CareerRepository;
 import com.chris.uniconnect.Repository.ContactRepository;
 import com.chris.uniconnect.Repository.RoleRepository;
 import com.chris.uniconnect.Repository.StudentRepository;
@@ -43,6 +45,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final AptitudeRepository aptitudeRepository;
     private final UbicationRepository ubicationRepository;
     private final ContactRepository contactRepository;
+    private final CareerRepository careerRepository;
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbcTemplate;
 
@@ -52,6 +55,7 @@ public class DemoDataSeeder implements CommandLineRunner {
                            AptitudeRepository aptitudeRepository,
                            UbicationRepository ubicationRepository,
                            ContactRepository contactRepository,
+                           CareerRepository careerRepository,
                            PasswordEncoder passwordEncoder,
                            JdbcTemplate jdbcTemplate) {
         this.userRepository = userRepository;
@@ -62,6 +66,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.aptitudeRepository = aptitudeRepository;
         this.ubicationRepository = ubicationRepository;
         this.contactRepository = contactRepository;
+        this.careerRepository = careerRepository;
         this.passwordEncoder = passwordEncoder;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -71,6 +76,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     public void run(String... args) {
         cleanupLegacyAptitudeSchema();
         cleanupLegacyUbicationSchema();
+        ensureCatalogUniqueIndexes();
 
         RolesEntity adminRole = ensureRole(Roles.ADMIN);
         RolesEntity teacherRole = ensureRole(Roles.TEACHER);
@@ -84,6 +90,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         seedAptitudes();
         seedUbications();
         seedContacts();
+        seedCareers();
     }
 
     private RolesEntity ensureRole(Roles role) {
@@ -193,6 +200,11 @@ public class DemoDataSeeder implements CommandLineRunner {
         );
     }
 
+    private void ensureCatalogUniqueIndexes() {
+        jdbcTemplate.execute("CREATE UNIQUE INDEX IF NOT EXISTS ux_aptitude_name_lower ON aptitude (lower(name))");
+        jdbcTemplate.execute("CREATE UNIQUE INDEX IF NOT EXISTS ux_technology_name_lower ON technology (lower(name))");
+    }
+
     private void seedAptitudes() {
         List<String> catalogo = List.of(
                 "Liderazgo", "Trabajo en equipo", "Comunicacion", "Resolucion de problemas",
@@ -244,6 +256,21 @@ public class DemoDataSeeder implements CommandLineRunner {
                 Contact contact = new Contact();
                 contact.setContact(type);
                 contactRepository.save(contact);
+            }
+        }
+    }
+
+    private void seedCareers() {
+        List<String> catalogo = List.of(
+                "Ingeniero en Software", "Ingeniero en Computacion", "Ingeniero en Ciberseguridad",
+                "Ingeniero en Plasticos", "Ingeniero en Produccion Industrial"
+        );
+
+        for (String nombre : catalogo) {
+            if (!careerRepository.existsByCareerNameIgnoreCase(nombre)) {
+                Career career = new Career();
+                career.setCareerName(nombre);
+                careerRepository.save(career);
             }
         }
     }

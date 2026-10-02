@@ -8,6 +8,7 @@ import com.chris.uniconnect.Mappers.StudentMappers;
 import com.chris.uniconnect.Mappers.TeacherMappers;
 import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.Model.Dto.RecruiterDto;
+import com.chris.uniconnect.Model.Dto.SkillsRequest;
 import com.chris.uniconnect.Model.Dto.StudentDto;
 import com.chris.uniconnect.Model.Dto.TeacherDto;
 import com.chris.uniconnect.Model.Entity.Aptitude;
@@ -15,6 +16,7 @@ import com.chris.uniconnect.Model.Entity.Person;
 import com.chris.uniconnect.Model.Entity.Recruiter;
 import com.chris.uniconnect.Model.Entity.Student;
 import com.chris.uniconnect.Model.Entity.Teacher;
+import com.chris.uniconnect.Model.Entity.Technology;
 import com.chris.uniconnect.Model.Entity.UserEntity;
 import com.chris.uniconnect.Repository.*;
 import com.chris.uniconnect.Service.IPersonService;
@@ -47,7 +49,15 @@ public class PersonaServiceImpl implements IPersonService {
     @Autowired
     private AptitudeRepository aptitudeRepository;
 
+    @Autowired
+    private TechnologyRepository technologyRepository;
+
+    @Autowired
+    private PersonaRepository personaRepository;
+
     private static final int MAX_APTITUDES = 5;
+
+    private static final int MAX_TECHNOLOGIES = 15;
 
 
     @Override
@@ -141,6 +151,45 @@ public class PersonaServiceImpl implements IPersonService {
         }
 
         throw new ResourceNotFoundException("cliente", "username", username);
+    }
+
+    @Override
+    @Transactional
+    public PersonDto updateSkills(String username, SkillsRequest skills) {
+        Set<Integer> technologyIds = skills.getTecnologias() == null ? Set.of() : skills.getTecnologias();
+        Set<Integer> aptitudeIds = skills.getAptitudes() == null ? Set.of() : skills.getAptitudes();
+
+        if (technologyIds.size() > MAX_TECHNOLOGIES) {
+            throw new BadRequestException("Solo puedes seleccionar hasta " + MAX_TECHNOLOGIES + " tecnologias");
+        }
+        if (aptitudeIds.size() > MAX_APTITUDES) {
+            throw new BadRequestException("Solo puedes seleccionar hasta " + MAX_APTITUDES + " aptitudes");
+        }
+
+        List<Technology> tecnologiasEncontradas = technologyRepository.findAllById(technologyIds);
+        if (tecnologiasEncontradas.size() != technologyIds.size()) {
+            throw new BadRequestException("Alguna de las tecnologias seleccionadas no existe");
+        }
+        List<Aptitude> aptitudesEncontradas = aptitudeRepository.findAllById(aptitudeIds);
+        if (aptitudesEncontradas.size() != aptitudeIds.size()) {
+            throw new BadRequestException("Alguna de las aptitudes seleccionadas no existe");
+        }
+
+        Person person = personaRepository.findByUserEntityUsername(username);
+        if (person == null) {
+            throw new ResourceNotFoundException("cliente", "username", username);
+        }
+        person.setTechnologies(new HashSet<>(tecnologiasEncontradas));
+        person.setAptitudes(new HashSet<>(aptitudesEncontradas));
+        Person saved = personaRepository.save(person);
+
+        if (saved instanceof Student student) {
+            return PersonMappers.INSTANCE.studentToStudentDto(student);
+        }
+        if (saved instanceof Teacher teacher) {
+            return TeacherMappers.INSTANCE.teacherToTeacherDto(teacher);
+        }
+        return RecruiterMappers.INSTANCE.recruiterToRecruiterDto((Recruiter) saved);
     }
 
 }

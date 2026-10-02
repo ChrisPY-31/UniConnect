@@ -54,7 +54,8 @@ public class SecurityConfig {
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/publication").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/teachers").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/technology").permitAll();
-                    authorize.requestMatchers(HttpMethod.POST, "/auth/**").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/auth/log-in").permitAll();
+                    authorize.requestMatchers(HttpMethod.POST, "/auth/sign-up").hasRole("ADMIN"); // solo el admin crea cuentas
                     authorize.requestMatchers("/ws/**").permitAll(); // el JWT se valida en el CONNECT de STOMP, no aqui
                     //configurar endpoints privados
                     //permisos generales

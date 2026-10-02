@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,26 +45,21 @@ public class TechnologyController {
                 .build(), HttpStatus.CREATED);
     }
 
-    @Operation(
-            summary = "Agregar tecnologias nuevas (no renombra existentes)",
-            description = "Pese al verbo PUT, internamente solo inserta los nombres que todavia no existen en el catalogo — no modifica el nombre de una tecnologia ya creada. Solo ADMIN."
-    )
+    @Operation(summary = "Renombrar una tecnologia del catalogo", description = "Solo ADMIN. El id va en la ruta; el body solo necesita nombre.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Tecnologias nuevas insertadas (las repetidas se ignoran en silencio)"),
+            @ApiResponse(responseCode = "200", description = "Tecnologia actualizada"),
+            @ApiResponse(responseCode = "400", description = "Nombre vacio o ya usado por otra tecnologia"),
+            @ApiResponse(responseCode = "404", description = "No existe una tecnologia con ese id"),
             @ApiResponse(responseCode = "403", description = "No es ADMIN")
     })
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/technology")
-    public ResponseEntity<?> updateTechnology(@RequestBody List<TechnologyDto> technology) {
-        try {
-            return new ResponseEntity<>(MensajeResponse.builder()
-                    .mensaje("Tecnologia creada con exito")
-                    .object(technologyService.createTechnology(technology))
-                    .build(), HttpStatus.OK);
-
-        } catch (DataAccessException ex) {
-            throw new RuntimeException(ex.getMessage());
-        }
+    @PutMapping("/technology/{id}")
+    public ResponseEntity<?> updateTechnology(@Parameter(description = "Id de la tecnologia") @PathVariable Integer id,
+                                              @RequestBody TechnologyDto technology) {
+        return ResponseEntity.ok(MensajeResponse.builder()
+                .mensaje("Tecnologia actualizada con exito")
+                .object(technologyService.updateTechnology(id, technology))
+                .build());
     }
 
     @Operation(summary = "Eliminar una tecnologia del catalogo", description = "Solo ADMIN.")

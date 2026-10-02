@@ -18,6 +18,7 @@ import org.mapstruct.factory.Mappers;
         UbicationMappers.class,
         EducationMappers.class,
         AptitudeMappers.class,
+        SkillMappers.class,
         PersonContactMappers.class,
         CompanyMappers.class
 })
@@ -38,6 +39,7 @@ public interface RecruiterMappers {
     @Mapping(source = "resumeUrl", target = "curriculum")
     @Mapping(source = "type", target = "tipo")
     @Mapping(source = "aptitudes", target = "aptitudes")
+    @Mapping(source = ".", target = "habilidades")
     @Mapping(source = "personContacts", target = "redContactos")
     @Mapping(source = "educations", target = "educaciones")
     @Mapping(source = "ubication", target = "ubicacion")
@@ -48,6 +50,7 @@ public interface RecruiterMappers {
 
     @InheritInverseConfiguration
     @Mapping(target = "aptitudes", ignore = true)
+    @Mapping(target = "technologies", ignore = true)
     @Mapping(target = "educations", ignore = true)
     @Mapping(target = "languages", ignore = true)
     Recruiter recruiterDtoToRecruiter(RecruiterDto recruiterDto);

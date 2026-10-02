@@ -17,6 +17,7 @@ import org.mapstruct.factory.Mappers;
         UbicationMappers.class,
         EducationMappers.class,
         AptitudeMappers.class,
+        SkillMappers.class,
         PersonContactMappers.class,
         RecomendationMappers.class,
 })
@@ -36,6 +37,7 @@ public interface TeacherMappers {
     @Mapping(source = "academicDegree", target = "gradoAcademico")
     @Mapping(source = "department", target = "departamento")
     @Mapping(source = "aptitudes", target = "aptitudes")
+    @Mapping(source = ".", target = "habilidades")
     @Mapping(source = "personContacts", target = "redContactos")
     @Mapping(source = "educations", target = "educaciones")
     @Mapping(source = "ubication", target = "ubicacion")
@@ -46,6 +48,7 @@ public interface TeacherMappers {
 
     @InheritInverseConfiguration
     @Mapping(target = "aptitudes", ignore = true)
+    @Mapping(target = "technologies", ignore = true)
     @Mapping(target = "educations", ignore = true)
     @Mapping(target = "languages", ignore = true)
     Teacher teacherDtoToTeacher(TeacherDto teacherDto);

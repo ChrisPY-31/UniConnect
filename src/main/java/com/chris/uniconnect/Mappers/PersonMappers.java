@@ -18,6 +18,7 @@ import java.util.List;
         UbicationMappers.class,
         EducationMappers.class,
         AptitudeMappers.class,
+        SkillMappers.class,
         CareerMappers.class,
         PersonContactMappers.class,
         ProjectMappers.class,
@@ -39,6 +40,7 @@ public interface PersonMappers {
     @Mapping(source = "resumeUrl", target = "curriculum")
     @Mapping(source = "type" , target = "tipo")
     @Mapping(source = "aptitudes", target = "aptitudes")
+    @Mapping(source = ".", target = "habilidades")
     @Mapping(source = "semester", target = "semestre")
     @Mapping(source = "career", target = "carrera")
     @Mapping(source = "personContacts", target = "redContactos")
@@ -52,6 +54,7 @@ public interface PersonMappers {
 
     @InheritInverseConfiguration
     @Mapping(target = "aptitudes", ignore = true)
+    @Mapping(target = "technologies", ignore = true)
     @Mapping(target = "educations", ignore = true)
     @Mapping(target = "languages", ignore = true)
     Student studentDtoToStudent(StudentDto studentDto);

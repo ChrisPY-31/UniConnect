@@ -1,7 +1,7 @@
 package com.chris.uniconnect.Controller;
 
 
-import com.chris.uniconnect.Model.Dto.PersonDto;
+import com.chris.uniconnect.Model.Dto.StudentDto;
 import com.chris.uniconnect.Model.Dto.RegisterRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthCreateUserRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthLoginRequest;
@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Autenticacion", description = "Registro e inicio de sesion. No requieren token.")
@@ -27,18 +28,22 @@ public class AuthenticationController {
     private UserDetailsServiceImpl userDetailsService;
 
     @Operation(
-            summary = "Crear cuenta",
-            description = "Crea el usuario, le asigna los roles pedidos y crea el perfil (Student/Teacher/Recruiter) asociado. Envia un correo de bienvenida con la contrasena en texto plano."
+            summary = "Crear cuenta (solo ADMIN)",
+            description = "El admin crea cuentas de STUDENT o TEACHER (un solo rol). Para STUDENT, `person.idCarrera` y `person.semestre` (1-10) son obligatorios; " +
+                    "para TEACHER se ignoran. Envia un correo de bienvenida con la contrasena en texto plano. " +
+                    "El token de la respuesta es del usuario creado, no del admin: el front no debe reemplazar la sesion del admin con el."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Cuenta creada, devuelve el token de acceso"),
-            @ApiResponse(responseCode = "400", description = "Datos invalidos, correo ya registrado o rol inexistente")
+            @ApiResponse(responseCode = "201", description = "Cuenta creada"),
+            @ApiResponse(responseCode = "400", description = "Datos invalidos, rol no permitido, carrera inexistente o falta carrera/semestre"),
+            @ApiResponse(responseCode = "401", description = "Correo ya registrado o sin token"),
+            @ApiResponse(responseCode = "403", description = "No es ADMIN")
     })
-    @SecurityRequirements
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/sign-up")
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
         AuthCreateUserRequest authCreateUserRequest = registerRequest.getUser();
-        PersonDto person = registerRequest.getPerson();
+        StudentDto person = registerRequest.getPerson();
         return new ResponseEntity<>(this.userDetailsService.createUser(authCreateUserRequest , person), HttpStatus.CREATED);
     }
 

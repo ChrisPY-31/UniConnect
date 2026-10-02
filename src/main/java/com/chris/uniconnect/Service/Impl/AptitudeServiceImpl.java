@@ -8,7 +8,9 @@ import com.chris.uniconnect.Service.IAptitudeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class AptitudeServiceImpl implements IAptitudeService {
@@ -23,7 +25,10 @@ public class AptitudeServiceImpl implements IAptitudeService {
 
     @Override
     public List<AptitudeDto> createAptitud(List<AptitudeDto> aptitudeDto) {
+        Set<String> vistos = new HashSet<>();
         List<Aptitude> nuevasAptitudes = aptitudeDto.stream()
+                .peek(dto -> dto.setNombre(dto.getNombre().trim()))
+                .filter(dto -> vistos.add(dto.getNombre().toLowerCase()))
                 .filter(dto -> !aptitudeRepository.existsByNameIgnoreCase(dto.getNombre()))
                 .map(AptitudeMappers.INSTANCE::aptitudeDtoToAptitude)
                 .toList();

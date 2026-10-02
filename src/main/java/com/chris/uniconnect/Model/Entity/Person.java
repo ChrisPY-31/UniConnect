@@ -61,8 +61,12 @@ public abstract class Person {
     )
     private Set<Aptitude> aptitudes;
 
-    @OneToMany(mappedBy = "person")
-    private List<Skill> skills;
+    @ManyToMany
+    @JoinTable(name = "person_technology",
+            joinColumns = @JoinColumn(name = "id_person"),
+            inverseJoinColumns = @JoinColumn(name = "id_technology")
+    )
+    private Set<Technology> technologies;
 
     @OneToMany(mappedBy = "person")
     private List<Language> languages;
