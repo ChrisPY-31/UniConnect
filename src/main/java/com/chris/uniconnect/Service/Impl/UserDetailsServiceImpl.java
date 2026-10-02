@@ -2,7 +2,7 @@ package com.chris.uniconnect.Service.Impl;
 
 import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Mappers.RecruiterMappers;
-import com.chris.uniconnect.Model.Dto.PersonDto;
+import com.chris.uniconnect.Model.Dto.StudentDto;
 import com.chris.uniconnect.Model.Dto.Response.AuthCreateUserRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthLoginRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthResponse;
@@ -66,6 +66,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private RecruiterRepository recruiterRepository;
+
+    @Autowired
+    private CareerRepository careerRepository;
 
     @Autowired
     private EmailServiceImpl emailService;
@@ -138,7 +141,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Transactional
-    public AuthResponse createUser(AuthCreateUserRequest authCreateUserRequest, PersonDto person) {
+    public AuthResponse createUser(AuthCreateUserRequest authCreateUserRequest, StudentDto person) {
         String username = authCreateUserRequest.username();
         String password = authCreateUserRequest.password();
         String email = authCreateUserRequest.email();
@@ -147,7 +150,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new BadCredentialsException("El correo ya esta en uso.");
         }
 
-        List<String> roleRequest = authCreateUserRequest.roleRequest().roleListName();
+        List<String> roleRequest = authCreateUserRequest.roleRequest() == null ? null : authCreateUserRequest.roleRequest().roleListName();
+        // por ahora el admin solo crea estudiantes y docentes; RECRUITER y ADMIN no se pueden crear aqui
+        if (roleRequest == null || roleRequest.size() != 1
+                || !(roleRequest.contains("STUDENT") || roleRequest.contains("TEACHER"))) {
+            throw new BadRequestException("Solo se pueden crear cuentas con un rol: STUDENT o TEACHER");
+        }
+        if (person == null) {
+            throw new BadRequestException("Los datos de la persona son obligatorios");
+        }
+        if (roleRequest.contains("STUDENT")) {
+            validateStudentAcademicData(person);
+        }
         Set<RolesEntity> rolesEntitySet = roleRepository.findByRoleEnumIn(roleRequest).stream().collect(Collectors.toSet());
 
         if (rolesEntitySet.isEmpty()) {
@@ -171,6 +185,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             student.setName(person.getNombre());
             student.setLastName(person.getApellido());
             student.setType("student");
+            student.setIdCareer(person.getIdCarrera());
+            student.setSemester(person.getSemestre().trim());
             student.setUserEntity(userCreated);
             studentRepository.save(student);
         }
@@ -181,14 +197,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             teacher.setUserEntity(userCreated);
             teacher.setType("teacher");
             teacherRepostory.save(teacher);
-        }
-        if (roleRequest.contains("RECRUITER")) {
-            Recruiter recruiter = new Recruiter();
-            recruiter.setName(person.getNombre());
-            recruiter.setLastName(person.getApellido());
-            recruiter.setUserEntity(userCreated);
-            recruiter.setType("recruiter");
-            recruiterRepository.save(recruiter);
         }
 
         try {
@@ -220,6 +228,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
         return authResponse;
+    }
+
+    private void validateStudentAcademicData(StudentDto person) {
+        if (person.getIdCarrera() == null) {
+            throw new BadRequestException("La carrera es obligatoria para estudiantes");
+        }
+        if (!careerRepository.existsById(person.getIdCarrera())) {
+            throw new BadRequestException("No existe la carrera con id: " + person.getIdCarrera());
+        }
+        String semestre = person.getSemestre() == null ? "" : person.getSemestre().trim();
+        if (!semestre.matches("\\d{1,2}") || Integer.parseInt(semestre) < 1 || Integer.parseInt(semestre) > 10) {
+            throw new BadRequestException("El semestre es obligatorio para estudiantes y debe estar entre 1 y 10");
+        }
     }
 
     public UserResponse userBlocked(Integer id) {

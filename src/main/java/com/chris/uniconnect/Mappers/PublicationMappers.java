@@ -49,34 +49,4 @@ public interface PublicationMappers {
     void updatePublicationFromDto(PublicationDto publicationDto, @MappingTarget Publication publication);
 
     List<PublicationDto> publicationListToPublicacionDtoList(List<Publication> publicationList);
-
-
-    default PersonaResponseM map(Person persona) {
-        if (persona instanceof Teacher teacher) {
-            TeacherResponse response = new TeacherResponse();
-            response.setId(teacher.getId());
-            response.setNombre(teacher.getName());
-            response.setApellido(teacher.getLastName());
-            response.setEspecialidad(teacher.getSpecialty());
-            response.setImagen(teacher.getImage());
-            return response;
-        } else if (persona instanceof Recruiter recruiter) {
-            RecruiterResponse response = new RecruiterResponse();
-            response.setId(recruiter.getId());
-            response.setNombre(recruiter.getName());
-            response.setApellido(recruiter.getLastName());
-            response.setEspecialidad(recruiter.getSpecialty());
-            response.setImagen(recruiter.getImage());
-            return response;
-        } else if (persona instanceof Student student) {
-            StudentResponse response = new StudentResponse();
-            response.setId(student.getId());
-            response.setNombre(student.getName());
-            response.setApellido(student.getLastName());
-            response.setEspecialidad(student.getSpecialty());
-            response.setImagen(student.getImage());
-            return response;
-        }
-        return null;
-    }
 }
