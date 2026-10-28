@@ -71,6 +71,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private CareerRepository careerRepository;
 
     @Autowired
+    private CompanyAdminRepository companyAdminRepository;
+
+    @Autowired
     private EmailServiceImpl emailService;
 
     @Value("${email.private.user}")
@@ -136,6 +139,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (!userDetails.isEnabled()) {
             throw new DisabledException("La cuenta se encuentra deshabilitada");
         }
+        validatePartnershipActive(username);
 
         return new UsernamePasswordAuthenticationToken(username, userDetails.getPassword(), userDetails.getAuthorities());
     }
@@ -228,6 +232,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
         return authResponse;
+    }
+
+    //las cuentas de empresa no entran si su convenio esta desactivado (vencido por fecha si puede entrar)
+    private void validatePartnershipActive(String username) {
+        CompanyAdmin companyAdmin = companyAdminRepository.findByUserEntityUsername(username);
+        if (companyAdmin != null && companyAdmin.getCorporatePartnershipsUAEMex() != null
+                && !Boolean.TRUE.equals(companyAdmin.getCorporatePartnershipsUAEMex().getActive())) {
+            throw new DisabledException("El convenio de tu empresa se encuentra desactivado");
+        }
     }
 
     private void validateStudentAcademicData(StudentDto person) {

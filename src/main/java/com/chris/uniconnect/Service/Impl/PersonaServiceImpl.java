@@ -2,10 +2,12 @@ package com.chris.uniconnect.Service.Impl;
 
 import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
+import com.chris.uniconnect.Mappers.CompanyAdminMappers;
 import com.chris.uniconnect.Mappers.PersonMappers;
 import com.chris.uniconnect.Mappers.RecruiterMappers;
 import com.chris.uniconnect.Mappers.StudentMappers;
 import com.chris.uniconnect.Mappers.TeacherMappers;
+import com.chris.uniconnect.Model.Dto.CompanyAdminDto;
 import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.Model.Dto.RecruiterDto;
 import com.chris.uniconnect.Model.Dto.SkillsRequest;
@@ -42,6 +44,9 @@ public class PersonaServiceImpl implements IPersonService {
 
     @Autowired
     private RecruiterRepository recruiterRepository;
+
+    @Autowired
+    private CompanyAdminRepository companyAdminRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -89,6 +94,11 @@ public class PersonaServiceImpl implements IPersonService {
         if (recruiter != null) {
             return recruiter;
         }
+
+        CompanyAdminDto companyAdmin = CompanyAdminMappers.INSTANCE.toDto(companyAdminRepository.findById(id).orElse(null));
+        if (companyAdmin != null) {
+            return companyAdmin;
+        }
         throw new ResourceNotFoundException("cliente", "id", id);
 
     }
@@ -109,6 +119,11 @@ public class PersonaServiceImpl implements IPersonService {
 
         if (reruiter != null) {
             return reruiter;
+        }
+
+        CompanyAdminDto companyAdmin = CompanyAdminMappers.INSTANCE.toDto(companyAdminRepository.findByUserEntityUsername(username));
+        if (companyAdmin != null) {
+            return companyAdmin;
         }
 
 

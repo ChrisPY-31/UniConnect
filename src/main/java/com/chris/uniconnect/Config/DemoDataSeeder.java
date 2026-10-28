@@ -77,11 +77,13 @@ public class DemoDataSeeder implements CommandLineRunner {
         cleanupLegacyAptitudeSchema();
         cleanupLegacyUbicationSchema();
         ensureCatalogUniqueIndexes();
+        dropRoleEnumCheck();
 
         RolesEntity adminRole = ensureRole(Roles.ADMIN);
         RolesEntity teacherRole = ensureRole(Roles.TEACHER);
         RolesEntity studentRole = ensureRole(Roles.STUDENT);
         ensureRole(Roles.RECRUITER);
+        ensureRole(Roles.COMPANY_ADMIN);
 
         seedAdmin(adminRole);
         seedTeacher(teacherRole);
@@ -198,6 +200,11 @@ public class DemoDataSeeder implements CommandLineRunner {
                 "DELETE FROM aptitude a USING aptitude b " +
                         "WHERE a.id_aptitude > b.id_aptitude AND lower(a.name) = lower(b.name)"
         );
+    }
+
+    //Hibernate 6 crea un CHECK con los valores del enum y ddl-auto=update no lo actualiza al agregar roles nuevos
+    private void dropRoleEnumCheck() {
+        jdbcTemplate.execute("ALTER TABLE roles DROP CONSTRAINT IF EXISTS roles_role_enum_check");
     }
 
     private void ensureCatalogUniqueIndexes() {

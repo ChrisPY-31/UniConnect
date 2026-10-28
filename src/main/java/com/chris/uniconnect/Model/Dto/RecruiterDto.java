@@ -8,9 +8,10 @@ import lombok.*;
 @NoArgsConstructor
 public class RecruiterDto extends PersonDto{
 
-    private Integer idCompania;
+    private Long idCorporacion;
 
     private String posicion;
 
-    private CompanyDto compania;
+    private CorporatePartnershipsUAEMexDto empresaAsociada;
+
 }

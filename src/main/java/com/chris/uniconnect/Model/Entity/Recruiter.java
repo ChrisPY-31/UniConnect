@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "recruiter")
 @Getter
@@ -14,12 +16,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Recruiter extends Person {
 
-    @Column(name = "id_company")
-    private Integer idCompany;
+    @Column(name = "id_corporate_partnership")
+    private Long idCorporatePartnership;
 
     private String position;
 
     @ManyToOne
-    @JoinColumn(name = "id_company" , referencedColumnName = "id_company" , insertable = false , updatable = false)
-    private Company company;
+    @JoinColumn(name = "id_corporate_partnership" , referencedColumnName = "id_corporate_partnership" , insertable = false , updatable = false)
+    private CorporatePartnershipsUAEMex corporatePartnershipsUAEMex;
+
+    @OneToMany(mappedBy = "recruiter")
+    private List<PostJob> postJobs;
 }

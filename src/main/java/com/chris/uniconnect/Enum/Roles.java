@@ -5,5 +5,6 @@ public enum Roles {
     TEACHER,
     STUDENT,
     RECRUITER,
+    COMPANY_ADMIN
 
 }

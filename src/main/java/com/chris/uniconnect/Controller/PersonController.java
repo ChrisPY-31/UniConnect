@@ -46,7 +46,7 @@ public class PersonController {
             @ApiResponse(responseCode = "200", description = "Perfil encontrado"),
             @ApiResponse(responseCode = "404", description = "No existe un usuario con ese username")
     })
-    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' , 'STUDENT', 'RECRUITER')")
+    @PreAuthorize("hasAnyRole('ADMIN' , 'TEACHER' , 'STUDENT', 'RECRUITER', 'COMPANY_ADMIN')")
     @GetMapping("/userAccount/{username}")
     public ResponseEntity<?> getAccountUser(@Parameter(description = "Username de la cuenta") @PathVariable String username) {
         return new ResponseEntity<>(MensajeResponse.builder()

@@ -20,7 +20,7 @@ import org.mapstruct.factory.Mappers;
         AptitudeMappers.class,
         SkillMappers.class,
         PersonContactMappers.class,
-        CompanyMappers.class
+        CorporatePartnershipsMappers.class
 })
 public interface RecruiterMappers {
 
@@ -28,7 +28,7 @@ public interface RecruiterMappers {
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "idUbication", target = "idUbicacion")
-    @Mapping(source = "idCompany" , target ="idCompania")
+    @Mapping(source = "idCorporatePartnership", target = "idCorporacion")
     @Mapping(source = "name", target = "nombre")
     @Mapping(source = "lastName", target = "apellido")
     @Mapping(source = "position", target = "posicion")
@@ -45,7 +45,7 @@ public interface RecruiterMappers {
     @Mapping(source = "ubication", target = "ubicacion")
     @Mapping(source = "city", target = "ciudad")
     @Mapping(source = "languages", target = "lenguajes")
-    @Mapping(source = "company", target = "compania")
+    @Mapping(source = "corporatePartnershipsUAEMex", target = "empresaAsociada")
     RecruiterDto recruiterToRecruiterDto(Recruiter recruiter);
 
     @InheritInverseConfiguration
@@ -53,6 +53,7 @@ public interface RecruiterMappers {
     @Mapping(target = "technologies", ignore = true)
     @Mapping(target = "educations", ignore = true)
     @Mapping(target = "languages", ignore = true)
+    @Mapping(target = "corporatePartnershipsUAEMex", ignore = true)
     Recruiter recruiterDtoToRecruiter(RecruiterDto recruiterDto);
 
     @InheritConfiguration(name = "recruiterDtoToRecruiter")

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,5 +37,8 @@ public class Student extends Person{
     //relacion llave compuesta OneToMany
     @OneToMany(mappedBy = "student")
     private List<Recomendation> recomendations;
+
+    @OneToMany(mappedBy = "students")
+    private Set<JobApplication> jobApplications = new HashSet<>();
 
 }
