@@ -38,7 +38,7 @@ public class Student extends Person{
     @OneToMany(mappedBy = "student")
     private List<Recomendation> recomendations;
 
-    @OneToMany(mappedBy = "students")
+    @OneToMany(mappedBy = "student")
     private Set<JobApplication> jobApplications = new HashSet<>();
 
 }

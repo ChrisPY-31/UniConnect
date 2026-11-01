@@ -77,7 +77,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         cleanupLegacyAptitudeSchema();
         cleanupLegacyUbicationSchema();
         ensureCatalogUniqueIndexes();
-        dropRoleEnumCheck();
+        dropEnumChecks();
 
         RolesEntity adminRole = ensureRole(Roles.ADMIN);
         RolesEntity teacherRole = ensureRole(Roles.TEACHER);
@@ -202,9 +202,11 @@ public class DemoDataSeeder implements CommandLineRunner {
         );
     }
 
-    //Hibernate 6 crea un CHECK con los valores del enum y ddl-auto=update no lo actualiza al agregar roles nuevos
-    private void dropRoleEnumCheck() {
+    //Hibernate 6 crea un CHECK con los valores del enum y ddl-auto=update no lo actualiza al agregar valores nuevos
+    private void dropEnumChecks() {
         jdbcTemplate.execute("ALTER TABLE roles DROP CONSTRAINT IF EXISTS roles_role_enum_check");
+        jdbcTemplate.execute("ALTER TABLE IF EXISTS notification DROP CONSTRAINT IF EXISTS notification_type_check");
+        jdbcTemplate.execute("ALTER TABLE IF EXISTS job_application DROP CONSTRAINT IF EXISTS job_application_application_status_check");
     }
 
     private void ensureCatalogUniqueIndexes() {

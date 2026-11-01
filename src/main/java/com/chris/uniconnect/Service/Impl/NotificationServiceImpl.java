@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Service.Impl;
 
+import com.chris.uniconnect.Enum.AplicationsStatus;
 import com.chris.uniconnect.Enum.NotificationType;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Model.Dto.Response.NotificationResponse;
@@ -70,6 +71,44 @@ public class NotificationServiceImpl implements INotificationService {
                 .type(NotificationType.PROJECT_MENTION)
                 .message("Fuiste mencionado en el proyecto " + projectName)
                 .referenceId(projectId)
+                .read(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        notificationRepository.save(notification);
+        pushToPerson(studentId, notification);
+    }
+
+    @Override
+    public void notifyJobApplicationReceived(Integer recruiterId, Long idPostJob, String studentName, String jobTitle) {
+        Notification notification = Notification.builder()
+                .person(personaRepository.getReferenceById(recruiterId))
+                .type(NotificationType.JOB_APPLICATION_RECEIVED)
+                .message(studentName + " se postulo a tu vacante " + jobTitle)
+                .referenceId(Math.toIntExact(idPostJob))
+                .read(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        notificationRepository.save(notification);
+        pushToPerson(recruiterId, notification);
+    }
+
+    @Override
+    public void notifyJobApplicationStatus(Integer studentId, Long idJobApplication, String jobTitle, AplicationsStatus status) {
+        String statusText = switch (status) {
+            case EN_REVISION -> "esta en revision";
+            case ENTREVISTA -> "paso a entrevista";
+            case ACEPTADA -> "fue aceptada";
+            case RECHAZADA -> "no fue seleccionada";
+            default -> "cambio de estado";
+        };
+
+        Notification notification = Notification.builder()
+                .person(personaRepository.getReferenceById(studentId))
+                .type(NotificationType.JOB_APPLICATION_STATUS)
+                .message("Tu postulacion a " + jobTitle + " " + statusText)
+                .referenceId(Math.toIntExact(idJobApplication))
                 .read(false)
                 .createdAt(LocalDateTime.now())
                 .build();

@@ -104,6 +104,21 @@ public class PersonaServiceImpl implements IPersonService {
     }
 
     @Override
+    @Transactional
+    public PersonDto getPublicPersonById(Integer id) {
+        Recruiter recruiter = recruiterRepository.findById(id).orElse(null);
+        if (recruiter != null) {
+            boolean accountActive = recruiter.getUserEntity() != null && recruiter.getUserEntity().isEnabled();
+            boolean partnershipActive = recruiter.getCorporatePartnershipsUAEMex() != null
+                    && Boolean.TRUE.equals(recruiter.getCorporatePartnershipsUAEMex().getActive());
+            if (!accountActive || !partnershipActive) {
+                throw new ResourceNotFoundException("cliente", "id", id);
+            }
+        }
+        return getPersonsById(id);
+    }
+
+    @Override
     public PersonDto getPersonByUserName(String username) {
 
         StudentDto student = PersonMappers.INSTANCE.studentToStudentDto(studentRepository.findByUserEntityUsername(username));

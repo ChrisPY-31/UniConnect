@@ -16,29 +16,19 @@ import com.chris.uniconnect.Repository.CorporatePartnershipsRepository;
 import com.chris.uniconnect.Repository.RoleRepository;
 import com.chris.uniconnect.Repository.UserRepository;
 import com.chris.uniconnect.Service.ICompanyAdminService;
+import com.chris.uniconnect.util.PasswordGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
 @Service
 public class CompanyAdminServiceImpl implements ICompanyAdminService {
-
-    private static final String UPPER = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-    private static final String LOWER = "abcdefghijkmnopqrstuvwxyz";
-    private static final String DIGITS = "23456789";
-    private static final String SYMBOLS = "!@#$%*?";
-    private static final int PASSWORD_LENGTH = 12;
-
-    private final SecureRandom random = new SecureRandom();
 
     @Autowired
     private CompanyAdminRepository companyAdminRepository;
@@ -57,6 +47,9 @@ public class CompanyAdminServiceImpl implements ICompanyAdminService {
 
     @Autowired
     private EmailServiceImpl emailService;
+
+    @Autowired
+    private PasswordGenerator passwordGenerator;
 
     @Override
     @Transactional
@@ -84,7 +77,7 @@ public class CompanyAdminServiceImpl implements ICompanyAdminService {
                 .findFirst()
                 .orElseThrow(() -> new BadRequestException("El rol COMPANY_ADMIN no existe en la base de datos"));
 
-        String password = generatePassword();
+        String password = passwordGenerator.generate();
 
         UserEntity userEntity = UserEntity.builder()
                 .username(username)
@@ -177,22 +170,5 @@ public class CompanyAdminServiceImpl implements ICompanyAdminService {
             throw new ResourceNotFoundException("Cuenta de empresa", "username", username);
         }
         return companyAdmin;
-    }
-
-    //garantiza al menos una mayuscula, minuscula, digito y simbolo
-    private String generatePassword() {
-        String all = UPPER + LOWER + DIGITS + SYMBOLS;
-        List<Character> chars = new ArrayList<>();
-        chars.add(UPPER.charAt(random.nextInt(UPPER.length())));
-        chars.add(LOWER.charAt(random.nextInt(LOWER.length())));
-        chars.add(DIGITS.charAt(random.nextInt(DIGITS.length())));
-        chars.add(SYMBOLS.charAt(random.nextInt(SYMBOLS.length())));
-        while (chars.size() < PASSWORD_LENGTH) {
-            chars.add(all.charAt(random.nextInt(all.length())));
-        }
-        Collections.shuffle(chars, random);
-        StringBuilder password = new StringBuilder();
-        chars.forEach(password::append);
-        return password.toString();
     }
 }

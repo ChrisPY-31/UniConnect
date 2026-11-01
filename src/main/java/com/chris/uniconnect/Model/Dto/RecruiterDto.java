@@ -12,6 +12,6 @@ public class RecruiterDto extends PersonDto{
 
     private String posicion;
 
-    private CorporatePartnershipsUAEMexDto empresaAsociada;
+    private CompanySummaryDto empresaAsociada;
 
 }

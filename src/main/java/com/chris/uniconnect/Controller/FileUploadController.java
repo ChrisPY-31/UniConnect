@@ -24,23 +24,33 @@ public class FileUploadController {
     }
 
     @Operation(
-            summary = "Subir foto de perfil",
-            description = "ADVERTENCIA: el {id} del path no se valida contra el usuario autenticado — cualquiera con rol STUDENT/TEACHER/RECRUITER puede cambiar la foto de otra persona. Pendiente de cerrar."
+            summary = "Subir mi foto de perfil",
+            description = "STUDENT, TEACHER o RECRUITER. El dueno se resuelve por JWT, ya no se manda id ni tipo. Reemplaza al antiguo PATCH /fileUsers/{id}."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Imagen actualizada"),
-            @ApiResponse(responseCode = "500", description = "Extension no permitida, archivo vacio o tipo de usuario invalido")
+            @ApiResponse(responseCode = "200", description = "Imagen actualizada, regresa el perfil"),
+            @ApiResponse(responseCode = "400", description = "Archivo vacio o extension no permitida")
     })
     @PreAuthorize("hasAnyRole('STUDENT' , 'TEACHER' , 'RECRUITER')")
-    @PatchMapping("/fileUsers/{id}")
-    public ResponseEntity<?> uploadFileUsers(@Parameter(description = "Id de la persona") @PathVariable Integer id,
-                                              @Parameter(description = "Archivo de imagen") @RequestParam("image") MultipartFile file,
-                                              @Parameter(description = "student, teacher o recruiter") @RequestParam("tipo") String tipoUser) {
-        try {
-            return ResponseEntity.ok(fileUploadService.uploadFileUser(id, file, tipoUser));
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+    @PatchMapping("/person/me/image")
+    public ResponseEntity<?> uploadMyProfileImage(@Parameter(description = "Archivo de imagen") @RequestParam("image") MultipartFile file,
+                                                  Authentication authentication) {
+        return ResponseEntity.ok(fileUploadService.uploadMyProfileImage(authentication.getName(), file));
+    }
+
+    @Operation(
+            summary = "Subir mi CV",
+            description = "Solo STUDENT. PDF de hasta 10MB; reemplaza el CV del perfil. Las postulaciones ya enviadas conservan el CV con el que se enviaron."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "CV actualizado, regresa el perfil"),
+            @ApiResponse(responseCode = "400", description = "Archivo vacio o no es PDF")
+    })
+    @PreAuthorize("hasRole('STUDENT')")
+    @PatchMapping("/student/me/resume")
+    public ResponseEntity<?> uploadMyResume(@Parameter(description = "Archivo PDF") @RequestParam("file") MultipartFile file,
+                                            Authentication authentication) {
+        return ResponseEntity.ok(fileUploadService.uploadMyResume(authentication.getName(), file));
     }
 
     @Operation(summary = "Subir imagen de un proyecto propio", description = "Solo STUDENT. Se valida que el proyecto sea del usuario autenticado.")

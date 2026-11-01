@@ -11,6 +11,9 @@ public interface IPersonService {
 
     PersonDto getPersonsById(Integer id);
 
+    //igual que getPersonsById, pero oculta (404) a los reclutadores desactivados o de un convenio desactivado
+    PersonDto getPublicPersonById(Integer id);
+
     PersonDto getPersonByUserName(String username);
 
     PersonDto updateAptitudes(String username, Set<Integer> aptitudeIds);

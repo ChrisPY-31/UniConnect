@@ -6,7 +6,11 @@ import com.chris.uniconnect.Model.Dto.PublicationDto;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FileUploadService {
-    PersonDto uploadFileUser(int id , MultipartFile file , String tipoUser);
+    //foto de perfil del usuario autenticado (cualquier subtipo de Person)
+    PersonDto uploadMyProfileImage(String username, MultipartFile file);
+
+    //CV en PDF del estudiante autenticado; las postulaciones guardan una copia de la url
+    PersonDto uploadMyResume(String username, MultipartFile file);
 
     ProjectDto uploadFileProject(String username, int id , MultipartFile file );
 

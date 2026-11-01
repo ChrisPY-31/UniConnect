@@ -1,17 +1,13 @@
 package com.chris.uniconnect.Mappers;
 
+import com.chris.uniconnect.Model.Dto.RecruiterAccountDto;
 import com.chris.uniconnect.Model.Dto.RecruiterDto;
-import com.chris.uniconnect.Model.Dto.TeacherDto;
 import com.chris.uniconnect.Model.Entity.Recruiter;
-import com.chris.uniconnect.Model.Entity.Teacher;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.InheritConfiguration;
-import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 @Mapper(uses = {
         IdiomasMappers.class,
@@ -48,15 +44,14 @@ public interface RecruiterMappers {
     @Mapping(source = "corporatePartnershipsUAEMex", target = "empresaAsociada")
     RecruiterDto recruiterToRecruiterDto(Recruiter recruiter);
 
-    @InheritInverseConfiguration
-    @Mapping(target = "aptitudes", ignore = true)
-    @Mapping(target = "technologies", ignore = true)
-    @Mapping(target = "educations", ignore = true)
-    @Mapping(target = "languages", ignore = true)
-    @Mapping(target = "corporatePartnershipsUAEMex", ignore = true)
-    Recruiter recruiterDtoToRecruiter(RecruiterDto recruiterDto);
+    @Mapping(source = "idCorporatePartnership", target = "idCorporacion")
+    @Mapping(source = "userEntity.username", target = "username")
+    @Mapping(source = "userEntity.email", target = "email")
+    @Mapping(source = "name", target = "nombre")
+    @Mapping(source = "lastName", target = "apellido")
+    @Mapping(source = "position", target = "puesto")
+    @Mapping(source = "userEntity.enabled", target = "cuentaActiva")
+    RecruiterAccountDto toAccountDto(Recruiter recruiter);
 
-    @InheritConfiguration(name = "recruiterDtoToRecruiter")
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateRecruiterFromDto(RecruiterDto recruiterDto, @MappingTarget Recruiter recruiter);
+    List<RecruiterAccountDto> toAccountDtoList(List<Recruiter> recruiters);
 }

@@ -234,11 +234,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return authResponse;
     }
 
-    //las cuentas de empresa no entran si su convenio esta desactivado (vencido por fecha si puede entrar)
+    //las cuentas de empresa y sus reclutadores no entran si su convenio esta desactivado (vencido por fecha si puede entrar)
     private void validatePartnershipActive(String username) {
+        CorporatePartnershipsUAEMex partnership = null;
         CompanyAdmin companyAdmin = companyAdminRepository.findByUserEntityUsername(username);
-        if (companyAdmin != null && companyAdmin.getCorporatePartnershipsUAEMex() != null
-                && !Boolean.TRUE.equals(companyAdmin.getCorporatePartnershipsUAEMex().getActive())) {
+        if (companyAdmin != null) {
+            partnership = companyAdmin.getCorporatePartnershipsUAEMex();
+        } else {
+            Recruiter recruiter = recruiterRepository.findByUserEntityUsername(username);
+            if (recruiter != null) {
+                partnership = recruiter.getCorporatePartnershipsUAEMex();
+            }
+        }
+        if (partnership != null && !Boolean.TRUE.equals(partnership.getActive())) {
             throw new DisabledException("El convenio de tu empresa se encuentra desactivado");
         }
     }

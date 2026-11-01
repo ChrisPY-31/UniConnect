@@ -4,15 +4,18 @@ import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Mappers.PersonMappers;
 import com.chris.uniconnect.Model.Dto.*;
+import com.chris.uniconnect.Model.Entity.Person;
 import com.chris.uniconnect.Model.Entity.Student;
 import com.chris.uniconnect.Model.Entity.Teacher;
 import com.chris.uniconnect.Repository.PersonaRepository;
+import com.chris.uniconnect.Repository.StudentRepository;
 import com.chris.uniconnect.Service.*;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
@@ -29,13 +32,10 @@ public class FileUpLoadServiceImpl implements FileUploadService {
     private IPersonService personService;
 
     @Autowired
-    private IStudentService studentService;
+    private PersonaRepository personaRepository;
 
     @Autowired
-    private ITeacherService teacherService;
-
-    @Autowired
-    private IRecruiterServce recruiterServce;
+    private StudentRepository studentRepository;
 
     @Autowired
     private IProjectService projectService;
@@ -46,70 +46,45 @@ public class FileUpLoadServiceImpl implements FileUploadService {
 
 
     @Override
-    public PersonDto uploadFileUser(int id, MultipartFile file, String tipoUser) {
+    @Transactional
+    public PersonDto uploadMyProfileImage(String username, MultipartFile file) {
+        Person person = personaRepository.findByUserEntityUsername(username);
+        if (person == null) {
+            throw new ResourceNotFoundException("Persona", "username", username);
+        }
+        //solo se toca la imagen, sin pasar por los DTO de cada rol
+        person.setImage(uploadImage(file, "Usuarios"));
+        personaRepository.save(person);
+        return personService.getPersonByUserName(username);
+    }
 
-        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "webp", "avif");
-
-        PersonDto personaFile = personService.getPersonsById(id);
-
-        // Validación de archivo nulo
+    @Override
+    @Transactional
+    public PersonDto uploadMyResume(String username, MultipartFile file) {
+        Student student = studentRepository.findByUserEntityUsername(username);
+        if (student == null) {
+            throw new ResourceNotFoundException("Estudiante", "username", username);
+        }
         if (file == null || file.isEmpty()) {
-            throw new RuntimeException("File is null or empty");
+            throw new BadRequestException("El archivo esta vacio");
         }
-
-        String extension = null;
-
-        if (file.getOriginalFilename() != null) {
-            String[] splitName = file.getOriginalFilename().split("\\.");
-            if (splitName.length > 1) {
-                extension = splitName[splitName.length - 1].toLowerCase();
-            }
-        }
-
-        // Validación corregida de extensiones
-        if (extension == null || !allowedExtensions.contains(extension)) {
-            throw new RuntimeException(String.format("Extension %s not allowed. Allowed extensions: %s",
-                    extension, allowedExtensions));
-        }
-
-        // Validación del tipo de usuario, antes de gastar la subida a Cloudinary
-        if (!List.of("teacher", "student", "recruiter").contains(tipoUser)) {
-            throw new BadRequestException(
-                    String.format("Tipo de usuario '%s' no es valido. Valores permitidos: teacher, student, recruiter", tipoUser));
+        String filename = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
+        if (!filename.endsWith(".pdf") || !"application/pdf".equals(file.getContentType())) {
+            throw new BadRequestException("El CV debe ser un archivo PDF");
         }
 
         try {
+            //raw: Cloudinary bloquea por defecto la entrega de PDFs subidos como image
             Map<String, Object> result = cloudinary.uploader().upload(
                     file.getBytes(),
-                    ObjectUtils.asMap("folder", "Usuarios")
+                    ObjectUtils.asMap("folder", "Curriculums", "resource_type", "raw", "format", "pdf")
             );
-
-            String imageUserUrl = result.get("secure_url").toString();
-            personaFile.setImagen(imageUserUrl);
-
-            switch (tipoUser) {
-                case "teacher" -> {
-                    TeacherDto teacher = teacherService.getTeacherById(id);
-                    teacher.setImagen(imageUserUrl);
-                    teacherService.updateTeacher(teacher);
-                }
-                case "student" -> {
-                    StudentDto student = studentService.getStudentById(id);
-                    student.setImagen(personaFile.getImagen());
-                    studentService.updateStudent(student);
-                }
-                case "recruiter" -> {
-                    RecruiterDto recruiter = recruiterServce.getRecruiterById(id);
-                    recruiter.setImagen(imageUserUrl);
-                    recruiterServce.updateRecruiter(recruiter);
-                }
-            }
-
-            return personaFile;
-
+            student.setResumeUrl(result.get("secure_url").toString());
         } catch (Exception e) {
             throw new RuntimeException("Error uploading file: " + e.getMessage());
         }
+        studentRepository.save(student);
+        return personService.getPersonByUserName(username);
     }
 
     @Override

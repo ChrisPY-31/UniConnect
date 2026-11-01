@@ -27,17 +27,19 @@ public class PersonController {
 
     private final IPersonService personService;
 
-    @Operation(summary = "Obtener el perfil publico de una persona por id", description = "Funciona para Student, Teacher o Recruiter indistintamente.")
+    @Operation(summary = "Obtener el perfil publico de una persona por id",
+            description = "Funciona para Student, Teacher o Recruiter indistintamente. De un Recruiter solo se muestra el resumen publico de su empresa, " +
+                    "y si su cuenta o su convenio estan desactivados responde 404.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Perfil encontrado"),
-            @ApiResponse(responseCode = "404", description = "No existe una persona con ese id")
+            @ApiResponse(responseCode = "404", description = "No existe una persona con ese id (o es un reclutador inactivo)")
     })
     @GetMapping("/person/{id}")
     public ResponseEntity<?> getIdPerson(@Parameter(description = "Id de la persona (Student/Teacher/Recruiter)") @PathVariable int id) {
 
         return new ResponseEntity<>(MensajeResponse.builder()
                 .mensaje("Persona encontrada con exito")
-                .object(personService.getPersonsById(id))
+                .object(personService.getPublicPersonById(id))
                 .build(), HttpStatus.OK);
     }
 

@@ -61,5 +61,6 @@ public interface PersonMappers {
 
     @InheritConfiguration(name = "studentDtoToStudent")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "resumeUrl", ignore = true) //el CV solo cambia con PATCH /student/me/resume
     void updateStudentFromDto(StudentDto studentDto, @MappingTarget Student student);
 }

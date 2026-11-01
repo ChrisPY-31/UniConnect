@@ -1,16 +1,12 @@
 package com.chris.uniconnect.Service;
 
 import com.chris.uniconnect.Model.Dto.RecruiterDto;
-import com.chris.uniconnect.Model.Dto.StudentDto;
-import com.chris.uniconnect.Model.Dto.TeacherDto;
+import com.chris.uniconnect.Model.Dto.RecruiterProfileRequest;
 
 public interface IRecruiterServce {
 
-    RecruiterDto getRecruiterById(int id);
+    //el reclutador siempre se resuelve por el username del JWT
+    RecruiterDto getMyProfile(String username);
 
-    RecruiterDto createRecruiter(RecruiterDto recruiter);
-
-    RecruiterDto updateRecruiter(RecruiterDto recruiter);
-
-    boolean existRecruiter(int id);
+    RecruiterDto updateMyProfile(String username, RecruiterProfileRequest request);
 }

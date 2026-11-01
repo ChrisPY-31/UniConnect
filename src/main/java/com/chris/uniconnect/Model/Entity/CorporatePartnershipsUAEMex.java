@@ -43,6 +43,10 @@ public class CorporatePartnershipsUAEMex {
     @OneToMany(mappedBy = "corporatePartnershipsUAEMex")
     private List<Recruiter> recruiters;
 
+    //landing de la empresa (1:1), de aqui sale el logo del resumen publico
+    @OneToOne(mappedBy = "corporatePartnershipsUAEMex")
+    private CompanyProfile companyProfile;
+
     @Transient
     public boolean isVigente() {
         LocalDate today = LocalDate.now();

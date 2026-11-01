@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Mappers;
 
+import com.chris.uniconnect.Model.Dto.CompanySummaryDto;
 import com.chris.uniconnect.Model.Dto.CorporatePartnershipsUAEMexDto;
 import com.chris.uniconnect.Model.Entity.CorporatePartnershipsUAEMex;
 import org.mapstruct.InheritConfiguration;
@@ -29,6 +30,7 @@ public interface CorporatePartnershipsMappers {
     @Mapping(target = "idCorporatePartnership", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "recruiters", ignore = true)
+    @Mapping(target = "companyProfile", ignore = true)
     @Mapping(source = "nombreEmpresa", target = "companyName")
     @Mapping(source = "categoria", target = "category")
     @Mapping(source = "tipoAcuerdo", target = "agreementType")
@@ -40,4 +42,11 @@ public interface CorporatePartnershipsMappers {
     void updateFromDto(CorporatePartnershipsUAEMexDto dto, @MappingTarget CorporatePartnershipsUAEMex partnership);
 
     List<CorporatePartnershipsUAEMexDto> toDtoList(List<CorporatePartnershipsUAEMex> partnerships);
+
+    //lo que se puede mostrar de la empresa en perfiles publicos (sin fechas ni estado del convenio)
+    @Mapping(source = "idCorporatePartnership", target = "idCorporacion")
+    @Mapping(source = "companyName", target = "nombreEmpresa")
+    @Mapping(source = "category", target = "categoria")
+    @Mapping(source = "companyProfile.logoUrl", target = "logo")
+    CompanySummaryDto toSummaryDto(CorporatePartnershipsUAEMex partnership);
 }
