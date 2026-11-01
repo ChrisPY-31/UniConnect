@@ -239,5 +239,38 @@ public class FileUpLoadServiceImpl implements FileUploadService {
         }
     }
 
+    @Override
+    public String uploadImage(MultipartFile file, String folder) {
+        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "webp", "avif");
+
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("El archivo esta vacio");
+        }
+
+        String extension = null;
+
+        if (file.getOriginalFilename() != null) {
+            String[] splitName = file.getOriginalFilename().split("\\.");
+            if (splitName.length > 1) {
+                extension = splitName[splitName.length - 1].toLowerCase();
+            }
+        }
+
+        if (extension == null || !allowedExtensions.contains(extension)) {
+            throw new BadRequestException(String.format("Extension %s no permitida. Extensiones permitidas: %s",
+                    extension, allowedExtensions));
+        }
+
+        try {
+            Map<String, Object> result = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap("folder", folder)
+            );
+            return result.get("secure_url").toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading file: " + e.getMessage());
+        }
+    }
+
 
 }

@@ -13,4 +13,7 @@ public interface FileUploadService {
     PublicationDto uploadFilePublication(String username, int id , MultipartFile file );
 
     String uploadFilePruebapublication( MultipartFile file);
+
+    //valida la imagen y la sube a la carpeta indicada de Cloudinary, regresa la url
+    String uploadImage(MultipartFile file, String folder);
 }

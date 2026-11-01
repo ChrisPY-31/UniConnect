@@ -6,9 +6,11 @@ import com.chris.uniconnect.Mappers.CorporatePartnershipsMappers;
 import com.chris.uniconnect.Model.Dto.CorporatePartnershipsUAEMexDto;
 import com.chris.uniconnect.Model.Entity.CorporatePartnershipsUAEMex;
 import com.chris.uniconnect.Repository.CorporatePartnershipsRepository;
+import com.chris.uniconnect.Service.ICompanyProfileService;
 import com.chris.uniconnect.Service.ICorporatePartnershipsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,7 +20,11 @@ public class CorporatePartnershipsServiceImpl implements ICorporatePartnershipsS
     @Autowired
     private CorporatePartnershipsRepository partnershipsRepository;
 
+    @Autowired
+    private ICompanyProfileService companyProfileService;
+
     @Override
+    @Transactional
     public CorporatePartnershipsUAEMexDto createPartnership(CorporatePartnershipsUAEMexDto partnership) {
         String name = partnership.getNombreEmpresa().trim();
         if (partnershipsRepository.existsByCompanyNameIgnoreCase(name)) {
@@ -28,7 +34,10 @@ public class CorporatePartnershipsServiceImpl implements ICorporatePartnershipsS
 
         CorporatePartnershipsUAEMex newPartnership = CorporatePartnershipsMappers.INSTANCE.toEntity(partnership);
         newPartnership.setCompanyName(name);
-        return CorporatePartnershipsMappers.INSTANCE.toDto(partnershipsRepository.save(newPartnership));
+        CorporatePartnershipsUAEMex savedPartnership = partnershipsRepository.save(newPartnership);
+        //cada convenio nace con su landing vacia, la empresa solo la edita
+        companyProfileService.createEmptyProfile(savedPartnership.getIdCorporatePartnership());
+        return CorporatePartnershipsMappers.INSTANCE.toDto(savedPartnership);
     }
 
     @Override
