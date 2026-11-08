@@ -1,6 +1,8 @@
 package com.chris.uniconnect.Mappers;
 
 import com.chris.uniconnect.Model.Dto.PublicationInteractionDto;
+import com.chris.uniconnect.Model.Dto.Response.AdministratorResponse;
+import com.chris.uniconnect.Model.Dto.Response.CompanyAdminResponse;
 import com.chris.uniconnect.Model.Dto.Response.PersonaResponseM;
 import com.chris.uniconnect.Model.Dto.Response.RecruiterResponse;
 import com.chris.uniconnect.Model.Dto.Response.StudentResponse;
@@ -58,6 +60,26 @@ public interface PublicationInteractionMappers {
             response.setApellido(student.getLastName());
             response.setEspecialidad(student.getSpecialty());
             response.setImagen(student.getImage());
+            return response;
+        } else if (persona instanceof CompanyAdmin companyAdmin) {
+            //la cuenta de empresa publica como la empresa: nombre y logo de la empresa
+            CompanyAdminResponse response = new CompanyAdminResponse();
+            response.setId(companyAdmin.getId());
+            CorporatePartnershipsUAEMex partnership = companyAdmin.getCorporatePartnershipsUAEMex();
+            response.setNombre(partnership != null ? partnership.getCompanyName() : companyAdmin.getName());
+            response.setApellido("");
+            response.setEspecialidad(partnership != null ? partnership.getCategory() : null);
+            response.setImagen(partnership != null && partnership.getCompanyProfile() != null
+                    ? partnership.getCompanyProfile().getLogoUrl() : null);
+            return response;
+        } else if (persona instanceof Administrator administrator) {
+            //cualquier ADMIN publica como la institucion (perfil compartido)
+            AdministratorResponse response = new AdministratorResponse();
+            response.setId(administrator.getId());
+            InstitutionProfile institution = administrator.getInstitutionProfile();
+            response.setNombre(institution != null ? institution.getName() : administrator.getName());
+            response.setApellido("");
+            response.setImagen(institution != null ? institution.getLogoUrl() : null);
             return response;
         }
         return null;

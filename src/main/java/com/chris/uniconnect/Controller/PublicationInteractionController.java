@@ -49,7 +49,7 @@ public class PublicationInteractionController {
             @ApiResponse(responseCode = "400", description = "Falta id.idPublication"),
             @ApiResponse(responseCode = "404", description = "La publicacion no existe")
     })
-    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER', 'COMPANY_ADMIN', 'ADMIN')")
     @PostMapping("/interactionPublicacion")
     public ResponseEntity<?> savePublication(@RequestBody PublicationInteractionDto publicationInteractionDto,
                                               Authentication authentication) {
@@ -67,7 +67,7 @@ public class PublicationInteractionController {
             @ApiResponse(responseCode = "400", description = "Falta id.idPublication"),
             @ApiResponse(responseCode = "404", description = "La publicacion no existe")
     })
-    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER', 'COMPANY_ADMIN', 'ADMIN')")
     @PutMapping("/interactionPublicacion")
     public ResponseEntity<?> updatePublication(@RequestBody PublicationInteractionDto publicationInteractionDto,
                                                 Authentication authentication) {

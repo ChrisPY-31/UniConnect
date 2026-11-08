@@ -8,6 +8,8 @@ import com.chris.uniconnect.Mappers.RecruiterMappers;
 import com.chris.uniconnect.Mappers.StudentMappers;
 import com.chris.uniconnect.Mappers.TeacherMappers;
 import com.chris.uniconnect.Model.Dto.CompanyAdminDto;
+import com.chris.uniconnect.Model.Entity.Administrator;
+import com.chris.uniconnect.Model.Entity.InstitutionProfile;
 import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.Model.Dto.RecruiterDto;
 import com.chris.uniconnect.Model.Dto.SkillsRequest;
@@ -47,6 +49,9 @@ public class PersonaServiceImpl implements IPersonService {
 
     @Autowired
     private CompanyAdminRepository companyAdminRepository;
+
+    @Autowired
+    private AdministratorRepository administratorRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -99,6 +104,11 @@ public class PersonaServiceImpl implements IPersonService {
         if (companyAdmin != null) {
             return companyAdmin;
         }
+
+        Administrator administrator = administratorRepository.findById(id).orElse(null);
+        if (administrator != null) {
+            return administratorToDto(administrator);
+        }
         throw new ResourceNotFoundException("cliente", "id", id);
 
     }
@@ -139,6 +149,11 @@ public class PersonaServiceImpl implements IPersonService {
         CompanyAdminDto companyAdmin = CompanyAdminMappers.INSTANCE.toDto(companyAdminRepository.findByUserEntityUsername(username));
         if (companyAdmin != null) {
             return companyAdmin;
+        }
+
+        Administrator administrator = administratorRepository.findByUserEntityUsername(username);
+        if (administrator != null) {
+            return administratorToDto(administrator);
         }
 
 
@@ -222,4 +237,17 @@ public class PersonaServiceImpl implements IPersonService {
         return RecruiterMappers.INSTANCE.recruiterToRecruiterDto((Recruiter) saved);
     }
 
+
+    //el admin no tiene perfil propio: se presenta como la institucion (perfil compartido, ver GET /institution)
+    private PersonDto administratorToDto(Administrator administrator) {
+        InstitutionProfile institution = administrator.getInstitutionProfile();
+        PersonDto dto = new PersonDto();
+        dto.setId(administrator.getId());
+        dto.setNombre(institution != null ? institution.getName() : administrator.getName());
+        dto.setApellido(institution != null ? "" : administrator.getLastName());
+        dto.setImagen(institution != null ? institution.getLogoUrl() : null);
+        dto.setDescripcion(institution != null ? institution.getDescription() : null);
+        dto.setTipo(administrator.getType());
+        return dto;
+    }
 }

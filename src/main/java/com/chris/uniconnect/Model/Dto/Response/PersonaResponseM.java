@@ -15,7 +15,9 @@ import lombok.Data;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = TeacherResponse.class, name = "teacher"),
         @JsonSubTypes.Type(value = RecruiterResponse.class, name = "recruiter"),
-        @JsonSubTypes.Type(value = StudentResponse.class, name = "student")
+        @JsonSubTypes.Type(value = StudentResponse.class, name = "student"),
+        @JsonSubTypes.Type(value = CompanyAdminResponse.class, name = "company_admin"),
+        @JsonSubTypes.Type(value = AdministratorResponse.class, name = "admin")
 })
 @Data
 public class PersonaResponseM {

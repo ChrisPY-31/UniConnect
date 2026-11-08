@@ -55,6 +55,7 @@ public class SecurityConfig {
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/teachers").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/technology").permitAll();
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/companies", "/api/v1/companies/*").permitAll(); // landing de empresas con convenio
+                    authorize.requestMatchers(HttpMethod.GET, "/api/v1/institution").permitAll(); // pagina publica de la institucion
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/jobs", "/api/v1/jobs/*", "/api/v1/companies/*/jobs").permitAll(); // vacantes publicadas
                     authorize.requestMatchers(HttpMethod.POST, "/auth/log-in").permitAll();
                     authorize.requestMatchers(HttpMethod.POST, "/auth/sign-up").hasRole("ADMIN"); // solo el admin crea cuentas
@@ -81,7 +82,7 @@ public class SecurityConfig {
 
                     //permisos de admin
                     authorize.requestMatchers(HttpMethod.GET, "/api/v1/manager").hasRole("ADMIN");
-                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/publication").hasAnyRole("STUDENT", "TEACHER", "RECRUITER");
+                    authorize.requestMatchers(HttpMethod.POST, "/api/v1/publication").hasAnyRole("STUDENT", "TEACHER", "RECRUITER", "COMPANY_ADMIN", "ADMIN");
 
 
                     //permisos de los reclutadores

@@ -25,7 +25,7 @@ public class FileUploadController {
 
     @Operation(
             summary = "Subir mi foto de perfil",
-            description = "STUDENT, TEACHER o RECRUITER. El dueno se resuelve por JWT, ya no se manda id ni tipo. Reemplaza al antiguo PATCH /fileUsers/{id}."
+            description = "STUDENT, TEACHER o RECRUITER (empresa e institucion usan el logo de su perfil). El dueno se resuelve por JWT, ya no se manda id ni tipo. Reemplaza al antiguo PATCH /fileUsers/{id}."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Imagen actualizada, regresa el perfil"),
@@ -79,7 +79,7 @@ public class FileUploadController {
             @ApiResponse(responseCode = "404", description = "La publicacion no existe"),
             @ApiResponse(responseCode = "500", description = "Extension no permitida o archivo vacio")
     })
-    @PreAuthorize("hasAnyRole('STUDENT' , 'TEACHER' ,'RECRUITER')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER', 'COMPANY_ADMIN', 'ADMIN')")
     @PatchMapping("/filePublication/{id}")
     public ResponseEntity<?> uploadPublicationsFileUsers(@Parameter(description = "Id de la publicacion") @PathVariable Integer id,
                                                           @Parameter(description = "Archivo de imagen") @RequestParam("image") MultipartFile file,

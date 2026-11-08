@@ -36,7 +36,7 @@ public class PublicationController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Publicacion creada")
     })
-    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER', 'COMPANY_ADMIN', 'ADMIN')")
     @PostMapping("/publication")
     public ResponseEntity<?> createPublication(@RequestBody PublicationDto publication, Authentication authentication) {
         PublicationDto savePublication = publicationService.createPublication(authentication.getName(), publication);
@@ -52,7 +52,7 @@ public class PublicationController {
             @ApiResponse(responseCode = "400", description = "La publicacion pertenece a otra persona"),
             @ApiResponse(responseCode = "404", description = "No existe una publicacion con ese id")
     })
-    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER', 'COMPANY_ADMIN', 'ADMIN')")
     @PutMapping("/publication/{id}")
     public ResponseEntity<?> updatePublication(@Parameter(description = "Id de la publicacion") @PathVariable Integer id,
                                                 @RequestBody PublicationDto publication,
@@ -70,7 +70,7 @@ public class PublicationController {
             @ApiResponse(responseCode = "400", description = "La publicacion pertenece a otra persona"),
             @ApiResponse(responseCode = "404", description = "No existe una publicacion con ese id")
     })
-    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'TEACHER', 'RECRUITER', 'COMPANY_ADMIN', 'ADMIN')")
     @DeleteMapping("/publication/{id}")
     public ResponseEntity<?> deletePublication(@Parameter(description = "Id de la publicacion") @PathVariable Integer id, Authentication authentication) {
         publicationService.deletePublication(authentication.getName(), id);

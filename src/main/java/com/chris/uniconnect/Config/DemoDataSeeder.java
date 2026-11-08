@@ -33,6 +33,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +45,7 @@ import java.util.Set;
 @Slf4j
 @Component
 @Profile("dev")
+@Order(1)
 public class DemoDataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
