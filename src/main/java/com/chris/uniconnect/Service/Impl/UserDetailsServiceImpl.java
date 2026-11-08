@@ -23,6 +23,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -116,7 +117,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         assert userLocked != null;
 
-        AuthResponse authResponse = new AuthResponse(username, "User loged successfuly", accessToken,
+        AuthResponse authResponse = new AuthResponse(username, mainRole(authentication), "User loged successfuly", accessToken,
                 true, userLocked.isAccountNonLocked()
 
         );
@@ -228,10 +229,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         String accessToken = jwtUtils.createToken(authentication);
 
-        AuthResponse authResponse = new AuthResponse(userCreated.getUsername(), "User creado con exito", accessToken, true, true);
+        AuthResponse authResponse = new AuthResponse(userCreated.getUsername(), mainRole(authentication), "User creado con exito", accessToken, true, true);
 
 
         return authResponse;
+    }
+
+    //cada cuenta tiene un solo rol; las authorities que no empiezan con ROLE_ son permisos
+    private String mainRole(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> authority.startsWith("ROLE_"))
+                .map(authority -> authority.substring("ROLE_".length()))
+                .findFirst()
+                .orElse(null);
     }
 
     //las cuentas de empresa y sus reclutadores no entran si su convenio esta desactivado (vencido por fecha si puede entrar)

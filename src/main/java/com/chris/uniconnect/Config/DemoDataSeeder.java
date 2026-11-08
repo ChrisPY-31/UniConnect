@@ -4,7 +4,11 @@ import com.chris.uniconnect.Enum.ContactType;
 import com.chris.uniconnect.Enum.Roles;
 import com.chris.uniconnect.Model.Entity.Aptitude;
 import com.chris.uniconnect.Model.Entity.Career;
+import com.chris.uniconnect.Model.Entity.CompanyAdmin;
+import com.chris.uniconnect.Model.Entity.CompanyProfile;
 import com.chris.uniconnect.Model.Entity.Contact;
+import com.chris.uniconnect.Model.Entity.CorporatePartnershipsUAEMex;
+import com.chris.uniconnect.Model.Entity.Recruiter;
 import com.chris.uniconnect.Model.Entity.RolesEntity;
 import com.chris.uniconnect.Model.Entity.Student;
 import com.chris.uniconnect.Model.Entity.Teacher;
@@ -13,7 +17,11 @@ import com.chris.uniconnect.Model.Entity.Ubication;
 import com.chris.uniconnect.Model.Entity.UserEntity;
 import com.chris.uniconnect.Repository.AptitudeRepository;
 import com.chris.uniconnect.Repository.CareerRepository;
+import com.chris.uniconnect.Repository.CompanyAdminRepository;
+import com.chris.uniconnect.Repository.CompanyProfileRepository;
 import com.chris.uniconnect.Repository.ContactRepository;
+import com.chris.uniconnect.Repository.CorporatePartnershipsRepository;
+import com.chris.uniconnect.Repository.RecruiterRepository;
 import com.chris.uniconnect.Repository.RoleRepository;
 import com.chris.uniconnect.Repository.StudentRepository;
 import com.chris.uniconnect.Repository.TeacherRepostory;
@@ -28,6 +36,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +55,10 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final UbicationRepository ubicationRepository;
     private final ContactRepository contactRepository;
     private final CareerRepository careerRepository;
+    private final CorporatePartnershipsRepository corporatePartnershipsRepository;
+    private final CompanyProfileRepository companyProfileRepository;
+    private final CompanyAdminRepository companyAdminRepository;
+    private final RecruiterRepository recruiterRepository;
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbcTemplate;
 
@@ -56,6 +69,10 @@ public class DemoDataSeeder implements CommandLineRunner {
                            UbicationRepository ubicationRepository,
                            ContactRepository contactRepository,
                            CareerRepository careerRepository,
+                           CorporatePartnershipsRepository corporatePartnershipsRepository,
+                           CompanyProfileRepository companyProfileRepository,
+                           CompanyAdminRepository companyAdminRepository,
+                           RecruiterRepository recruiterRepository,
                            PasswordEncoder passwordEncoder,
                            JdbcTemplate jdbcTemplate) {
         this.userRepository = userRepository;
@@ -67,6 +84,10 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.ubicationRepository = ubicationRepository;
         this.contactRepository = contactRepository;
         this.careerRepository = careerRepository;
+        this.corporatePartnershipsRepository = corporatePartnershipsRepository;
+        this.companyProfileRepository = companyProfileRepository;
+        this.companyAdminRepository = companyAdminRepository;
+        this.recruiterRepository = recruiterRepository;
         this.passwordEncoder = passwordEncoder;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -82,12 +103,15 @@ public class DemoDataSeeder implements CommandLineRunner {
         RolesEntity adminRole = ensureRole(Roles.ADMIN);
         RolesEntity teacherRole = ensureRole(Roles.TEACHER);
         RolesEntity studentRole = ensureRole(Roles.STUDENT);
-        ensureRole(Roles.RECRUITER);
-        ensureRole(Roles.COMPANY_ADMIN);
+        RolesEntity recruiterRole = ensureRole(Roles.RECRUITER);
+        RolesEntity companyAdminRole = ensureRole(Roles.COMPANY_ADMIN);
 
         seedAdmin(adminRole);
         seedTeacher(teacherRole);
         seedStudent(studentRole);
+        CorporatePartnershipsUAEMex demoPartnership = seedPartnership();
+        seedCompanyAdmin(companyAdminRole, demoPartnership);
+        seedRecruiter(recruiterRole, demoPartnership);
         seedTechnologies();
         seedAptitudes();
         seedUbications();
@@ -150,6 +174,81 @@ public class DemoDataSeeder implements CommandLineRunner {
         teacher.setUserEntity(savedUser);
         teacherRepostory.save(teacher);
         log.info("Usuario demo creado -> username: profesor.demo | password: Teacher123*");
+    }
+
+    //convenio demo vigente (sin fecha final) para probar las cuentas de empresa y reclutador
+    private CorporatePartnershipsUAEMex seedPartnership() {
+        String companyName = "Empresa Demo";
+        CorporatePartnershipsUAEMex partnership = corporatePartnershipsRepository.findByCompanyNameIgnoreCase(companyName)
+                .orElseGet(() -> {
+                    CorporatePartnershipsUAEMex created = new CorporatePartnershipsUAEMex();
+                    created.setCompanyName(companyName);
+                    created.setCategory("Tecnologia");
+                    created.setAgreementType("Practicas profesionales");
+                    created.setStartDate(LocalDate.now().withDayOfYear(1));
+                    created.setActive(true);
+                    log.info("Convenio demo creado -> {}", companyName);
+                    return corporatePartnershipsRepository.save(created);
+                });
+        Long idPartnership = partnership.getIdCorporatePartnership();
+        if (companyProfileRepository.findByIdCorporatePartnership(idPartnership).isEmpty()) {
+            CompanyProfile profile = new CompanyProfile();
+            profile.setIdCorporatePartnership(idPartnership);
+            profile.setDescription("Empresa de prueba para el ambiente de desarrollo.");
+            companyProfileRepository.save(profile);
+        }
+        return partnership;
+    }
+
+    private void seedCompanyAdmin(RolesEntity companyAdminRole, CorporatePartnershipsUAEMex partnership) {
+        String username = "empresa.demo";
+        if (userRepository.findUserByUsername(username).isPresent()) {
+            return;
+        }
+        UserEntity savedUser = userRepository.save(demoUser(username, "Empresa123*", companyAdminRole));
+
+        CompanyAdmin companyAdmin = new CompanyAdmin();
+        companyAdmin.setName("Empresa");
+        companyAdmin.setLastName("Demo");
+        companyAdmin.setPosition("Recursos Humanos");
+        companyAdmin.setType("company_admin");
+        companyAdmin.setIdCorporatePartnership(partnership.getIdCorporatePartnership());
+        companyAdmin.setCorporatePartnershipsUAEMex(partnership);
+        companyAdmin.setUserEntity(savedUser);
+        companyAdminRepository.save(companyAdmin);
+        log.info("Usuario demo creado -> username: empresa.demo | password: Empresa123*");
+    }
+
+    private void seedRecruiter(RolesEntity recruiterRole, CorporatePartnershipsUAEMex partnership) {
+        String username = "reclutador.demo";
+        if (userRepository.findUserByUsername(username).isPresent()) {
+            return;
+        }
+        UserEntity savedUser = userRepository.save(demoUser(username, "Recruiter123*", recruiterRole));
+
+        Recruiter recruiter = new Recruiter();
+        recruiter.setName("Reclutador");
+        recruiter.setLastName("Demo");
+        recruiter.setPosition("Reclutador de talento");
+        recruiter.setType("recruiter");
+        recruiter.setIdCorporatePartnership(partnership.getIdCorporatePartnership());
+        recruiter.setCorporatePartnershipsUAEMex(partnership);
+        recruiter.setUserEntity(savedUser);
+        recruiterRepository.save(recruiter);
+        log.info("Usuario demo creado -> username: reclutador.demo | password: Recruiter123*");
+    }
+
+    private UserEntity demoUser(String username, String password, RolesEntity role) {
+        return UserEntity.builder()
+                .username(username)
+                .email(username + "@uniconnect.com")
+                .password(passwordEncoder.encode(password))
+                .isEnabled(true)
+                .accountNonExpired(true)
+                .accountNonLocked(true)
+                .credentialsNonExpired(true)
+                .roles(Set.of(role))
+                .build();
     }
 
     private void seedStudent(RolesEntity studentRole) {
