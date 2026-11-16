@@ -82,4 +82,46 @@ public final class PostJobSpecifications {
             return cb.equal(root.join("technologies").get("idTechnology"), idTechnology);
         };
     }
+
+    //listas del reclutador y de la empresa: titulo, descripcion o ubicacion, sin importar mayusculas
+    public static Specification<PostJob> ownText(String text) {
+        if (text == null || text.isBlank()) {
+            return null;
+        }
+        String pattern = "%" + text.trim().toLowerCase() + "%";
+        return (root, query, cb) -> cb.or(
+                cb.like(cb.lower(root.get("title")), pattern),
+                cb.like(cb.lower(root.get("description")), pattern),
+                cb.like(cb.lower(root.get("ubication")), pattern)
+        );
+    }
+
+    //un borrador nunca tiene postulaciones: se excluye de los selectores de vacante
+    public static Specification<PostJob> notDraft() {
+        return (root, query, cb) -> cb.notEqual(root.get("status"), VacanteStatus.BORRADOR);
+    }
+
+    public static Specification<PostJob> recruiter(Integer idRecruiter) {
+        return idRecruiter == null ? null : (root, query, cb) -> cb.equal(root.get("idRecruiter"), idRecruiter);
+    }
+
+    //mismo criterio que PostJob.getEffectiveStatus(): una PUBLICADA con fecha de cierre pasada cuenta como VENCIDA
+    public static Specification<PostJob> effectiveStatus(VacanteStatus status) {
+        if (status == null) {
+            return null;
+        }
+        return (root, query, cb) -> {
+            LocalDate today = LocalDate.now();
+            var expired = cb.and(
+                    cb.equal(root.get("status"), VacanteStatus.PUBLICADA),
+                    cb.isNotNull(root.get("closingDate")),
+                    cb.lessThan(root.get("closingDate"), today)
+            );
+            return switch (status) {
+                case VENCIDA -> cb.or(cb.equal(root.get("status"), VacanteStatus.VENCIDA), expired);
+                case PUBLICADA -> cb.and(cb.equal(root.get("status"), VacanteStatus.PUBLICADA), cb.not(expired));
+                default -> cb.equal(root.get("status"), status);
+            };
+        };
+    }
 }

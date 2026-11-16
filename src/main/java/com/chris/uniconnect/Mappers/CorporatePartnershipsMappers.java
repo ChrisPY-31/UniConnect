@@ -24,6 +24,7 @@ public interface CorporatePartnershipsMappers {
     @Mapping(source = "endDate", target = "fechaFinal")
     @Mapping(source = "active", target = "activo")
     @Mapping(source = "vigente", target = "vigente")
+    @Mapping(source = "companyProfile.logoUrl", target = "logo")
     CorporatePartnershipsUAEMexDto toDto(CorporatePartnershipsUAEMex partnership);
 
     //id, estado y reclutadores nunca se toman del body

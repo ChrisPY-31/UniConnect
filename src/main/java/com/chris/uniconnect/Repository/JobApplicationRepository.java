@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Repository;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.chris.uniconnect.Enum.AplicationsStatus;
 import com.chris.uniconnect.Model.Entity.JobApplication;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
+public interface JobApplicationRepository extends JpaRepository<JobApplication, Long>, JpaSpecificationExecutor<JobApplication> {
 
     boolean existsByIdStudentAndIdPostJob(Integer idStudent, Long idPostJob);
 

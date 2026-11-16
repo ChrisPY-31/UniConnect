@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Repository;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.chris.uniconnect.Model.Entity.Recruiter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RecruiterRepository extends JpaRepository<Recruiter , Integer> {
+public interface RecruiterRepository extends JpaRepository<Recruiter , Integer>, JpaSpecificationExecutor<Recruiter> {
 
     Recruiter findByUserEntityUsername(String username);
 

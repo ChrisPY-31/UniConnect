@@ -37,6 +37,7 @@ public class Publication {
     @JoinColumn(name = "id_person" , referencedColumnName = "id" , insertable = false , updatable = false)
     private Person person;
 
-    @OneToMany(mappedBy = "publication")
+    //al borrar la publicacion se borran sus likes y comentarios
+    @OneToMany(mappedBy = "publication", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<PublicationInteraction> publicationInteractions;
 }

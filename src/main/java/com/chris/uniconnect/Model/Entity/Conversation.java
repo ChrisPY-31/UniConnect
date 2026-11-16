@@ -29,8 +29,8 @@ public class Conversation {
     @Column(name = "id_recruiter", nullable = false)
     private Integer idRecruiter;
 
-    //postulacion desde la que se abrio el chat (contexto de la vacante)
-    @Column(name = "id_job_application", nullable = false)
+    //postulacion desde la que se abrio el chat; null en los chats directos (desde 2026-11-08 todos se abren directo)
+    @Column(name = "id_job_application")
     private Long idJobApplication;
 
     //solo el estudiante bloquea/desbloquea

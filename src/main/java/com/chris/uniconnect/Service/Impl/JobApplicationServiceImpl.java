@@ -1,5 +1,11 @@
 package com.chris.uniconnect.Service.Impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.chris.uniconnect.Model.Dto.Response.ApplicationStatsResponse;
+import com.chris.uniconnect.Repository.JobApplicationSpecifications;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import com.chris.uniconnect.Enum.AplicationsStatus;
 import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
@@ -101,13 +107,37 @@ public class JobApplicationServiceImpl implements IJobApplicationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<JobApplicationDto> getApplicationsForMyJob(String recruiterUsername, Long idPostJob, AplicationsStatus status) {
+    public Page<JobApplicationDto> getApplicationsForMyJob(String recruiterUsername, Long idPostJob, AplicationsStatus status, String text, Pageable pageable) {
+        checkMyJob(recruiterUsername, idPostJob);
+        Specification<JobApplication> specification = Specification.allOf(
+                JobApplicationSpecifications.postJob(idPostJob),
+                JobApplicationSpecifications.status(status),
+                JobApplicationSpecifications.text(text)
+        );
+        return jobApplicationRepository.findAll(specification, pageable).map(JobApplicationMappers.INSTANCE::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ApplicationStatsResponse getApplicationsForMyJobSummary(String recruiterUsername, Long idPostJob) {
+        checkMyJob(recruiterUsername, idPostJob);
+        return applicationStats(JobApplicationSpecifications.postJob(idPostJob));
+    }
+
+    //una vacante de otro reclutador se trata como inexistente
+    private void checkMyJob(String recruiterUsername, Long idPostJob) {
         Integer idRecruiter = findRecruiter(recruiterUsername).getId();
         if (postJobRepository.findByIdPostJobAndIdRecruiter(idPostJob, idRecruiter).isEmpty()) {
             throw new ResourceNotFoundException("Vacante", "id", idPostJob);
         }
-        List<JobApplication> applications = jobApplicationRepository.findByIdPostJobOrderByAppliedAtDesc(idPostJob);
-        return JobApplicationMappers.INSTANCE.toDtoList(filterByStatus(applications, status));
+    }
+
+    private ApplicationStatsResponse applicationStats(Specification<JobApplication> base) {
+        Map<String, Long> byStatus = new LinkedHashMap<>();
+        for (AplicationsStatus status : AplicationsStatus.values()) {
+            byStatus.put(status.name(), jobApplicationRepository.count(Specification.allOf(base, JobApplicationSpecifications.status(status))));
+        }
+        return new ApplicationStatsResponse(jobApplicationRepository.count(base), byStatus);
     }
 
     //solo hacia adelante: ENVIADA -> EN_REVISION -> ENTREVISTA -> ACEPTADA, o RECHAZADA desde cualquier estado abierto
@@ -141,13 +171,23 @@ public class JobApplicationServiceImpl implements IJobApplicationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<JobApplicationDto> getCompanyApplications(String companyAdminUsername, Long idPostJob, AplicationsStatus status) {
-        Long idPartnership = findCompanyAdmin(companyAdminUsername).getIdCorporatePartnership();
-        List<JobApplication> applications = jobApplicationRepository.findByPostJobIdCorporatePartnershipOrderByAppliedAtDesc(idPartnership);
-        if (idPostJob != null) {
-            applications = applications.stream().filter(application -> idPostJob.equals(application.getIdPostJob())).toList();
-        }
-        return JobApplicationMappers.INSTANCE.toDtoList(filterByStatus(applications, status));
+    public Page<JobApplicationDto> getCompanyApplications(String companyAdminUsername, Long idPostJob, AplicationsStatus status, String text, Pageable pageable) {
+        Specification<JobApplication> specification = Specification.allOf(
+                JobApplicationSpecifications.partnership(findCompanyAdmin(companyAdminUsername).getIdCorporatePartnership()),
+                JobApplicationSpecifications.postJob(idPostJob),
+                JobApplicationSpecifications.status(status),
+                JobApplicationSpecifications.text(text)
+        );
+        return jobApplicationRepository.findAll(specification, pageable).map(JobApplicationMappers.INSTANCE::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ApplicationStatsResponse getCompanyApplicationsSummary(String companyAdminUsername, Long idPostJob) {
+        return applicationStats(Specification.allOf(
+                JobApplicationSpecifications.partnership(findCompanyAdmin(companyAdminUsername).getIdCorporatePartnership()),
+                JobApplicationSpecifications.postJob(idPostJob)
+        ));
     }
 
     @Override

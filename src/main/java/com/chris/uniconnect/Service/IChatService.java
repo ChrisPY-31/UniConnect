@@ -23,6 +23,11 @@ public interface IChatService {
 
     MessageDto sendMessage(String username, Long idConversation, SendMessageRequest request);
 
+    //solo el autor; editar tiene limite de tiempo, eliminar es logico y sin limite
+    MessageDto editMessage(String username, Long idConversation, Long idMessage, SendMessageRequest request);
+
+    MessageDto deleteMessage(String username, Long idConversation, Long idMessage);
+
     ConversationDto markAsRead(String username, Long idConversation);
 
     //solo el estudiante

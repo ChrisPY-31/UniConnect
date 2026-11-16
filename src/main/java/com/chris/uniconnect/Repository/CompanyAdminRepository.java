@@ -1,5 +1,6 @@
 package com.chris.uniconnect.Repository;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.chris.uniconnect.Model.Entity.CompanyAdmin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CompanyAdminRepository extends JpaRepository<CompanyAdmin, Integer> {
+public interface CompanyAdminRepository extends JpaRepository<CompanyAdmin, Integer>, JpaSpecificationExecutor<CompanyAdmin> {
 
     CompanyAdmin findByUserEntityUsername(String username);
 

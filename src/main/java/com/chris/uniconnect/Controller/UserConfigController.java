@@ -2,7 +2,12 @@ package com.chris.uniconnect.Controller;
 
 import com.chris.uniconnect.Model.Dto.ChangePasswordDto;
 import com.chris.uniconnect.Model.Dto.ResetPasswordDto;
+import com.chris.uniconnect.Model.Dto.Response.UserSummaryResponse;
+import com.chris.uniconnect.Model.Dto.Response.UserStatsResponse;
+import com.chris.uniconnect.Enum.Roles;
+import com.chris.uniconnect.Enum.UserStatus;
 import com.chris.uniconnect.Service.Impl.UserDetailsServiceImpl;
+import com.chris.uniconnect.util.PageRequests;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +15,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,12 +31,29 @@ public class UserConfigController {
 
     private final UserDetailsServiceImpl userDetailsService;
 
-    @Operation(summary = "Listar cuentas", description = "Solo ADMIN. No incluye el hash de la contrasena.")
-    @ApiResponse(responseCode = "200", description = "Listado de cuentas")
+    @Operation(summary = "Listar cuentas (paginado y con filtros)",
+            description = "Solo ADMIN. No incluye el hash de la contrasena. Ordenado por id ascendente. "
+                    + "Todos los filtros son opcionales y totalElements es el de los resultados ya filtrados.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pagina de cuentas"),
+            @ApiResponse(responseCode = "400", description = "page < 0, size fuera de 1..50 o rol/estado invalido")
+    })
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<?> getUsers() {
-        return new ResponseEntity<>(userDetailsService.getUsers(), HttpStatus.OK);
+    public ResponseEntity<Page<UserSummaryResponse>> getUsers(@Parameter(description = "Texto en username o correo (sin importar mayusculas)") @RequestParam(required = false) String q,
+                                                              @Parameter(description = "Rol") @RequestParam(required = false) Roles rol,
+                                                              @Parameter(description = "ACTIVA, BLOQUEADA o DESHABILITADA") @RequestParam(required = false) UserStatus estado,
+                                                              @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+                                                              @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(userDetailsService.getUsers(q, rol, estado, PageRequests.of(page, size, Sort.by(Sort.Direction.ASC, "id"))));
+    }
+
+    @Operation(summary = "Resumen de cuentas", description = "Solo ADMIN. Total de cuentas, cuantas hay por rol y cuantas estan bloqueadas (habilitadas pero con accountNonLocked = false).")
+    @ApiResponse(responseCode = "200", description = "Resumen")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/summary")
+    public ResponseEntity<UserStatsResponse> getUsersSummary() {
+        return ResponseEntity.ok(userDetailsService.getUserStats());
     }
 
     @Operation(summary = "Bloquear/desbloquear una cuenta", description = "Solo ADMIN. Es un toggle: invierte el estado actual. El id es el de la persona (Student/Teacher/Recruiter), no el de UserEntity.")

@@ -1,5 +1,7 @@
 package com.chris.uniconnect.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.chris.uniconnect.Model.Dto.CreateRecruiterRequest;
 import com.chris.uniconnect.Model.Dto.RecruiterAccountDto;
 
@@ -19,7 +21,7 @@ public interface IRecruiterAccountService {
     void resetMyRecruiterPassword(String companyAdminUsername, Integer idRecruiter);
 
     //ADMIN: lectura por convenio y desactivacion como control
-    List<RecruiterAccountDto> getRecruitersByPartnership(Long idPartnership);
+    Page<RecruiterAccountDto> getRecruitersByPartnership(Long idPartnership, Boolean active, String text, Pageable pageable);
 
     RecruiterAccountDto changeRecruiterStatus(Integer idRecruiter, boolean active);
 }

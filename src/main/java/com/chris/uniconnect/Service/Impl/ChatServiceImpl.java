@@ -1,8 +1,8 @@
 package com.chris.uniconnect.Service.Impl;
 
-import com.chris.uniconnect.Enum.AplicationsStatus;
 import com.chris.uniconnect.Enum.ConversationStatus;
 import com.chris.uniconnect.Enum.IssuerType;
+import com.chris.uniconnect.Enum.MessageEvent;
 import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Mappers.ChatMappers;
@@ -38,9 +38,6 @@ public class ChatServiceImpl implements IChatService {
     private MessageRepository messageRepository;
 
     @Autowired
-    private JobApplicationRepository jobApplicationRepository;
-
-    @Autowired
     private StudentRepository studentRepository;
 
     @Autowired
@@ -60,24 +57,20 @@ public class ChatServiceImpl implements IChatService {
         if (recruiter == null) {
             throw new ResourceNotFoundException("Reclutador", "username", recruiterUsername);
         }
-        JobApplication jobApplication = jobApplicationRepository
-                .findByIdJobApplicationAndPostJobIdRecruiter(request.idPostulacion(), recruiter.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Postulacion", "id", request.idPostulacion()));
-        if (jobApplication.getAplicationStatus() == AplicationsStatus.RETIRADA) {
-            throw new BadRequestException("El estudiante retiro su postulacion, no se puede iniciar el chat");
-        }
+        //chat directo: no hace falta postulacion; una cuenta de estudiante deshabilitada responde como inexistente
+        Student student = studentRepository.findById(request.idEstudiante())
+                .filter(found -> found.getUserEntity() != null && found.getUserEntity().isEnabled())
+                .orElseThrow(() -> new ResourceNotFoundException("Estudiante", "id", request.idEstudiante()));
 
-        //si ya existe la conversacion con este estudiante se reutiliza
+        //si ya existe la conversacion con este estudiante se reutiliza (si el la bloqueo, el envio falla)
         Conversation conversation = conversationRepository
-                .findByIdStudentAndIdRecruiter(jobApplication.getIdStudent(), recruiter.getId())
+                .findByIdStudentAndIdRecruiter(student.getId(), recruiter.getId())
                 .orElseGet(() -> {
                     Conversation newConversation = new Conversation();
-                    newConversation.setIdStudent(jobApplication.getIdStudent());
-                    newConversation.setStudent(jobApplication.getStudent());
+                    newConversation.setIdStudent(student.getId());
+                    newConversation.setStudent(student);
                     newConversation.setIdRecruiter(recruiter.getId());
                     newConversation.setRecruiter(recruiter);
-                    newConversation.setIdJobApplication(jobApplication.getIdJobApplication());
-                    newConversation.setJobApplication(jobApplication);
                     newConversation.setStatus(ConversationStatus.ACTIVA);
                     newConversation.setCreatedAt(LocalDateTime.now());
                     return conversationRepository.save(newConversation);
@@ -135,6 +128,62 @@ public class ChatServiceImpl implements IChatService {
 
     @Override
     @Transactional
+    public MessageDto editMessage(String username, Long idConversation, Long idMessage, SendMessageRequest request) {
+        Participant me = findParticipant(username);
+        Conversation conversation = findMyConversation(me, idConversation);
+        Message message = findMyMessage(conversation, me, idMessage);
+        if (message.isDeleted()) {
+            throw new BadRequestException("El mensaje fue eliminado, ya no se puede editar");
+        }
+        if (message.getSentAt().plus(Message.EDIT_WINDOW).isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Solo se puede editar un mensaje durante los primeros " + Message.EDIT_WINDOW.toMinutes() + " minutos");
+        }
+
+        //mismo texto: no cuenta como edicion ni se empuja por WebSocket
+        String newContent = request.contenido().trim();
+        if (newContent.equals(message.getContent())) {
+            return ChatMappers.INSTANCE.toMessageDto(message);
+        }
+
+        message.setContent(newContent);
+        message.setEditedAt(LocalDateTime.now());
+        MessageDto messageDto = ChatMappers.INSTANCE.toMessageDto(messageRepository.save(message));
+        messageDto.setEvento(MessageEvent.EDITADO);
+        pushToParticipants(conversation, messageDto);
+        return messageDto;
+    }
+
+    @Override
+    @Transactional
+    public MessageDto deleteMessage(String username, Long idConversation, Long idMessage) {
+        Participant me = findParticipant(username);
+        Conversation conversation = findMyConversation(me, idConversation);
+        Message message = findMyMessage(conversation, me, idMessage);
+        if (message.isDeleted()) {
+            throw new BadRequestException("El mensaje ya estaba eliminado");
+        }
+
+        //se vacia el contenido en BD, no solo en la respuesta
+        message.setDeleted(true);
+        message.setContent("");
+        MessageDto messageDto = ChatMappers.INSTANCE.toMessageDto(messageRepository.save(message));
+        messageDto.setEvento(MessageEvent.ELIMINADO);
+        pushToParticipants(conversation, messageDto);
+        return messageDto;
+    }
+
+    //solo mensajes propios; uno ajeno responde igual que uno inexistente. Bloqueada = nadie envia ni modifica
+    private Message findMyMessage(Conversation conversation, Participant me, Long idMessage) {
+        if (conversation.getStatus() == ConversationStatus.BLOQUEADA) {
+            throw new BadRequestException("La conversacion esta bloqueada, no se pueden modificar mensajes");
+        }
+        return messageRepository.findByIdMessageAndIdConversation(idMessage, conversation.getIdConversation())
+                .filter(message -> message.getIdSender().equals(me.id()) && message.getSenderType() == me.type())
+                .orElseThrow(() -> new ResourceNotFoundException("Mensaje", "id", idMessage));
+    }
+
+    @Override
+    @Transactional
     public ConversationDto markAsRead(String username, Long idConversation) {
         Participant me = findParticipant(username);
         Conversation conversation = findMyConversation(me, idConversation);
@@ -172,18 +221,24 @@ public class ChatServiceImpl implements IChatService {
         message.setContent(content.trim());
         message.setSentAt(now);
         MessageDto messageDto = ChatMappers.INSTANCE.toMessageDto(messageRepository.save(message));
+        messageDto.setEvento(MessageEvent.NUEVO);
 
         conversation.setLastMessageAt(now);
         conversationRepository.save(conversation);
 
-        //a los dos participantes (el remitente puede tener otra pestana abierta), ya confirmada la transaccion
+        pushToParticipants(conversation, messageDto);
+        return messageDto;
+    }
+
+    //a los dos participantes (el remitente puede tener otra pestana abierta), ya confirmada la transaccion.
+    //nuevo, editado o eliminado viajan por la misma cola; el campo evento dice cual fue (reemplazar por idMensaje si ya lo tiene)
+    private void pushToParticipants(Conversation conversation, MessageDto messageDto) {
         String studentUsername = conversation.getStudent().getUserEntity().getUsername();
         String recruiterUsername = conversation.getRecruiter().getUserEntity().getUsername();
         afterCommit(() -> {
             messagingTemplate.convertAndSendToUser(studentUsername, MESSAGES_QUEUE, messageDto);
             messagingTemplate.convertAndSendToUser(recruiterUsername, MESSAGES_QUEUE, messageDto);
         });
-        return messageDto;
     }
 
     private void afterCommit(Runnable action) {
@@ -203,8 +258,8 @@ public class ChatServiceImpl implements IChatService {
         ConversationDto dto = new ConversationDto();
         dto.setIdConversacion(conversation.getIdConversation());
         dto.setEstado(conversation.getStatus());
-        dto.setCreada(conversation.getCreatedAt());
-        dto.setUltimoMensajeEn(conversation.getLastMessageAt());
+        dto.setCreada(ChatMappers.INSTANCE.toOffset(conversation.getCreatedAt()));
+        dto.setUltimoMensajeEn(ChatMappers.INSTANCE.toOffset(conversation.getLastMessageAt()));
         dto.setUltimoMensaje(messageRepository.findFirstByIdConversationOrderBySentAtDesc(conversation.getIdConversation())
                 .map(ChatMappers.INSTANCE::toMessageDto)
                 .orElse(null));

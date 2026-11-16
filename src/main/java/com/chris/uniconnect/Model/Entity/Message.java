@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,6 +17,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Message {
+
+    //tiempo para editar un mensaje desde que se envio (eliminar no tiene limite)
+    public static final Duration EDIT_WINDOW = Duration.ofMinutes(15);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_message")
@@ -40,6 +45,14 @@ public class Message {
     //null = el destinatario no lo ha leido
     @Column(name = "read_at")
     private LocalDateTime readAt;
+
+    //null = nunca editado
+    @Column(name = "edited_at")
+    private LocalDateTime editedAt;
+
+    //borrado logico: la fila se queda (no deja huecos en el chat) pero el contenido se vacia
+    @Column(nullable = false, columnDefinition = "boolean not null default false")
+    private boolean deleted;
 
     @ManyToOne
     @JoinColumn(name = "id_conversation", referencedColumnName = "id_conversation", insertable = false, updatable = false)

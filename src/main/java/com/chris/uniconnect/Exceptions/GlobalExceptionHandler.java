@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +63,15 @@ public class GlobalExceptionHandler {
                 : exception.getMessage();
         ApiResponse apiResponse = new ApiResponse(mensaje, webRequest.getDescription(false));
         return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    //p.ej. ?rol=FOO o ?page=abc: el parametro no se puede convertir al tipo esperado
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse> handlerTypeMismatch(MethodArgumentTypeMismatchException exception,
+                                                           WebRequest webRequest) {
+        String mensaje = "Valor invalido para el parametro '" + exception.getName() + "': " + exception.getValue();
+        ApiResponse apiResponse = new ApiResponse(mensaje, webRequest.getDescription(false));
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)

@@ -22,9 +22,11 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     Optional<Message> findFirstByIdConversationOrderBySentAtDesc(Long idConversation);
 
-    //no leidos por conversacion: los que mando la otra parte y no tienen readAt; filas [idConversation, count]
+    Optional<Message> findByIdMessageAndIdConversation(Long idMessage, Long idConversation);
+
+    //no leidos por conversacion: los que mando la otra parte, sin readAt y no eliminados; filas [idConversation, count]
     @Query("select m.idConversation, count(m) from Message m where m.idConversation in :ids " +
-            "and m.senderType <> :readerType and m.readAt is null group by m.idConversation")
+            "and m.senderType <> :readerType and m.readAt is null and m.deleted = false group by m.idConversation")
     List<Object[]> countUnreadByConversation(@Param("ids") Collection<Long> ids, @Param("readerType") IssuerType readerType);
 
     @Modifying

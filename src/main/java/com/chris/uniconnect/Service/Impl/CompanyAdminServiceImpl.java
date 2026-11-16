@@ -1,5 +1,9 @@
 package com.chris.uniconnect.Service.Impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import com.chris.uniconnect.Repository.CompanyAccountSpecifications;
 import com.chris.uniconnect.Enum.Roles;
 import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
@@ -114,11 +118,13 @@ public class CompanyAdminServiceImpl implements ICompanyAdminService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CompanyAdminDto> getCompanyAdmins(Long idPartnership) {
-        List<CompanyAdmin> companyAdmins = idPartnership == null
-                ? companyAdminRepository.findAll()
-                : companyAdminRepository.findByIdCorporatePartnership(idPartnership);
-        return CompanyAdminMappers.INSTANCE.toDtoList(companyAdmins);
+    public Page<CompanyAdminDto> getCompanyAdmins(Long idPartnership, Boolean active, String text, Pageable pageable) {
+        Specification<CompanyAdmin> specification = Specification.allOf(
+                CompanyAccountSpecifications.partnership(idPartnership),
+                CompanyAccountSpecifications.active(active),
+                CompanyAccountSpecifications.text(text)
+        );
+        return companyAdminRepository.findAll(specification, pageable).map(CompanyAdminMappers.INSTANCE::toDto);
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.chris.uniconnect.Model.Dto;
 import com.chris.uniconnect.Enum.ConversationStatus;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -15,16 +15,16 @@ public class ConversationDto {
 
     private ConversationStatus estado;
 
-    private LocalDateTime creada;
+    private OffsetDateTime creada;
 
-    private LocalDateTime ultimoMensajeEn;
+    private OffsetDateTime ultimoMensajeEn;
 
     private MessageDto ultimoMensaje;
 
     //mensajes de la otra parte que quien consulta no ha leido
     private long noLeidos;
 
-    //vacante de la postulacion con la que se abrio el chat
+    //vacante de la postulacion con la que se abrio el chat; null en los chats directos
     private JobApplicationJobDto vacante;
 
     private ChatParticipantDto contraparte;

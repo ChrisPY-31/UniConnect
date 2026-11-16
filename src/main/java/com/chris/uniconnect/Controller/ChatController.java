@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import com.chris.uniconnect.util.PageRequests;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,11 +24,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Tag(name = "Chat", description = """
-        Chat estudiante-reclutador. Una conversacion por par; solo el reclutador la inicia, desde una postulacion a una de sus vacantes. \
+        Chat estudiante-reclutador. Una conversacion por par; solo el reclutador la inicia, directo con cualquier estudiante (no hace falta que se haya postulado). \
         Ya abierta, ambos escriben. Solo el estudiante puede bloquearla (BLOQUEADA = nadie envia).
 
         Envio por REST; tiempo real por WebSocket: suscribirse a `/user/queue/messages` (misma conexion STOMP `/ws` con JWT en el CONNECT). \
-        Cada mensaje enviado se empuja a los dos participantes como MessageDto (incluye idConversacion). \
+        Cada mensaje enviado, editado o eliminado se empuja a los dos participantes como MessageDto (incluye idConversacion); \
+        el campo `evento` (NUEVO, EDITADO, ELIMINADO) dice que paso. Las fechas salen con zona horaria. \
         Una conversacion ajena responde 404.""")
 @RestController
 @RequestMapping("/api/v1")
@@ -38,13 +39,14 @@ public class ChatController {
 
     private final IChatService chatService;
 
-    @Operation(summary = "Iniciar una conversacion con un postulante",
-            description = "Solo RECRUITER. La postulacion debe ser a una de sus vacantes y no estar RETIRADA. " +
-                    "Si ya existe conversacion con ese estudiante, se reutiliza y se le agrega el mensaje.")
+    @Operation(summary = "Iniciar una conversacion con un estudiante",
+            description = "Solo RECRUITER. Body: idEstudiante + mensaje; el estudiante no necesita haberse postulado. " +
+                    "Si ya existe conversacion con ese estudiante, se reutiliza y se le agrega el mensaje. " +
+                    "El campo vacante del resultado solo viene en conversaciones antiguas abiertas desde una postulacion.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Mensaje enviado, regresa la conversacion"),
-            @ApiResponse(responseCode = "400", description = "Postulacion retirada, conversacion bloqueada o mensaje invalido"),
-            @ApiResponse(responseCode = "404", description = "No existe la postulacion en tus vacantes"),
+            @ApiResponse(responseCode = "400", description = "Conversacion bloqueada por el estudiante o mensaje invalido"),
+            @ApiResponse(responseCode = "404", description = "No existe el estudiante o su cuenta esta deshabilitada"),
             @ApiResponse(responseCode = "403", description = "No es RECRUITER")
     })
     @PreAuthorize("hasRole('RECRUITER')")
@@ -77,14 +79,15 @@ public class ChatController {
     @Operation(summary = "Mensajes de una conversacion mia", description = "Paginado, del mas reciente al mas antiguo.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Pagina de mensajes"),
+            @ApiResponse(responseCode = "400", description = "page < 0 o size fuera de 1..50"),
             @ApiResponse(responseCode = "404", description = "No existe o no participas en ella")
     })
     @GetMapping("/conversations/{id}/messages")
     public ResponseEntity<Page<MessageDto>> getMessages(@Parameter(description = "Id de la conversacion") @PathVariable Long id,
                                                         @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
-                                                        @Parameter(description = "Tamano de pagina") @RequestParam(defaultValue = "30") int size,
+                                                        @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "30") int size,
                                                         Authentication authentication) {
-        return ResponseEntity.ok(chatService.getMessages(authentication.getName(), id, PageRequest.of(page, size)));
+        return ResponseEntity.ok(chatService.getMessages(authentication.getName(), id, PageRequests.of(page, size)));
     }
 
     @Operation(summary = "Enviar un mensaje", description = "STUDENT o RECRUITER participante. Se empuja por WebSocket a ambos.")
@@ -98,6 +101,37 @@ public class ChatController {
                                                   @Valid @RequestBody SendMessageRequest request,
                                                   Authentication authentication) {
         return new ResponseEntity<>(chatService.sendMessage(authentication.getName(), id, request), HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Editar un mensaje propio",
+            description = "STUDENT o RECRUITER, solo el autor y durante los primeros 15 minutos (ver `editableHasta`). Aunque ya se haya leido; queda con fecha en `editado`. Si el texto no cambia, no se marca como editado ni se empuja. " +
+                    "El mensaje actualizado se empuja por WebSocket a ambos (reemplazar por idMensaje).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Mensaje editado"),
+            @ApiResponse(responseCode = "400", description = "Paso el tiempo para editar, mensaje eliminado, conversacion bloqueada o contenido invalido"),
+            @ApiResponse(responseCode = "404", description = "No existe la conversacion o el mensaje no es tuyo")
+    })
+    @PutMapping("/conversations/{id}/messages/{idMensaje}")
+    public ResponseEntity<MessageDto> editMessage(@Parameter(description = "Id de la conversacion") @PathVariable Long id,
+                                                  @Parameter(description = "Id del mensaje") @PathVariable Long idMensaje,
+                                                  @Valid @RequestBody SendMessageRequest request,
+                                                  Authentication authentication) {
+        return ResponseEntity.ok(chatService.editMessage(authentication.getName(), id, idMensaje, request));
+    }
+
+    @Operation(summary = "Eliminar un mensaje propio",
+            description = "STUDENT o RECRUITER, solo el autor, sin limite de tiempo. Borrado logico: el mensaje se queda con `eliminado = true` " +
+                    "y `contenido = null` (mostrar \"Este mensaje fue eliminado\"). Se empuja por WebSocket a ambos.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Mensaje eliminado, regresa el mensaje con eliminado = true"),
+            @ApiResponse(responseCode = "400", description = "Ya estaba eliminado o la conversacion esta bloqueada"),
+            @ApiResponse(responseCode = "404", description = "No existe la conversacion o el mensaje no es tuyo")
+    })
+    @DeleteMapping("/conversations/{id}/messages/{idMensaje}")
+    public ResponseEntity<MessageDto> deleteMessage(@Parameter(description = "Id de la conversacion") @PathVariable Long id,
+                                                    @Parameter(description = "Id del mensaje") @PathVariable Long idMensaje,
+                                                    Authentication authentication) {
+        return ResponseEntity.ok(chatService.deleteMessage(authentication.getName(), id, idMensaje));
     }
 
     @Operation(summary = "Marcar como leida", description = "Marca como leidos los mensajes de la otra parte en esta conversacion.")

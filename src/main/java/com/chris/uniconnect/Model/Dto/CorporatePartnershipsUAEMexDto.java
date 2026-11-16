@@ -35,4 +35,8 @@ public class CorporatePartnershipsUAEMexDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean vigente;
 
+    //logo de su landing (CompanyProfile), solo lectura
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String logo;
+
 }

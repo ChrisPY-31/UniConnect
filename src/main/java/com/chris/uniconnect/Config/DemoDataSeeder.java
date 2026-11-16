@@ -308,6 +308,8 @@ public class DemoDataSeeder implements CommandLineRunner {
         jdbcTemplate.execute("ALTER TABLE roles DROP CONSTRAINT IF EXISTS roles_role_enum_check");
         jdbcTemplate.execute("ALTER TABLE IF EXISTS notification DROP CONSTRAINT IF EXISTS notification_type_check");
         jdbcTemplate.execute("ALTER TABLE IF EXISTS job_application DROP CONSTRAINT IF EXISTS job_application_application_status_check");
+        //ddl-auto=update no quita NOT NULL: los chats directos no tienen postulacion
+        jdbcTemplate.execute("ALTER TABLE IF EXISTS conversation ALTER COLUMN id_job_application DROP NOT NULL");
     }
 
     private void ensureCatalogUniqueIndexes() {

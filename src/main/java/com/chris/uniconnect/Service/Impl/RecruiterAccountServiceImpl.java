@@ -1,5 +1,9 @@
 package com.chris.uniconnect.Service.Impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import com.chris.uniconnect.Repository.CompanyAccountSpecifications;
 import com.chris.uniconnect.Enum.Roles;
 import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
@@ -158,11 +162,16 @@ public class RecruiterAccountServiceImpl implements IRecruiterAccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RecruiterAccountDto> getRecruitersByPartnership(Long idPartnership) {
+    public Page<RecruiterAccountDto> getRecruitersByPartnership(Long idPartnership, Boolean active, String text, Pageable pageable) {
         if (!partnershipsRepository.existsById(idPartnership)) {
             throw new ResourceNotFoundException("Convenio", "idCorporacion", idPartnership);
         }
-        return RecruiterMappers.INSTANCE.toAccountDtoList(recruiterRepository.findByIdCorporatePartnership(idPartnership));
+        Specification<Recruiter> specification = Specification.allOf(
+                CompanyAccountSpecifications.partnership(idPartnership),
+                CompanyAccountSpecifications.active(active),
+                CompanyAccountSpecifications.text(text)
+        );
+        return recruiterRepository.findAll(specification, pageable).map(RecruiterMappers.INSTANCE::toAccountDto);
     }
 
     @Override

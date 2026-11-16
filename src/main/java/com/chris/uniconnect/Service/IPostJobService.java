@@ -6,6 +6,8 @@ import com.chris.uniconnect.Enum.WorkModality;
 import com.chris.uniconnect.Enum.WorkingDay;
 import com.chris.uniconnect.Model.Dto.PostJobDto;
 import com.chris.uniconnect.Model.Dto.PostJobRequest;
+import com.chris.uniconnect.Model.Dto.Response.JobOptionResponse;
+import com.chris.uniconnect.Model.Dto.Response.JobStatsResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,7 +18,11 @@ public interface IPostJobService {
     //RECRUITER: solo sus propias vacantes
     PostJobDto createJob(String recruiterUsername, PostJobRequest request);
 
-    List<PostJobDto> getMyJobs(String recruiterUsername, VacanteStatus status);
+    Page<PostJobDto> getMyJobs(String recruiterUsername, VacanteStatus status, String text, TypeApplication type, Pageable pageable);
+
+    JobStatsResponse getMyJobsSummary(String recruiterUsername);
+
+    List<JobOptionResponse> getMyJobOptions(String recruiterUsername);
 
     PostJobDto getMyJob(String recruiterUsername, Long idPostJob);
 
@@ -27,7 +33,11 @@ public interface IPostJobService {
     void deleteMyJob(String recruiterUsername, Long idPostJob);
 
     //COMPANY_ADMIN: ve todas las de su empresa y solo modera el estado
-    List<PostJobDto> getCompanyJobs(String companyAdminUsername, VacanteStatus status, Integer idRecruiter);
+    Page<PostJobDto> getCompanyJobs(String companyAdminUsername, VacanteStatus status, Integer idRecruiter, String text, TypeApplication type, Pageable pageable);
+
+    JobStatsResponse getCompanyJobsSummary(String companyAdminUsername, Integer idRecruiter);
+
+    List<JobOptionResponse> getCompanyJobOptions(String companyAdminUsername);
 
     PostJobDto changeCompanyJobStatus(String companyAdminUsername, Long idPostJob, VacanteStatus status);
 

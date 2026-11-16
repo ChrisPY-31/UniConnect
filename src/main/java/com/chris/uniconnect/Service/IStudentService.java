@@ -1,5 +1,8 @@
 package com.chris.uniconnect.Service;
 
+import com.chris.uniconnect.Model.Dto.StudentSearchRequest;
+import com.chris.uniconnect.Model.Dto.Response.StudentStatsResponse;
+
 
 import com.chris.uniconnect.Model.Dto.PersonDto;
 import com.chris.uniconnect.Model.Dto.StudentAllDto;
@@ -16,7 +19,9 @@ public interface IStudentService {
 
     StudentDto getStudentById(Integer id);
 
-    Page<StudentAllDto> getStudents(Pageable pageable);
+    Page<StudentAllDto> getStudents(StudentSearchRequest search, Pageable pageable);
+
+    StudentStatsResponse getStudentStats();
 
     StudentDto createStudent(StudentDto studentDto );
 

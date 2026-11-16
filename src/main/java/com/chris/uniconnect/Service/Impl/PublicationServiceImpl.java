@@ -10,6 +10,7 @@ import com.chris.uniconnect.Service.IPersonService;
 import com.chris.uniconnect.Service.IPublicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -54,6 +55,7 @@ public class PublicationServiceImpl implements IPublicationService {
     }
 
     @Override
+    @Transactional
     public void deletePublication(String username, Integer idPublication) {
         Integer personId = personService.getPersonByUserName(username).getId();
 

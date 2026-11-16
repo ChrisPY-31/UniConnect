@@ -8,7 +8,11 @@ import java.util.List;
 
 public interface INotificationService {
 
-    List<NotificationResponse> getNotifications(Integer personId);
+    //todas por JWT: la persona sale del username, nunca del cliente
+    List<NotificationResponse> getMyNotifications(String username);
+
+    //ruta antigua /notifications/{personId}: solo responde si personId es el del usuario autenticado
+    List<NotificationResponse> getNotifications(String username, Integer personId);
 
     void notifyRecommendation(RecomendationPk id);
 
@@ -20,5 +24,15 @@ public interface INotificationService {
     //al estudiante; referenceId = id de la postulacion
     void notifyJobApplicationStatus(Integer studentId, Long idJobApplication, String jobTitle, AplicationsStatus status);
 
-    NotificationResponse markAsRead(Integer id);
+    NotificationResponse markAsRead(String username, Integer id);
+
+    void deleteMine(String username, Integer id);
+
+    //ids ajenos o inexistentes se ignoran; regresa cuantas se borraron
+    int deleteMine(String username, List<Integer> ids);
+
+    int deleteAllMine(String username, boolean onlyRead);
+
+    //tarea diaria: leidas con mas de N dias
+    int deleteReadOlderThan(int days);
 }

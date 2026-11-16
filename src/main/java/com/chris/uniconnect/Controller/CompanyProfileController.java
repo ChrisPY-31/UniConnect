@@ -4,6 +4,9 @@ import com.chris.uniconnect.Model.Dto.CompanyProfileDto;
 import com.chris.uniconnect.Model.Dto.CompanyProfileRequest;
 import com.chris.uniconnect.Service.ICompanyProfileService;
 import com.chris.uniconnect.payload.MensajeResponse;
+import com.chris.uniconnect.util.PageRequests;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,11 +32,18 @@ public class CompanyProfileController {
 
     private final ICompanyProfileService companyProfileService;
 
-    @Operation(summary = "Listar empresas", description = "Publico, sin login. Solo convenios vigentes (activos y dentro de fechas), ordenados por nombre.")
-    @ApiResponse(responseCode = "200", description = "Lista de empresas (puede ser un array vacio)")
+    @Operation(summary = "Listar empresas (paginado)", description = "Publico, sin login. Solo convenios vigentes (activos y dentro de fechas), ordenados por nombre. q opcional (empresa o categoria).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pagina de empresas"),
+            @ApiResponse(responseCode = "400", description = "page < 0 o size fuera de 1..50")
+    })
     @GetMapping("/companies")
-    public ResponseEntity<List<CompanyProfileDto>> getCompanies() {
-        return ResponseEntity.ok(companyProfileService.getPublicProfiles());
+    public ResponseEntity<Page<CompanyProfileDto>> getCompanies(
+            @Parameter(description = "Texto en el nombre o la categoria") @RequestParam(required = false) String q,
+            @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(companyProfileService.getPublicProfiles(q,
+                PageRequests.of(page, size, Sort.by("companyName", "idCorporatePartnership"))));
     }
 
     @Operation(summary = "Landing de una empresa", description = "Publico, sin login. Un convenio desactivado o vencido responde 404.")

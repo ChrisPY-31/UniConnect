@@ -1,5 +1,8 @@
 package com.chris.uniconnect.Controller;
 
+import com.chris.uniconnect.util.PageRequests;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
 import com.chris.uniconnect.Model.Dto.CreateRecruiterRequest;
 import com.chris.uniconnect.Model.Dto.RecruiterAccountDto;
 import com.chris.uniconnect.Service.IRecruiterAccountService;
@@ -111,16 +114,24 @@ public class RecruiterAccountController {
                 .build());
     }
 
-    @Operation(summary = "Listar los reclutadores de un convenio", description = "Solo ADMIN, solo lectura.")
+    @Operation(summary = "Listar los reclutadores de un convenio (paginado)", description = "Solo ADMIN, solo lectura. Primero los activos y luego por nombre. "
+            + "Filtros opcionales: activo y q (nombre, apellido, usuario o correo).")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de reclutadores (puede ser un array vacio)"),
+            @ApiResponse(responseCode = "200", description = "Pagina de reclutadores"),
+            @ApiResponse(responseCode = "400", description = "page < 0 o size fuera de 1..50"),
             @ApiResponse(responseCode = "404", description = "No existe el convenio"),
             @ApiResponse(responseCode = "403", description = "No es ADMIN")
     })
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/partnerships/{id}/recruiters")
-    public ResponseEntity<List<RecruiterAccountDto>> getRecruitersByPartnership(@Parameter(description = "Id del convenio") @PathVariable Long id) {
-        return ResponseEntity.ok(recruiterAccountService.getRecruitersByPartnership(id));
+    public ResponseEntity<Page<RecruiterAccountDto>> getRecruitersByPartnership(
+            @Parameter(description = "Id del convenio") @PathVariable Long id,
+            @Parameter(description = "true: solo activos; false: solo desactivados") @RequestParam(required = false) Boolean activo,
+            @Parameter(description = "Texto en nombre, apellido, usuario o correo") @RequestParam(required = false) String q,
+            @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size) {
+        Sort sort = Sort.by(Sort.Order.desc("userEntity.isEnabled"), Sort.Order.asc("name"), Sort.Order.asc("lastName"), Sort.Order.asc("id"));
+        return ResponseEntity.ok(recruiterAccountService.getRecruitersByPartnership(id, activo, q, PageRequests.of(page, size, sort)));
     }
 
     @Operation(summary = "Activar o desactivar un reclutador (control del ADMIN)",

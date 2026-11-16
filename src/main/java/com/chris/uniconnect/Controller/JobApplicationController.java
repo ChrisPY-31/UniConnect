@@ -1,5 +1,9 @@
 package com.chris.uniconnect.Controller;
 
+import com.chris.uniconnect.Model.Dto.Response.ApplicationStatsResponse;
+import com.chris.uniconnect.util.PageRequests;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
 import com.chris.uniconnect.Enum.AplicationsStatus;
 import com.chris.uniconnect.Model.Dto.JobApplicationDto;
 import com.chris.uniconnect.Model.Dto.JobApplicationRequest;
@@ -30,6 +34,8 @@ import java.util.List;
 public class JobApplicationController {
 
     private final IJobApplicationService jobApplicationService;
+
+    private static final Sort NEWEST_FIRST = Sort.by(Sort.Direction.DESC, "appliedAt", "idJobApplication");
 
     @Operation(summary = "Postularme a una vacante",
             description = "Solo STUDENT. La vacante debe estar visible. Se adjunta una copia del CV del perfil (obligatorio, ver PATCH /student/me/resume).")
@@ -76,15 +82,31 @@ public class JobApplicationController {
 
     @Operation(summary = "Postulantes de una vacante mia", description = "Solo RECRUITER. Una vacante de otro reclutador responde 404. El perfil completo del estudiante esta en GET /person/{id}.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de postulaciones (puede ser un array vacio)"),
+            @ApiResponse(responseCode = "200", description = "Pagina de postulaciones, de la mas reciente a la mas antigua"),
+            @ApiResponse(responseCode = "400", description = "page < 0, size fuera de 1..50 o estado invalido"),
             @ApiResponse(responseCode = "404", description = "No existe la vacante entre las tuyas")
     })
     @PreAuthorize("hasRole('RECRUITER')")
     @GetMapping("/recruiter/me/jobs/{id}/applications")
-    public ResponseEntity<List<JobApplicationDto>> getApplicationsForMyJob(@Parameter(description = "Id de la vacante") @PathVariable Long id,
+    public ResponseEntity<Page<JobApplicationDto>> getApplicationsForMyJob(@Parameter(description = "Id de la vacante") @PathVariable Long id,
                                                                            @Parameter(description = "Estado (opcional)") @RequestParam(required = false) AplicationsStatus estado,
+                                                                           @Parameter(description = "Texto en nombre o apellido del alumno, su carrera o el titulo") @RequestParam(required = false) String q,
+                                                                           @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+                                                                           @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size,
                                                                            Authentication authentication) {
-        return ResponseEntity.ok(jobApplicationService.getApplicationsForMyJob(authentication.getName(), id, estado));
+        return ResponseEntity.ok(jobApplicationService.getApplicationsForMyJob(authentication.getName(), id, estado, q, PageRequests.of(page, size, NEWEST_FIRST)));
+    }
+
+    @Operation(summary = "Resumen de postulantes de una vacante mia", description = "Solo RECRUITER. Total y conteo por estado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resumen"),
+            @ApiResponse(responseCode = "404", description = "No existe la vacante entre las tuyas")
+    })
+    @PreAuthorize("hasRole('RECRUITER')")
+    @GetMapping("/recruiter/me/jobs/{id}/applications/summary")
+    public ResponseEntity<ApplicationStatsResponse> getApplicationsForMyJobSummary(@Parameter(description = "Id de la vacante") @PathVariable Long id,
+                                                                                    Authentication authentication) {
+        return ResponseEntity.ok(jobApplicationService.getApplicationsForMyJobSummary(authentication.getName(), id));
     }
 
     @Operation(summary = "Cambiar el estado de una postulacion",
@@ -105,13 +127,28 @@ public class JobApplicationController {
                 .object(application).build());
     }
 
-    @Operation(summary = "Postulaciones de mi empresa", description = "Solo COMPANY_ADMIN, solo lectura. Filtros opcionales por vacante y estado.")
-    @ApiResponse(responseCode = "200", description = "Lista de postulaciones (puede ser un array vacio)")
+    @Operation(summary = "Postulaciones de mi empresa (paginado)", description = "Solo COMPANY_ADMIN, solo lectura. De la mas reciente a la mas antigua. Filtros opcionales: vacante, estado y q.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pagina de postulaciones"),
+            @ApiResponse(responseCode = "400", description = "page < 0, size fuera de 1..50 o estado invalido")
+    })
     @PreAuthorize("hasRole('COMPANY_ADMIN')")
     @GetMapping("/company-admin/me/applications")
-    public ResponseEntity<List<JobApplicationDto>> getCompanyApplications(@Parameter(description = "Id de la vacante (opcional)") @RequestParam(required = false) Long idVacante,
+    public ResponseEntity<Page<JobApplicationDto>> getCompanyApplications(@Parameter(description = "Id de la vacante (opcional)") @RequestParam(required = false) Long idVacante,
                                                                           @Parameter(description = "Estado (opcional)") @RequestParam(required = false) AplicationsStatus estado,
+                                                                          @Parameter(description = "Texto en nombre o apellido del alumno, su carrera o el titulo") @RequestParam(required = false) String q,
+                                                                          @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+                                                                          @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size,
                                                                           Authentication authentication) {
-        return ResponseEntity.ok(jobApplicationService.getCompanyApplications(authentication.getName(), idVacante, estado));
+        return ResponseEntity.ok(jobApplicationService.getCompanyApplications(authentication.getName(), idVacante, estado, q, PageRequests.of(page, size, NEWEST_FIRST)));
+    }
+
+    @Operation(summary = "Resumen de las postulaciones de mi empresa", description = "Solo COMPANY_ADMIN. Total y conteo por estado; con idVacante, solo los de esa vacante.")
+    @ApiResponse(responseCode = "200", description = "Resumen")
+    @PreAuthorize("hasRole('COMPANY_ADMIN')")
+    @GetMapping("/company-admin/me/applications/summary")
+    public ResponseEntity<ApplicationStatsResponse> getCompanyApplicationsSummary(@Parameter(description = "Id de la vacante (opcional)") @RequestParam(required = false) Long idVacante,
+                                                                                  Authentication authentication) {
+        return ResponseEntity.ok(jobApplicationService.getCompanyApplicationsSummary(authentication.getName(), idVacante));
     }
 }

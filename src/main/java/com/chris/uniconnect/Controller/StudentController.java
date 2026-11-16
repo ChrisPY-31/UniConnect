@@ -5,6 +5,9 @@ import com.chris.uniconnect.payload.MensajeResponse;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Model.Dto.StudentAllDto;
 import com.chris.uniconnect.Model.Dto.StudentDto;
+import com.chris.uniconnect.Model.Dto.StudentSearchRequest;
+import com.chris.uniconnect.Model.Dto.Response.StudentStatsResponse;
+import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Service.IStudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,7 +15,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import com.chris.uniconnect.util.PageRequests;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,13 +35,43 @@ public class StudentController {
     private final IStudentService studentService;
 
 
-    @Operation(summary = "Listar estudiantes (paginado)", description = "ADVERTENCIA: sin @PreAuthorize, abierto a cualquiera.")
-    @ApiResponse(responseCode = "200", description = "Pagina de estudiantes")
+    @Operation(summary = "Listar y buscar estudiantes (paginado)",
+            description = "ADVERTENCIA: sin @PreAuthorize, abierto a cualquiera. Todos los filtros son opcionales y se combinan; "
+                    + "totalElements es el de los resultados ya filtrados.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pagina de estudiantes"),
+            @ApiResponse(responseCode = "400", description = "page < 0, size fuera de 1..50, orden invalido o parametro con tipo invalido")
+    })
     @GetMapping("/students")
-    public ResponseEntity<?> getStudents(@Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
-                                          @Parameter(description = "Tamano de pagina") @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(studentService.getStudents(pageable));
+    public ResponseEntity<?> getStudents(@Parameter(description = "Palabras en nombre o apellido (sin importar mayusculas ni acentos)") @RequestParam(required = false) String q,
+                                          @Parameter(description = "Id de la carrera") @RequestParam(required = false) Integer idCarrera,
+                                          @Parameter(description = "Semestre (1..10)") @RequestParam(required = false) Integer semestre,
+                                          @Parameter(description = "Id de la ubicacion (estado)") @RequestParam(required = false) Integer idUbicacion,
+                                          @Parameter(description = "Ids de tecnologias separados por coma; el alumno debe tener todas") @RequestParam(required = false) List<Integer> tecnologias,
+                                          @Parameter(description = "true: solo alumnos con al menos un proyecto") @RequestParam(required = false) Boolean conProyectos,
+                                          @Parameter(description = "true: solo alumnos con al menos una recomendacion") @RequestParam(required = false) Boolean recomendados,
+                                          @Parameter(description = "recientes (por defecto), nombre o recomendaciones") @RequestParam(defaultValue = "recientes") String orden,
+                                          @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+                                          @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size) {
+        Sort sort = switch (orden.trim().toLowerCase()) {
+            case "", "recientes" -> Sort.by(Sort.Direction.DESC, "id");
+            case "nombre" -> Sort.by(Sort.Direction.ASC, "name", "lastName", "id");
+            //el orden por recomendaciones lo pone la Specification
+            case "recomendaciones" -> Sort.unsorted();
+            default -> throw new BadRequestException("El parametro orden debe ser recientes, nombre o recomendaciones");
+        };
+        Pageable pageable = PageRequests.of(page, size, sort);
+        StudentSearchRequest search = new StudentSearchRequest(q, idCarrera, semestre, idUbicacion, tecnologias,
+                conProyectos, recomendados, sort.isUnsorted());
+        return ResponseEntity.ok(studentService.getStudents(search, pageable));
+    }
+
+    @Operation(summary = "Resumen de estudiantes", description = "Solo ADMIN. Total, alumnos por carrera (todas las del catalogo, aunque tengan 0) y alumnos sin carrera.")
+    @ApiResponse(responseCode = "200", description = "Resumen")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/students/summary")
+    public ResponseEntity<StudentStatsResponse> getStudentsSummary() {
+        return ResponseEntity.ok(studentService.getStudentStats());
     }
 
     @Operation(summary = "Buscar estudiantes por nombre/carrera/especialidad", description = "ADVERTENCIA: sin @PreAuthorize, abierto a cualquiera.")

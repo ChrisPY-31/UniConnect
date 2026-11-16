@@ -1,6 +1,11 @@
 package com.chris.uniconnect.Controller;
 
 import com.chris.uniconnect.Model.Dto.CorporatePartnershipsUAEMexDto;
+import com.chris.uniconnect.Model.Dto.Response.PartnershipOptionResponse;
+import com.chris.uniconnect.Model.Dto.Response.PartnershipStatsResponse;
+import com.chris.uniconnect.util.PageRequests;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import com.chris.uniconnect.Service.ICorporatePartnershipsService;
 import com.chris.uniconnect.payload.MensajeResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,15 +45,38 @@ public class CorporatePartnershipsController {
                 .object(savedPartnership).build(), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Listar convenios", description = "Sin filtro devuelve todos. vigente=true: activos, ya iniciados y sin vencer. vigente=false: el resto (inactivos, vencidos o que aun no inician).")
+    @Operation(summary = "Listar convenios (paginado)", description = "Ordenados por nombre de la empresa. Sin vigente devuelve todos. vigente=true: activos, ya iniciados y sin vencer. "
+            + "vigente=false: el resto (inactivos, vencidos o que aun no inician). q busca en empresa, categoria o tipo de acuerdo. Cada convenio trae el logo de su landing.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de convenios (puede ser un array vacio)"),
+            @ApiResponse(responseCode = "200", description = "Pagina de convenios"),
+            @ApiResponse(responseCode = "400", description = "page < 0 o size fuera de 1..50"),
             @ApiResponse(responseCode = "403", description = "No es ADMIN")
     })
     @GetMapping("/partnerships")
-    public ResponseEntity<List<CorporatePartnershipsUAEMexDto>> getPartnerships(
-            @Parameter(description = "Filtrar por vigencia (opcional)") @RequestParam(required = false) Boolean vigente) {
-        return ResponseEntity.ok(partnershipsService.getPartnerships(vigente));
+    public ResponseEntity<Page<CorporatePartnershipsUAEMexDto>> getPartnerships(
+            @Parameter(description = "Filtrar por vigencia (opcional)") @RequestParam(required = false) Boolean vigente,
+            @Parameter(description = "Texto en empresa, categoria o tipo de acuerdo") @RequestParam(required = false) String q,
+            @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(partnershipsService.getPartnerships(vigente, q,
+                PageRequests.of(page, size, Sort.by("companyName", "idCorporatePartnership"))));
+    }
+
+    @Operation(summary = "Resumen de convenios", description = "Total, vigentes, no vigentes, los vigentes que vencen en los proximos `dias` (30 por defecto) y las categorias / tipos de acuerdo ya usados.")
+    @ApiResponse(responseCode = "200", description = "Resumen")
+    @GetMapping("/partnerships/summary")
+    public ResponseEntity<PartnershipStatsResponse> getPartnershipsSummary(
+            @Parameter(description = "Dias para contar como 'vence pronto'") @RequestParam(defaultValue = "30") int dias) {
+        return ResponseEntity.ok(partnershipsService.getPartnershipStats(Math.max(0, dias)));
+    }
+
+    @Operation(summary = "Convenios para un selector", description = "Sin paginar, ordenados por nombre: { idCorporacion, nombreEmpresa } de los convenios activos. "
+            + "Con sinCuenta=true (por defecto) solo los que aun no tienen cuenta de empresa activa.")
+    @ApiResponse(responseCode = "200", description = "Lista corta de convenios")
+    @GetMapping("/partnerships/options")
+    public ResponseEntity<List<PartnershipOptionResponse>> getPartnershipOptions(
+            @Parameter(description = "Solo convenios sin cuenta de empresa activa") @RequestParam(defaultValue = "true") boolean sinCuenta) {
+        return ResponseEntity.ok(partnershipsService.getPartnershipOptions(sinCuenta));
     }
 
     @Operation(summary = "Detalle de un convenio")

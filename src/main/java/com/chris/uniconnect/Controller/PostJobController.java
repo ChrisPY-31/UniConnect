@@ -6,6 +6,8 @@ import com.chris.uniconnect.Enum.WorkModality;
 import com.chris.uniconnect.Enum.WorkingDay;
 import com.chris.uniconnect.Model.Dto.PostJobDto;
 import com.chris.uniconnect.Model.Dto.PostJobRequest;
+import com.chris.uniconnect.Model.Dto.Response.JobOptionResponse;
+import com.chris.uniconnect.Model.Dto.Response.JobStatsResponse;
 import com.chris.uniconnect.Service.IPostJobService;
 import com.chris.uniconnect.payload.MensajeResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +20,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import com.chris.uniconnect.util.PageRequests;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,13 +56,37 @@ public class PostJobController {
                 .object(postJob).build(), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Mis vacantes", description = "Solo RECRUITER. Filtro opcional por estado (incluye VENCIDA).")
-    @ApiResponse(responseCode = "200", description = "Lista de vacantes (puede ser un array vacio)")
+    @Operation(summary = "Mis vacantes", description = "Solo RECRUITER. Filtros opcionales: estado (incluye VENCIDA), q (titulo, descripcion o ubicacion) y tipo.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pagina de vacantes, de la mas reciente a la mas antigua"),
+            @ApiResponse(responseCode = "400", description = "page < 0, size fuera de 1..50, estado o tipo invalido")
+    })
     @PreAuthorize("hasRole('RECRUITER')")
     @GetMapping("/recruiter/me/jobs")
-    public ResponseEntity<List<PostJobDto>> getMyJobs(@Parameter(description = "Estado (opcional)") @RequestParam(required = false) VacanteStatus estado,
+    public ResponseEntity<Page<PostJobDto>> getMyJobs(@Parameter(description = "Estado (opcional)") @RequestParam(required = false) VacanteStatus estado,
+                                                      @Parameter(description = "Texto en titulo, descripcion o ubicacion") @RequestParam(required = false) String q,
+                                                      @Parameter(description = "Tipo (opcional)") @RequestParam(required = false) TypeApplication tipo,
+                                                      @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+                                                      @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size,
                                                       Authentication authentication) {
-        return ResponseEntity.ok(postJobService.getMyJobs(authentication.getName(), estado));
+        PageRequest pageable = PageRequests.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt", "idPostJob"));
+        return ResponseEntity.ok(postJobService.getMyJobs(authentication.getName(), estado, q, tipo, pageable));
+    }
+
+    @Operation(summary = "Resumen de mis vacantes", description = "Solo RECRUITER. Total y conteo por estado efectivo (una PUBLICADA con fecha de cierre pasada cuenta como VENCIDA).")
+    @ApiResponse(responseCode = "200", description = "Resumen")
+    @PreAuthorize("hasRole('RECRUITER')")
+    @GetMapping("/recruiter/me/jobs/summary")
+    public ResponseEntity<JobStatsResponse> getMyJobsSummary(Authentication authentication) {
+        return ResponseEntity.ok(postJobService.getMyJobsSummary(authentication.getName()));
+    }
+
+    @Operation(summary = "Mis vacantes para un selector", description = "Solo RECRUITER. Sin paginar y sin borradores: { idVacante, titulo, estado }, de la mas reciente a la mas antigua.")
+    @ApiResponse(responseCode = "200", description = "Lista corta de vacantes")
+    @PreAuthorize("hasRole('RECRUITER')")
+    @GetMapping("/recruiter/me/jobs/options")
+    public ResponseEntity<List<JobOptionResponse>> getMyJobOptions(Authentication authentication) {
+        return ResponseEntity.ok(postJobService.getMyJobOptions(authentication.getName()));
     }
 
     @Operation(summary = "Detalle de una vacante mia", description = "Solo RECRUITER. Una vacante de otro reclutador responde 404.")
@@ -123,14 +150,39 @@ public class PostJobController {
         return ResponseEntity.ok(MensajeResponse.builder().mensaje("Vacante eliminada con exito").build());
     }
 
-    @Operation(summary = "Vacantes de mi empresa", description = "Solo COMPANY_ADMIN. Todas las de su convenio, filtros opcionales por estado y reclutador.")
-    @ApiResponse(responseCode = "200", description = "Lista de vacantes (puede ser un array vacio)")
+    @Operation(summary = "Vacantes de mi empresa", description = "Solo COMPANY_ADMIN. Todas las de su convenio, filtros opcionales: estado, idReclutador, q (titulo, descripcion o ubicacion) y tipo.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pagina de vacantes, de la mas reciente a la mas antigua"),
+            @ApiResponse(responseCode = "400", description = "page < 0, size fuera de 1..50, estado o tipo invalido")
+    })
     @PreAuthorize("hasRole('COMPANY_ADMIN')")
     @GetMapping("/company-admin/me/jobs")
-    public ResponseEntity<List<PostJobDto>> getCompanyJobs(@Parameter(description = "Estado (opcional)") @RequestParam(required = false) VacanteStatus estado,
+    public ResponseEntity<Page<PostJobDto>> getCompanyJobs(@Parameter(description = "Estado (opcional)") @RequestParam(required = false) VacanteStatus estado,
                                                            @Parameter(description = "Id del reclutador (opcional)") @RequestParam(required = false) Integer idReclutador,
+                                                           @Parameter(description = "Texto en titulo, descripcion o ubicacion") @RequestParam(required = false) String q,
+                                                           @Parameter(description = "Tipo (opcional)") @RequestParam(required = false) TypeApplication tipo,
+                                                           @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+                                                           @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size,
                                                            Authentication authentication) {
-        return ResponseEntity.ok(postJobService.getCompanyJobs(authentication.getName(), estado, idReclutador));
+        PageRequest pageable = PageRequests.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt", "idPostJob"));
+        return ResponseEntity.ok(postJobService.getCompanyJobs(authentication.getName(), estado, idReclutador, q, tipo, pageable));
+    }
+
+    @Operation(summary = "Resumen de las vacantes de mi empresa", description = "Solo COMPANY_ADMIN. Total y conteo por estado efectivo; con idReclutador, solo las de ese reclutador.")
+    @ApiResponse(responseCode = "200", description = "Resumen")
+    @PreAuthorize("hasRole('COMPANY_ADMIN')")
+    @GetMapping("/company-admin/me/jobs/summary")
+    public ResponseEntity<JobStatsResponse> getCompanyJobsSummary(@Parameter(description = "Id del reclutador (opcional)") @RequestParam(required = false) Integer idReclutador,
+                                                                  Authentication authentication) {
+        return ResponseEntity.ok(postJobService.getCompanyJobsSummary(authentication.getName(), idReclutador));
+    }
+
+    @Operation(summary = "Vacantes de mi empresa para un selector", description = "Solo COMPANY_ADMIN. Sin paginar y sin borradores: { idVacante, titulo, estado }, de la mas reciente a la mas antigua.")
+    @ApiResponse(responseCode = "200", description = "Lista corta de vacantes")
+    @PreAuthorize("hasRole('COMPANY_ADMIN')")
+    @GetMapping("/company-admin/me/jobs/options")
+    public ResponseEntity<List<JobOptionResponse>> getCompanyJobOptions(Authentication authentication) {
+        return ResponseEntity.ok(postJobService.getCompanyJobOptions(authentication.getName()));
     }
 
     @Operation(summary = "Moderar el estado de una vacante de mi empresa",
@@ -152,7 +204,10 @@ public class PostJobController {
     }
 
     @Operation(summary = "Buscar vacantes (publico)", description = "No requiere login. Paginado, de la mas reciente a la mas antigua. Todos los filtros son opcionales.")
-    @ApiResponse(responseCode = "200", description = "Pagina de vacantes")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pagina de vacantes"),
+            @ApiResponse(responseCode = "400", description = "page < 0 o size fuera de 1..50")
+    })
     @GetMapping("/jobs")
     public ResponseEntity<Page<PostJobDto>> searchJobs(@Parameter(description = "Texto en titulo o descripcion") @RequestParam(required = false) String q,
                                                        @RequestParam(required = false) TypeApplication tipo,
@@ -162,8 +217,8 @@ public class PostJobController {
                                                        @RequestParam(required = false) Integer idTecnologia,
                                                        @RequestParam(required = false) Long idCorporacion,
                                                        @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
-                                                       @Parameter(description = "Tamano de pagina") @RequestParam(defaultValue = "20") int size) {
-        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publicationDate", "idPostJob"));
+                                                       @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size) {
+        PageRequest pageable = PageRequests.of(page, size, Sort.by(Sort.Direction.DESC, "publicationDate", "idPostJob"));
         return ResponseEntity.ok(postJobService.searchJobs(q, tipo, jornada, modalidad, idCarrera, idTecnologia, idCorporacion, pageable));
     }
 
@@ -178,12 +233,15 @@ public class PostJobController {
     }
 
     @Operation(summary = "Vacantes de una empresa (publico)", description = "No requiere login. Atajo de GET /jobs?idCorporacion= para la landing.")
-    @ApiResponse(responseCode = "200", description = "Pagina de vacantes")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pagina de vacantes"),
+            @ApiResponse(responseCode = "400", description = "page < 0 o size fuera de 1..50")
+    })
     @GetMapping("/companies/{idCorporacion}/jobs")
     public ResponseEntity<Page<PostJobDto>> getCompanyPublicJobs(@Parameter(description = "Id del convenio") @PathVariable Long idCorporacion,
-                                                                 @RequestParam(defaultValue = "0") int page,
-                                                                 @RequestParam(defaultValue = "20") int size) {
-        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publicationDate", "idPostJob"));
+                                                                 @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+                                                                 @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size) {
+        PageRequest pageable = PageRequests.of(page, size, Sort.by(Sort.Direction.DESC, "publicationDate", "idPostJob"));
         return ResponseEntity.ok(postJobService.searchJobs(null, null, null, null, null, null, idCorporacion, pageable));
     }
 }

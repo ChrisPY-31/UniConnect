@@ -1,5 +1,8 @@
 package com.chris.uniconnect.Controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import com.chris.uniconnect.util.PageRequests;
 import com.chris.uniconnect.Model.Dto.CompanyAdminDto;
 import com.chris.uniconnect.Model.Dto.CompanyAdminProfileRequest;
 import com.chris.uniconnect.Model.Dto.CreateCompanyAdminRequest;
@@ -47,16 +50,22 @@ public class CompanyAdminController {
                 .object(companyAdmin).build(), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Listar cuentas de empresa", description = "Solo ADMIN. Filtro opcional por convenio.")
+    @Operation(summary = "Listar cuentas de empresa (paginado)", description = "Solo ADMIN. De la mas reciente a la mas antigua. Filtros opcionales: convenio, activa (cuenta habilitada) y q (nombre, apellido, usuario o correo).")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de cuentas (puede ser un array vacio)"),
+            @ApiResponse(responseCode = "200", description = "Pagina de cuentas"),
+            @ApiResponse(responseCode = "400", description = "page < 0 o size fuera de 1..50"),
             @ApiResponse(responseCode = "403", description = "No es ADMIN")
     })
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/company-admins")
-    public ResponseEntity<List<CompanyAdminDto>> getCompanyAdmins(
-            @Parameter(description = "Id del convenio (opcional)") @RequestParam(required = false) Long idCorporacion) {
-        return ResponseEntity.ok(companyAdminService.getCompanyAdmins(idCorporacion));
+    public ResponseEntity<Page<CompanyAdminDto>> getCompanyAdmins(
+            @Parameter(description = "Id del convenio (opcional)") @RequestParam(required = false) Long idCorporacion,
+            @Parameter(description = "true: solo la activa; false: solo las desactivadas") @RequestParam(required = false) Boolean activa,
+            @Parameter(description = "Texto en nombre, apellido, usuario o correo") @RequestParam(required = false) String q,
+            @Parameter(description = "Numero de pagina, desde 0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Tamano de pagina (1..50)") @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(companyAdminService.getCompanyAdmins(idCorporacion, activa, q,
+                PageRequests.of(page, size, Sort.by(Sort.Direction.DESC, "id"))));
     }
 
     @Operation(summary = "Detalle de una cuenta de empresa", description = "Solo ADMIN.")

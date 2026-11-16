@@ -8,12 +8,18 @@ import com.chris.uniconnect.Model.Dto.Response.AuthLoginRequest;
 import com.chris.uniconnect.Model.Dto.Response.AuthResponse;
 import com.chris.uniconnect.Model.Dto.Response.UserResponse;
 import com.chris.uniconnect.Model.Dto.Response.UserSummaryResponse;
+import com.chris.uniconnect.Model.Dto.Response.UserStatsResponse;
+import com.chris.uniconnect.Enum.Roles;
+import com.chris.uniconnect.Enum.UserStatus;
 import com.chris.uniconnect.Model.Entity.*;
 import com.chris.uniconnect.Repository.*;
 import com.chris.uniconnect.util.JwtUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
@@ -36,7 +42,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -291,8 +299,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     }
 
-    public List<UserSummaryResponse> getUsers() {
-        return userRepository.findAll().stream()
+    @Transactional(readOnly = true)
+    public Page<UserSummaryResponse> getUsers(String text, Roles role, UserStatus status, Pageable pageable) {
+        Specification<UserEntity> specification = Specification.allOf(
+                UserSpecifications.text(text),
+                UserSpecifications.role(role),
+                UserSpecifications.status(status)
+        );
+        return userRepository.findAll(specification, pageable)
                 .map(userEntity -> new UserSummaryResponse(
                         userEntity.getId(),
                         userEntity.getUsername(),
@@ -300,10 +314,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                         userEntity.isEnabled(),
                         userEntity.isAccountNonLocked(),
                         userEntity.getRoles().stream()
-                                .map(role -> role.getRoleEnum().name())
+                                .map(userRole -> userRole.getRoleEnum().name())
                                 .collect(Collectors.toSet())
-                ))
-                .collect(Collectors.toList());
+                ));
+    }
+
+    @Transactional(readOnly = true)
+    public UserStatsResponse getUserStats() {
+        //todas las claves siempre presentes (en 0 si no hay usuarios con ese rol), en el orden que espera el front
+        Map<String, Long> porRol = new LinkedHashMap<>();
+        for (Roles role : List.of(Roles.STUDENT, Roles.TEACHER, Roles.RECRUITER, Roles.COMPANY_ADMIN, Roles.ADMIN)) {
+            porRol.put(role.name(), 0L);
+        }
+        for (Object[] row : userRepository.countUsersByRole()) {
+            porRol.put(((Roles) row[0]).name(), (Long) row[1]);
+        }
+        return new UserStatsResponse(userRepository.count(), porRol, userRepository.countByIsEnabledTrueAndAccountNonLockedFalse());
     }
 
     public UserResponse changePassword(String username, String currentPassword, String newPassword) {

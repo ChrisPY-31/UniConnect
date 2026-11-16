@@ -9,6 +9,8 @@ import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Mappers.PostJobMappers;
 import com.chris.uniconnect.Model.Dto.PostJobDto;
 import com.chris.uniconnect.Model.Dto.PostJobRequest;
+import com.chris.uniconnect.Model.Dto.Response.JobOptionResponse;
+import com.chris.uniconnect.Model.Dto.Response.JobStatsResponse;
 import com.chris.uniconnect.Model.Entity.*;
 import com.chris.uniconnect.Repository.*;
 import com.chris.uniconnect.Service.IJobApplicationService;
@@ -16,6 +18,7 @@ import com.chris.uniconnect.Service.IPostJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.chris.uniconnect.Repository.PostJobSpecifications.*;
@@ -70,9 +75,26 @@ public class PostJobServiceImpl implements IPostJobService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PostJobDto> getMyJobs(String recruiterUsername, VacanteStatus status) {
-        List<PostJob> postJobs = postJobRepository.findByIdRecruiterOrderByCreatedAtDesc(findRecruiter(recruiterUsername).getId());
-        return PostJobMappers.INSTANCE.toDtoList(filterByStatus(postJobs, status));
+    public Page<PostJobDto> getMyJobs(String recruiterUsername, VacanteStatus status, String text, TypeApplication type, Pageable pageable) {
+        Specification<PostJob> specification = Specification.allOf(
+                recruiter(findRecruiter(recruiterUsername).getId()),
+                effectiveStatus(status),
+                ownText(text),
+                typeApplication(type)
+        );
+        return postJobRepository.findAll(specification, pageable).map(PostJobMappers.INSTANCE::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public JobStatsResponse getMyJobsSummary(String recruiterUsername) {
+        return jobStats(recruiter(findRecruiter(recruiterUsername).getId()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<JobOptionResponse> getMyJobOptions(String recruiterUsername) {
+        return jobOptions(recruiter(findRecruiter(recruiterUsername).getId()));
     }
 
     @Override
@@ -115,13 +137,47 @@ public class PostJobServiceImpl implements IPostJobService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PostJobDto> getCompanyJobs(String companyAdminUsername, VacanteStatus status, Integer idRecruiter) {
-        Long idPartnership = findCompanyAdmin(companyAdminUsername).getIdCorporatePartnership();
-        List<PostJob> postJobs = postJobRepository.findByIdCorporatePartnershipOrderByCreatedAtDesc(idPartnership);
-        if (idRecruiter != null) {
-            postJobs = postJobs.stream().filter(postJob -> idRecruiter.equals(postJob.getIdRecruiter())).toList();
+    public Page<PostJobDto> getCompanyJobs(String companyAdminUsername, VacanteStatus status, Integer idRecruiter, String text, TypeApplication type, Pageable pageable) {
+        Specification<PostJob> specification = Specification.allOf(
+                partnership(findCompanyAdmin(companyAdminUsername).getIdCorporatePartnership()),
+                recruiter(idRecruiter),
+                effectiveStatus(status),
+                ownText(text),
+                typeApplication(type)
+        );
+        return postJobRepository.findAll(specification, pageable).map(PostJobMappers.INSTANCE::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public JobStatsResponse getCompanyJobsSummary(String companyAdminUsername, Integer idRecruiter) {
+        return jobStats(Specification.allOf(
+                partnership(findCompanyAdmin(companyAdminUsername).getIdCorporatePartnership()),
+                recruiter(idRecruiter)
+        ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<JobOptionResponse> getCompanyJobOptions(String companyAdminUsername) {
+        return jobOptions(partnership(findCompanyAdmin(companyAdminUsername).getIdCorporatePartnership()));
+    }
+
+    //total y conteo por estado efectivo (mismo criterio que el filtro estado de las listas)
+    private JobStatsResponse jobStats(Specification<PostJob> base) {
+        Map<String, Long> byStatus = new LinkedHashMap<>();
+        for (VacanteStatus status : VacanteStatus.values()) {
+            byStatus.put(status.name(), postJobRepository.count(Specification.allOf(base, effectiveStatus(status))));
         }
-        return PostJobMappers.INSTANCE.toDtoList(filterByStatus(postJobs, status));
+        return new JobStatsResponse(postJobRepository.count(base), byStatus);
+    }
+
+    //todas las vacantes que no son borrador, de la mas reciente a la mas antigua, sin paginar
+    private List<JobOptionResponse> jobOptions(Specification<PostJob> base) {
+        return postJobRepository.findAll(Specification.allOf(base, notDraft()), Sort.by(Sort.Direction.DESC, "createdAt", "idPostJob"))
+                .stream()
+                .map(job -> new JobOptionResponse(job.getIdPostJob(), job.getTitle(), job.getEffectiveStatus()))
+                .toList();
     }
 
     @Override
@@ -258,13 +314,6 @@ public class PostJobServiceImpl implements IPostJobService {
         if (postJob.getClosingDate() != null && postJob.getClosingDate().isBefore(LocalDate.now())) {
             throw new BadRequestException("La fecha de cierre ya paso, actualizala antes de publicar");
         }
-    }
-
-    private List<PostJob> filterByStatus(List<PostJob> postJobs, VacanteStatus status) {
-        if (status == null) {
-            return postJobs;
-        }
-        return postJobs.stream().filter(postJob -> postJob.getEffectiveStatus() == status).toList();
     }
 
     private Recruiter findRecruiter(String username) {

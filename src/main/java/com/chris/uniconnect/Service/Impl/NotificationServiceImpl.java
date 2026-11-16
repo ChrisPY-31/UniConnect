@@ -2,9 +2,11 @@ package com.chris.uniconnect.Service.Impl;
 
 import com.chris.uniconnect.Enum.AplicationsStatus;
 import com.chris.uniconnect.Enum.NotificationType;
+import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Model.Dto.Response.NotificationResponse;
 import com.chris.uniconnect.Model.Entity.Notification;
+import com.chris.uniconnect.Model.Entity.Person;
 import com.chris.uniconnect.Model.Entity.RecomendationPk;
 import com.chris.uniconnect.Model.Entity.Teacher;
 import com.chris.uniconnect.Repository.NotificationRepository;
@@ -15,6 +17,7 @@ import com.chris.uniconnect.Service.INotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,10 +41,20 @@ public class NotificationServiceImpl implements INotificationService {
     private SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public List<NotificationResponse> getNotifications(Integer personId) {
-        return notificationRepository.findByPerson_IdOrderByCreatedAtDesc(personId).stream()
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getMyNotifications(String username) {
+        return notificationRepository.findByPerson_IdOrderByCreatedAtDesc(myPersonId(username)).stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getNotifications(String username, Integer personId) {
+        if (!myPersonId(username).equals(personId)) {
+            throw new BadRequestException("Solo puedes consultar tus propias notificaciones");
+        }
+        return getMyNotifications(username);
     }
 
     @Override
@@ -124,13 +137,56 @@ public class NotificationServiceImpl implements INotificationService {
     }
 
     @Override
-    public NotificationResponse markAsRead(Integer id) {
-        Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("notification", "id", id));
-
+    @Transactional
+    public NotificationResponse markAsRead(String username, Integer id) {
+        Notification notification = findMine(username, id);
         notification.setRead(true);
-
         return toResponse(notificationRepository.save(notification));
+    }
+
+    @Override
+    @Transactional
+    public void deleteMine(String username, Integer id) {
+        notificationRepository.delete(findMine(username, id));
+    }
+
+    @Override
+    @Transactional
+    public int deleteMine(String username, List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+        return notificationRepository.deleteByOwnerAndIds(myPersonId(username), ids);
+    }
+
+    @Override
+    @Transactional
+    public int deleteAllMine(String username, boolean onlyRead) {
+        Integer personId = myPersonId(username);
+        return onlyRead
+                ? notificationRepository.deleteReadByOwner(personId)
+                : notificationRepository.deleteAllByOwner(personId);
+    }
+
+    @Override
+    @Transactional
+    public int deleteReadOlderThan(int days) {
+        return notificationRepository.deleteReadOlderThan(LocalDateTime.now().minusDays(days));
+    }
+
+    //una notificacion ajena responde igual que una inexistente
+    private Notification findMine(String username, Integer id) {
+        return notificationRepository.findByIdAndPerson_Id(id, myPersonId(username))
+                .orElseThrow(() -> new ResourceNotFoundException("notification", "id", id));
+    }
+
+    //sirve para todos los roles con Person (estudiante, profesor, reclutador, empresa, admin)
+    private Integer myPersonId(String username) {
+        Person person = personaRepository.findByUserEntityUsername(username);
+        if (person == null) {
+            throw new ResourceNotFoundException("Persona", "username", username);
+        }
+        return person.getId();
     }
 
     private NotificationResponse toResponse(Notification notification) {

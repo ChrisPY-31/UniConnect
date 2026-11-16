@@ -13,6 +13,10 @@ import com.chris.uniconnect.Repository.CompanyProfileRepository;
 import com.chris.uniconnect.Repository.CorporatePartnershipsRepository;
 import com.chris.uniconnect.Service.FileUploadService;
 import com.chris.uniconnect.Service.ICompanyProfileService;
+import com.chris.uniconnect.Repository.PartnershipSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,20 +53,17 @@ public class CompanyProfileServiceImpl implements ICompanyProfileService {
     //solo convenios vigentes; un convenio sin perfil todavia sale con nombre y categoria
     @Override
     @Transactional(readOnly = true)
-    public List<CompanyProfileDto> getPublicProfiles() {
-        List<CorporatePartnershipsUAEMex> partnerships = partnershipsRepository.findAll().stream()
-                .filter(CorporatePartnershipsUAEMex::isVigente)
-                .sorted(Comparator.comparing(CorporatePartnershipsUAEMex::getCompanyName, String.CASE_INSENSITIVE_ORDER))
-                .toList();
+    public Page<CompanyProfileDto> getPublicProfiles(String text, Pageable pageable) {
+        //solo vigentes; text busca en el nombre, la categoria o el tipo de acuerdo
+        Page<CorporatePartnershipsUAEMex> partnerships = partnershipsRepository.findAll(
+                Specification.allOf(PartnershipSpecifications.vigente(true), PartnershipSpecifications.text(text)), pageable);
 
         Map<Long, CompanyProfile> profiles = companyProfileRepository
-                .findByIdCorporatePartnershipIn(partnerships.stream().map(CorporatePartnershipsUAEMex::getIdCorporatePartnership).toList())
+                .findByIdCorporatePartnershipIn(partnerships.getContent().stream().map(CorporatePartnershipsUAEMex::getIdCorporatePartnership).toList())
                 .stream()
                 .collect(Collectors.toMap(CompanyProfile::getIdCorporatePartnership, Function.identity()));
 
-        return partnerships.stream()
-                .map(partnership -> CompanyProfileMappers.INSTANCE.toDto(partnership, profiles.get(partnership.getIdCorporatePartnership())))
-                .toList();
+        return partnerships.map(partnership -> CompanyProfileMappers.INSTANCE.toDto(partnership, profiles.get(partnership.getIdCorporatePartnership())));
     }
 
     @Override

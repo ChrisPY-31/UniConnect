@@ -4,6 +4,13 @@ import com.chris.uniconnect.Exceptions.BadRequestException;
 import com.chris.uniconnect.Exceptions.ResourceNotFoundException;
 import com.chris.uniconnect.Mappers.CorporatePartnershipsMappers;
 import com.chris.uniconnect.Model.Dto.CorporatePartnershipsUAEMexDto;
+import com.chris.uniconnect.Model.Dto.Response.PartnershipOptionResponse;
+import com.chris.uniconnect.Model.Dto.Response.PartnershipStatsResponse;
+import com.chris.uniconnect.Repository.PartnershipSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import com.chris.uniconnect.Model.Entity.CorporatePartnershipsUAEMex;
 import com.chris.uniconnect.Repository.CorporatePartnershipsRepository;
 import com.chris.uniconnect.Service.ICompanyProfileService;
@@ -41,14 +48,37 @@ public class CorporatePartnershipsServiceImpl implements ICorporatePartnershipsS
     }
 
     @Override
-    public List<CorporatePartnershipsUAEMexDto> getPartnerships(Boolean vigente) {
-        List<CorporatePartnershipsUAEMex> partnerships = partnershipsRepository.findAll();
-        if (vigente != null) {
-            partnerships = partnerships.stream()
-                    .filter(partnership -> partnership.isVigente() == vigente)
-                    .toList();
-        }
-        return CorporatePartnershipsMappers.INSTANCE.toDtoList(partnerships);
+    @Transactional(readOnly = true)
+    public Page<CorporatePartnershipsUAEMexDto> getPartnerships(Boolean vigente, String text, Pageable pageable) {
+        Specification<CorporatePartnershipsUAEMex> specification = Specification.allOf(
+                PartnershipSpecifications.vigente(vigente),
+                PartnershipSpecifications.text(text)
+        );
+        return partnershipsRepository.findAll(specification, pageable).map(CorporatePartnershipsMappers.INSTANCE::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PartnershipStatsResponse getPartnershipStats(int expiringDays) {
+        long vigentes = partnershipsRepository.count(PartnershipSpecifications.vigente(true));
+        long total = partnershipsRepository.count();
+        return new PartnershipStatsResponse(total, vigentes, total - vigentes,
+                partnershipsRepository.count(PartnershipSpecifications.expiringWithin(expiringDays)),
+                partnershipsRepository.findDistinctCategories(),
+                partnershipsRepository.findDistinctAgreementTypes());
+    }
+
+    //activos (los unicos a los que se les puede crear cuenta); con withoutCompanyAdmin, solo los que no tienen cuenta activa
+    @Override
+    @Transactional(readOnly = true)
+    public List<PartnershipOptionResponse> getPartnershipOptions(boolean withoutCompanyAdmin) {
+        Specification<CorporatePartnershipsUAEMex> specification = Specification.allOf(
+                PartnershipSpecifications.active(),
+                withoutCompanyAdmin ? PartnershipSpecifications.withoutActiveCompanyAdmin() : null
+        );
+        return partnershipsRepository.findAll(specification, Sort.by("companyName")).stream()
+                .map(p -> new PartnershipOptionResponse(p.getIdCorporatePartnership(), p.getCompanyName()))
+                .toList();
     }
 
     @Override

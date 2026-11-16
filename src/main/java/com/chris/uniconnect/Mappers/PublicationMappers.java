@@ -41,7 +41,8 @@ public interface PublicationMappers {
     @Mapping(source = "imagen", target = "image")
     @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "persona", target = "person" , ignore = true)
-    @Mapping(source = "interacciones", target = "publicationInteractions")
+    //las interacciones solo se manejan por /interactionPublicacion; con orphanRemoval, copiarlas del body borraria los likes/comentarios
+    @Mapping(target = "publicationInteractions", ignore = true)
     Publication publicacionDtoToPublication(PublicationDto publicationDto);
 
     @InheritConfiguration(name = "publicacionDtoToPublication")
